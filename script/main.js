@@ -1107,7 +1107,6 @@ var InputManager = (function InputManager() {
   }
 
   InputManager.prototype.init = function init() {
-
     for (var k in this.KEYS) {
       this[k] = false;
       this.CODE_TO_KEY[this.KEYS[k]] = k;
@@ -1115,7 +1114,7 @@ var InputManager = (function InputManager() {
   };
   
   InputManager.prototype.listenTo = function listenTo(scene) {
-    scene.el.addEventListener('keydown', this.onKeyDown.bind(this));
+    window.addEventListener('keydown', this.onKeyDown.bind(this));
     window.addEventListener('keyup', this.onKeyUp.bind(this));
     window.addEventListener('mousemove', this.onMouseMove.bind(this));
     scene.el.addEventListener('mousedown', this.onMouseDown.bind(this));
@@ -1328,7 +1327,7 @@ var Menu = (function Menu() {
   };
   
   Menu.prototype.createVolume = function createVolume() {
-    var elVolume = this.el.querySelector('#volume');
+    var elVolume = this.el.querySelector('#effects-volume');
     if (elVolume) {
       var volume = UserSettings.get(UserSettings.VOLUME);
       if (volume !== null) {

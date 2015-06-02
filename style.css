@@ -99,10 +99,10 @@ canvas {
     display: inline-block;
     vertical-align: middle;
   }
-  #menu .setting b {
+  #menu .setting.range b {
     width: 150px;
   }
-  #menu .setting span {
+  #menu .setting.range span {
     width: 234px;
     text-align: center;
   }

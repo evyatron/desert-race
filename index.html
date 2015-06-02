@@ -14,9 +14,17 @@
     </div>
     <div id="menu">
       <h1>Menu</h1>
-      <label class="setting" for="volume">
-        <b>Volume:</b>
-        <span><input type="range" min="0" max="1" step="0.05" id="volume" name="volume" /></span>
+      <label class="setting checkbox" for="enable-sound">
+        <span><input type="checkbox" id="enable-sound" name="enable-sound" /></span>
+        <b>Enable Sound</b>
+      </label>
+      <label class="setting range" for="music-volume">
+        <b>Music Volume:</b>
+        <span><input type="range" min="0" max="1" step="0.01" id="music-volume" name="music-volume" /></span>
+      </label>
+      <label class="setting range" for="effects-volume">
+        <b>Effects Volume:</b>
+        <span><input type="range" min="0" max="1" step="0.01" id="effects-volume" name="effects-volume" /></span>
       </label>
       <table id="keys">
         <thead>
