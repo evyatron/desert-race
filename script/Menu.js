@@ -9,28 +9,19 @@ var Menu = (function Menu() {
     this.createSoundEnabled();
     this.createVolume('effects-volume', UserSettings.EFFECTS_VOLUME);
     this.createVolume('music-volume', UserSettings.MUSIC_VOLUME);
-    this.createKeys();
   };
   
-  Menu.prototype.createKeys = function createKeys() {
+  Menu.prototype.createKeys = function createKeys(actions) {
     var html = '';
     
-    function createKey(title, key) {
+    for (var actionId in actions) {
+      var action = actions[actionId];
+      
       html += '<tr>' +
-                '<td>' + title + '</td>' +
-                '<td>' + key + '</td>' +
+                '<td>' + action.title + '</td>' +
+                '<td>' + action.key + '</td>' +
               '</tr>';
     }
-    
-    createKey('Move Up', 'W');
-    createKey('Move Down', 'S');
-    createKey('Move Left', 'A');
-    createKey('Move Right', 'D');
-    createKey('Boost', 'Shift');
-    createKey('Fire', 'Left Mouse Button');
-    createKey('Reload', 'Right Mouse Button');
-    createKey('1', 'Equip Rifle');
-    createKey('2', 'Equip Shotgun');
     
     this.el.querySelector('#keys tbody').innerHTML = html;
   };

@@ -232,7 +232,23 @@ canvas {
       background: rgba(0, 0, 0, 1);
       border-radius: 2px;
     }
-    
+
+/* PISTOL */
+#weapon.pistol .cooldown {
+  width: 64px;
+}
+#weapon.pistol .magazine .bullet {
+  position: relative;
+  width: 7px;
+  height: 26px;
+  margin-left: 3px;
+}
+#weapon.pistol .magazine .bullet .empty {
+  background-image: url(images/pistol/bullet-empty.png);
+}
+#weapon.pistol .magazine .bullet .full {
+  background-image: url(images/pistol/bullet-full.png);
+}
 /* SHOTGUN */
 #weapon.shotgun .magazine .bullet {
   position: relative;
@@ -246,8 +262,10 @@ canvas {
 #weapon.shotgun .magazine .bullet .full {
   background-image: url(images/shotgun/bullet-full.png);
 }
-
 /* RIFLE */
+#weapon.rifle .cooldown {
+  width: 20px;
+}
 #weapon.rifle .magazine .bullet {
   position: relative;
   width: 9px;
