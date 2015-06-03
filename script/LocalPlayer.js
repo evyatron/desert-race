@@ -14,8 +14,8 @@ var LocalPlayer = (function LocalPlayer() {
 
     options.id = 'localPlayer';
     options.isLocalPlayer = true;
-    options.width = 90;
-    options.height = 150;
+    options.width = 128;
+    options.height = 128;
     options.speed = options.speed;
     options.zIndex = 100;
     options.wheelsSize = 8;
@@ -48,6 +48,21 @@ var LocalPlayer = (function LocalPlayer() {
     InputManager.on('pressed', InputManager.KEYS.NUMBER_3, this.equipWeapon.bind(this, 2));
 
     this.equipWeapon(0);
+    
+    this.equipParts([
+      new VehiclePart({
+        'type': VEHICLE_PART_TYPES.BODY,
+        'src': 'images/parts/default/body.png'
+      }),
+      new VehiclePart({
+        'type': VEHICLE_PART_TYPES.ENGINE,
+        'src': 'images/parts/default/engine.png'
+      }),
+      new VehiclePart({
+        'type': VEHICLE_PART_TYPES.WHEELS,
+        'src': 'images/parts/default/wheels.png'
+      })
+    ]);
   };
 
   LocalPlayer.prototype.update = function update(dt) {
@@ -107,7 +122,7 @@ var LocalPlayer = (function LocalPlayer() {
   };
 
   LocalPlayer.prototype.draw = function draw(context) {
-    Sprite.prototype.draw.apply(this, arguments);
+    Vehicle.prototype.draw.apply(this, arguments);
 
     var x = this.position.x,
         y = this.position.y,
