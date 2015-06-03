@@ -1,4 +1,4 @@
-body, div, p, canvas, h1, ul, li {
+body, div, p, canvas, h1, h2, h3, ul, li {
   margin: 0;
   padding: 0;
 }
@@ -70,27 +70,71 @@ canvas {
   
 #menu {
   position: absolute;
-  top: 50%;
+  top: 0;
   left: 0;
   width: 400px;
-  height: 600px;
-  margin-top: -300px;
+  padding-bottom: 20px;
   z-index: 50;
   color: #fff;
-  font-size: 1.4em;
+  font-size: 1.2em;
   background: rgba(0, 0, 0, .8);
+  border-radius: 0 0 10px 0;
+  transform: translateX(-100%);
+  transition: transform 250ms ease-in;
 }
-  #menu h1 {
+#menu:hover {
+  transition-timing-function: ease-out;
+  transform: translateX(0);
+  box-shadow: 0 0 3px 0 rgba(0, 0, 0, 1),
+              0 0 10px 0 rgba(0, 0, 0, .7);
+}
+  #menu .handle {
+    position: absolute;
+    top: 0;
+    left: 100%;
+    width: 50px;
+    height: 50px;
+    border-radius: 0 0 5px 0;
+    background: rgba(0, 0, 0, .8);
+    transition: transform 210ms ease-in,
+                opacity 210ms ease-in;
+  }
+  #menu:hover .handle {
+    transition-timing-function: ease-out;
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  
+    #menu .handle:before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 30px;
+      height: 40px;
+      margin: -20px 0 0 -15px;
+      background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 20%,
+                                             rgba(255, 255, 255, 1) 25%,
+                                             rgba(255, 255, 255, 0) 30%,
+                                             rgba(255, 255, 255, 0) 45%,
+                                             rgba(255, 255, 255, 1) 50%,
+                                             rgba(255, 255, 255, 0) 55%,
+                                             rgba(255, 255, 255, 0) 70%,
+                                             rgba(255, 255, 255, 1) 75%,
+                                             rgba(255, 255, 255, 0) 80%);
+    }
+  #menu .title {
     text-align: center;
     font-size: 1.2em;
     font-weight: 300;
-    padding: 8px 0;
+    height: 50px;
+    line-height: 50px;
     border-bottom: 1px solid rgba(255, 255, 255, .5);
   }
   #menu .setting {
     position: relative;
     display: block;
-    padding: 5px;
+    padding: 0 5px;
     background: rgba(0, 0, 0, .5);
   }
   #menu .setting span,
@@ -106,8 +150,10 @@ canvas {
     width: 234px;
     text-align: center;
   }
+  #menu .setting.checkbox {
+    padding: 5px;
+  }
   #menu table {
-    margin-top: 50px;
     width: 100%;
     border-collapse: collapse;
   }
@@ -117,10 +163,14 @@ canvas {
   #menu table th,
   #menu table td {
     text-align: left;
-    font-size: .7em;
+    font-size: .8em;
     font-weight: 300;
     padding: 4px;
-    border: 1px solid rgba(255, 255, 255, .2);
+    border-bottom: 1px solid rgba(255, 255, 255, .2);
+  }
+  #menu table th:first-child,
+  #menu table td:first-child {
+    border-right: 1px solid rgba(255, 255, 255, .2);
   }
   #menu table th {
     background: rgba(0, 0, 0, .5);
@@ -147,6 +197,14 @@ canvas {
   }
     #weapon .magazine .bullet {
       display: inline-block;
+    }
+    #weapon .magazine .bullet .empty {
+      top: 0;
+      background-position: 50% 0%;
+    }
+    #weapon .magazine .bullet .full {
+      bottom: 0;
+      background-position: 50% 100%;
     }
     
   #weapon .cooldown {
@@ -183,15 +241,31 @@ canvas {
   height: 100%;
 }
 #weapon.shotgun .magazine .bullet .empty {
-  top: 0;
-  background-position: 50% 0%;
   background-image: url(images/shotgun/bullet-empty.png);
 }
 #weapon.shotgun .magazine .bullet .full {
-  bottom: 0;
-  background-position: 50% 100%;
   background-image: url(images/shotgun/bullet-full.png);
 }
+
+/* RIFLE */
+#weapon.rifle .magazine .bullet {
+  position: relative;
+  width: 16px;
+  height: 35px;
+  margin-left: 5px;
+}
+#weapon.rifle .magazine .bullet .empty,
+#weapon.rifle .magazine .bullet .full {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 100%;
+  background-image: url(images/shotgun/bullet-empty.png);
+}
+#weapon.rifle .magazine .bullet .empty {
+  opacity: .5;
+}
+
 /*
 #weapon.shotgun .magazine .bullet[data-full = "false"] .empty {
   display: block;

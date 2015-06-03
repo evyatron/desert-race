@@ -9,11 +9,12 @@ var scene,
 
 var speedIncrease = 0;
 
-var PLAYER_NORMAL_SPEED = 400,
-    PLAYER_MOVEMENT_SPEED = 100,
-    PLAYER_BOOST_SPEED = 800,
-    PLAYER_SPEED_OVER_SOMETHING = 250,
-    CURRENT_PLAYER_SPEED = PLAYER_NORMAL_SPEED,
+var PLAYER_MOVEMENT_SPEED = 100;
+
+var currentWorldSpeed = 0,
+    NORMAL_WORLD_SPEED = 400,
+    WORLD_SPEED_WHEN_BOOST = 800,
+    WORLD_SPEED_WHEN_OVER_SOMETHING = 250,
     PLAYER_DISTANCE_FROM_BOTTOM = 10,
     OVER_SOMETHING_RATTLE = 100;
 
@@ -36,15 +37,19 @@ var DEBUG = /DEBUG/.test(window.location.href);
 
 function init() {
   AudioPlayer.init({
-    'isEnabled': true,
+    'isEnabled': UserSettings.get(UserSettings.SOUND_ENABLED),
     'baseSrc': 'sounds',
-    'volume': UserSettings.get(UserSettings.VOLUME),
+    'effectsVolume': UserSettings.get(UserSettings.EFFECTS_VOLUME),
+    'musicVolume': UserSettings.get(UserSettings.MUSIC_VOLUME),
     'sounds': {
       'ENGINE': 'engine.ogg',
       
       'SHOTGUN_EMPTY': 'shotgun/empty.mp3',
       'SHOTGUN_FIRE': 'shotgun/fire.mp3',
       'SHOTGUN_RELOAD': 'shotgun/reload-bullet.mp3',
+      'RIFLE_EMPTY': 'shotgun/empty.mp3',
+      'RIFLE_FIRE': 'rifle/fire.wav',
+      'RIFLE_RELOAD': 'rifle/reload-bullet.wav',
       
       'VOLUME_CHANGE': 'shotgun/empty.mp3'
     }
@@ -67,12 +72,14 @@ function init() {
     'width': ROAD_WIDTH,
     'height': scene.height,
     'zIndex': 0,
+    'friction': 1,
     'position': new Victor(scene.width / 2, scene.height / 2)
   });
   roadSprite2 = new Sprite({
     'width': ROAD_WIDTH,
     'height': scene.height,
     'zIndex': 0,
+    'friction': 1,
     'position': new Victor(scene.width / 2, -scene.height / 2)
   });
   
@@ -121,6 +128,8 @@ function onBeforeGameLoopUpdate(dt) {
 function onAfterGameLoopUpdate(dt, context) {
   var i, len, sprite;
   
+  var worldSpeed = NORMAL_WORLD_SPEED;
+  
   var isOverWheels = false;
   if (player.didHit) {
     for (i = 0, len = player.spritesHit.length; i < len; i++) {
@@ -145,7 +154,7 @@ function onAfterGameLoopUpdate(dt, context) {
     STATS.timeOverThings += dt;
     player.position.y += rand(-OVER_SOMETHING_RATTLE, OVER_SOMETHING_RATTLE) * dt;
     player.position.x += rand(-OVER_SOMETHING_RATTLE, OVER_SOMETHING_RATTLE) * dt;
-    CURRENT_PLAYER_SPEED = PLAYER_SPEED_OVER_SOMETHING;
+    worldSpeed = WORLD_SPEED_WHEN_OVER_SOMETHING;
   } else {
     if (InputManager.SHIFT) {
       if (player.equippedWeapon) {
@@ -154,32 +163,36 @@ function onAfterGameLoopUpdate(dt, context) {
       
       STATS.turboTime += dt;
 
-      if (CURRENT_PLAYER_SPEED >= PLAYER_BOOST_SPEED) {
-        CURRENT_PLAYER_SPEED = PLAYER_BOOST_SPEED;
+      if (worldSpeed >= WORLD_SPEED_WHEN_BOOST) {
+        worldSpeed = WORLD_SPEED_WHEN_BOOST;
       } else {
         speedIncrease += 30 * dt;
-        CURRENT_PLAYER_SPEED += speedIncrease;
+        worldSpeed += speedIncrease;
       }
     } else {
       if (player.equippedWeapon) {
         player.equippedWeapon.decreaseSpread(dt);
       }
       
-      if (CURRENT_PLAYER_SPEED < PLAYER_NORMAL_SPEED) {
+      if (worldSpeed < NORMAL_WORLD_SPEED) {
         speedIncrease = 0;
-        CURRENT_PLAYER_SPEED = PLAYER_NORMAL_SPEED;
-      } else if (CURRENT_PLAYER_SPEED > PLAYER_NORMAL_SPEED) {
+        worldSpeed = NORMAL_WORLD_SPEED;
+      } else if (worldSpeed > NORMAL_WORLD_SPEED) {
         speedIncrease += 50 * dt;
-        CURRENT_PLAYER_SPEED -= speedIncrease;
+        worldSpeed -= speedIncrease;
       }
     }
   }
 
   // make sure everything always moves at the correct speed
-  roadSprite1.velocity.y = CURRENT_PLAYER_SPEED;
-  roadSprite2.velocity.y = CURRENT_PLAYER_SPEED;
-  for (i = 0, len = things.length; i < len; i++) {
-    things[i].velocity.y = CURRENT_PLAYER_SPEED;
+  if (worldSpeed !== currentWorldSpeed) {
+    currentWorldSpeed = worldSpeed;
+
+    roadSprite1.velocity.y = worldSpeed;
+    roadSprite2.velocity.y = worldSpeed;
+    for (i = 0, len = things.length; i < len; i++) {
+      things[i].velocity.y = worldSpeed;
+    }
   }
 
   var playerHDist = ROAD_MARGIN,
@@ -228,8 +241,8 @@ function onAfterGameLoopUpdate(dt, context) {
   }
 
   // update distance
-  // CURRENT_PLAYER_SPEED is in pixels per second
-  var kmph = CURRENT_PLAYER_SPEED * 3600 / 20000,
+  // currentWorldSpeed is in pixels per second
+  var kmph = currentWorldSpeed * 3600 / 20000,
       distance = kmph * dt;
 
   STATS.distance += distance;
@@ -245,25 +258,29 @@ function onAfterGameLoopUpdate(dt, context) {
 function spawnRoadThing() {
   var width = rand(10, 50),
       height = rand(width, width * 2),
+      speed = currentWorldSpeed || NORMAL_WORLD_SPEED,
       thing = new Sprite({
         'type': 'roadThing',
         'width': width,
         'height': height,
         'colour': 'rgba(0, 0, 0, .1)',
         'zIndex': 50,
+        'friction': 1,
         'doesCollide': true,
+        'velocity': new Victor(0, speed),
         'position': new Victor(rand(ROAD_LEFT + width / 2 + ROAD_MARGIN, ROAD_RIGHT - width / 2 - ROAD_MARGIN), -height)
       });
 
   things.push(thing);
   scene.addSprite(thing);
 
-  timeToSpawnRoadThing = scene.height / CURRENT_PLAYER_SPEED * randF(0.15, 0.4);
+  timeToSpawnRoadThing = scene.height / speed * randF(0.15, 0.4);
 }
 
 function spawnSideThing() {
   var width = rand(10, 100),
       height = width,
+      speed = currentWorldSpeed || NORMAL_WORLD_SPEED,
       isOnLeftSide = Math.random() > 0.5,
       x = isOnLeftSide? rand(width / 2, ROAD_LEFT - width / 2) : rand(ROAD_RIGHT + width / 2, scene.width - width / 2),
       thing = new Sprite({
@@ -271,14 +288,16 @@ function spawnSideThing() {
         'width': width,
         'height': height,
         'zIndex': 50,
+        'friction': 1,
         'image': 'images/rock' + rand(1, NUMBER_OF_ROCK_IMAGES) + '.png',
+        'velocity': new Victor(0, speed),
         'position': new Victor(x, -height)
       });
 
   things.push(thing);
   scene.addSprite(thing);
 
-  timeToSpawnSideThing = scene.height / CURRENT_PLAYER_SPEED * randF(0.2, 0.7);
+  timeToSpawnSideThing = scene.height / speed * randF(0.2, 0.7);
 }
 
 function createRoad(callback) {
@@ -331,166 +350,6 @@ function createRoad(callback) {
     callback();
   }
 }
-
-var Sprite = (function Sprite() {
-  function Sprite(options) {
-    this.id;
-    this.type;
-    this.scene;
-    this.zIndex;
-
-    this.colour;
-    this.image;
-
-    this.friction;
-    this.speed;
-    this.width;
-    this.height;
-    this.halfWidth;
-    this.halfHeight;
-    this.position;
-    this.velocity;
-    this.hitBounds = {
-      'width': 0,
-      'height': 0,
-      'right': 0,
-      'bottom': 0
-    };
-    this.doesCollide;
-    this.destroyWhenOutOfBounds;
-
-    this.spritesHit = [];
-    this.didHit = false;
-
-    Sprite.prototype.init.apply(this, arguments);
-  }
-  
-  Sprite.prototype.init = function init(options) {
-    !options && (options = {});
-
-    this.id = options.id || (Date.now() + '_' + Math.round(Math.random() * 100000));
-    this.type = options.type || 'sprite';
-    this.zIndex = options.zIndex || 0;
-
-    this.colour = options.colour || 'rgba(255, 0, 0, 1)';
-
-    if (options.image) {
-      this.setImage(options.image);
-    }
-
-    this.friction = options.friction || 0.8;
-    this.width = options.width || 0;
-    this.height = options.height || 0;
-    this.speed = options.speed || 0;
-    this.position = options.position || new Victor(0, 0);
-    this.velocity = options.velocity || new Victor(0, 0);
-    this.doesCollide = Boolean(options.doesCollide);
-    this.destroyWhenOutOfBounds = Boolean(options.destroyWhenOutOfBounds);
-
-    this.halfWidth = this.width / 2;
-    this.halfHeight = this.height / 2;
-    this.hitBounds.width = this.width;
-    this.hitBounds.height = this.height;
-  };
-
-  Sprite.prototype.setImage = function setImage(src) {
-    this.image = new Image();
-    this.image.src = src;
-  };
-
-  Sprite.prototype.destroy = function destroy() {
-    if (this.scene) {
-      this.scene.removeSprite(this);
-    }
-  };
-
-  Sprite.prototype.setScene = function setScene(scene) {
-    this.scene = scene;
-  };
-
-  Sprite.prototype.update = function update(dt) {
-    this.spritesHit = [];
-    this.didHit = false;
-
-    var x = this.position.x,
-        y = this.position.y;
-
-    if (this.velocity.x !== 0 || this.velocity.y !== 0) {
-      this.position.x = x = x + this.velocity.x * dt;
-      this.position.y = y = y + this.velocity.y * dt;
-
-      this.velocity.x *= this.friction;
-      this.velocity.y *= this.friction;
-
-      if (Math.abs(this.velocity.x) < 1) {
-        this.velocity.x = 0;
-      }
-      if (Math.abs(this.velocity.y) < 1) {
-        this.velocity.y = 0;
-      }
-    }
-
-    this.top = y - this.halfHeight;
-    this.bottom = y + this.halfHeight;
-    this.left = x - this.halfWidth;
-    this.right = x + this.halfWidth;
-
-    this.hitBounds.top = y - this.halfHeight;
-    this.hitBounds.bottom = y + this.halfHeight;
-    this.hitBounds.left = x - this.halfWidth;
-    this.hitBounds.right = x + this.halfWidth;
-
-    if (this.destroyWhenOutOfBounds) {
-      if (this.right < 0 || this.left > this.scene.width ||
-          this.bottom < 0 || this.top > this.scene.height) {
-        this.destroy();
-      }
-    }
-  };
-
-  Sprite.prototype.checkCollisions = function checkCollisions(sprites) {
-    var hitBounds = this.hitBounds;
-
-    for (var i = 0, len = sprites.length, sprite; i < len; i++) {
-      sprite = sprites[i];
-
-      if (sprite.id === this.id) {
-        continue;
-      }
-      if (!this.doesCollide || !sprite.doesCollide) {
-        continue;
-      }
-
-      var spriteHitBounds = sprite.hitBounds;
-
-      if (!(spriteHitBounds.left > hitBounds.right || 
-           spriteHitBounds.right < hitBounds.left || 
-           spriteHitBounds.top > hitBounds.bottom ||
-           spriteHitBounds.bottom < hitBounds.top)) {
-        this.didHit = true;
-        this.spritesHit.push(sprite);
-      }
-    }
-
-    return this.didHit;
-  };
-  
-  Sprite.prototype.draw = function draw(context) {
-    var w = this.width,
-        h = this.height,
-        x = this.position.x - w / 2,
-        y = this.position.y - h / 2;
-
-    if (this.image) {
-      context.drawImage(this.image, x, y, w, h);
-    } else {
-      context.fillStyle = this.colour;
-      context.fillRect(x, y, w, h);
-    }
-  };
-
-  return Sprite;
-}());
 
 var Bullet = (function Bullet() {
   function Bullet(options) {
@@ -607,10 +466,11 @@ var LocalPlayer = (function LocalPlayer() {
     this.elWeaponMagazine = this.elWeapon.querySelector('.magazine');
     this.elWeaponCooldown = this.elWeapon.querySelector('.cooldown b');
 
+    this.weapons.push(new Rifle());
     this.weapons.push(new Shotgun());
-    //this.weapons.push(new Pistol());
-    //this.weapons.push(new Shotgun());
-    //this.weapons.push(new Rifle());
+    
+    InputManager.on('pressed', InputManager.KEYS.NUMBER_1, this.equipWeapon.bind(this, 0));
+    InputManager.on('pressed', InputManager.KEYS.NUMBER_2, this.equipWeapon.bind(this, 1));
 
     this.equipWeapon(0);
   };
@@ -640,6 +500,10 @@ var LocalPlayer = (function LocalPlayer() {
   
   LocalPlayer.prototype.equipWeapon = function equipWeapon(index) {
     if (this.equippedWeapon) {
+      if (this.equippedWeapon.isReloading || this.equippedWeapon.isInCooldown) {
+        return false;
+      }
+      
       this.elWeapon.classList.remove(this.equippedWeapon.type);
     }
     
@@ -649,12 +513,16 @@ var LocalPlayer = (function LocalPlayer() {
     
     var html = '';
     for (var i = 0; i < this.equippedWeapon.magazineSize; i++) {
+      var isFull = i < this.equippedWeapon.inMagazine;
+      
       html += '<li class="bullet" data-full="true" data-i="' + i + '">' +
-                '<b class="empty" style="height: 0%;"></b>' +
-                '<b class="full" style="height: 100%;"></b>' +
+                '<b class="empty" style="height: ' + (isFull? 0 : 100) + '%;"></b>' +
+                '<b class="full" style="height: ' + (isFull? 100 : 0) + '%;"></b>' +
               '</li>';
     }
     this.elWeaponMagazine.innerHTML = html;
+    
+    return true;
   };
 
   LocalPlayer.prototype.draw = function draw(context) {
@@ -932,6 +800,33 @@ var Shotgun = (function Shotgun() {
   return Shotgun;
 }());
 
+var Rifle = (function Rifle() {
+  function Rifle(options) {
+    !options && (options = {});
+
+    options.type = 'rifle';
+    options.damagePerBullet = 10;
+    options.bulletsPerShot = 1;
+    options.minSpreadAngle = 3;
+    options.maxSpreadAngle = 60;
+    options.magazineSize = 1;
+    options.bulletsPerReload = 1;
+    options.timeToReload = 2;
+    options.timeToCooldown = 0.5;
+    
+    options.soundFire = AudioPlayer.RIFLE_FIRE;
+    options.soundEmpty = AudioPlayer.RIFLE_EMPTY;
+    options.soundReload = AudioPlayer.RIFLE_RELOAD;
+
+    Weapon.call(this, options);
+  }
+
+  Rifle.prototype = Object.create(Weapon.prototype);
+  Rifle.prototype.constructor = Rifle;
+
+  return Rifle;
+}());
+
 /* main scene - the actual game */
 var Scene = (function Scene() {
   function Scene(options) {
@@ -1072,343 +967,5 @@ var Scene = (function Scene() {
 
   return Scene;
 }());
-
-var InputManager = (function InputManager() {
-  function InputManager() {
-    this.listeners = {
-      'pressed': {},
-      'released': {}
-    };
-
-    this.isLeftMouseButtonDown = false;
-    this.isMiddleMouseButtonDown = false;
-    this.isRightMouseButtonDown = false;
-    this.mousePosition = new Victor();
-
-    this.KEYS_DOWN = {};
-
-    this.CODE_TO_KEY = {};
-
-    this.KEYS = {
-      SHIFT: 16,
-
-      LEFT: 37,
-      UP: 38,
-      RIGHT: 39,
-      DOWN: 40,
-
-      W: 87,
-      D: 68,
-      S: 83,
-      A: 65
-    };
-
-    this.init();
-  }
-
-  InputManager.prototype.init = function init() {
-    for (var k in this.KEYS) {
-      this[k] = false;
-      this.CODE_TO_KEY[this.KEYS[k]] = k;
-    }
-  };
-  
-  InputManager.prototype.listenTo = function listenTo(scene) {
-    window.addEventListener('keydown', this.onKeyDown.bind(this));
-    window.addEventListener('keyup', this.onKeyUp.bind(this));
-    window.addEventListener('mousemove', this.onMouseMove.bind(this));
-    scene.el.addEventListener('mousedown', this.onMouseDown.bind(this));
-    window.addEventListener('mouseup', this.onMouseUp.bind(this));
-    scene.el.addEventListener('contextmenu', preventFunction);
-  };
-
-  InputManager.prototype.on = function on(event, key, callback) {
-    if (!this.listeners[event]) {
-      this.listeners[event] = {};
-    }
-    if (!this.listeners[event][key]) {
-      this.listeners[event][key] = [];
-    }
-
-    this.listeners[event][key].push(callback);
-  };
-
-  InputManager.prototype.onMouseMove = function onMouseMove(e) {
-    this.mousePosition.x = e.pageX;
-    this.mousePosition.y = e.pageY;
-  };
-
-  InputManager.prototype.onMouseDown = function onMouseDown(e) {
-    if (e.button === 0) {
-      this.isLeftMouseButtonDown = true;
-    } else if (e.button === 1) {
-      this.isMiddleMouseButtonDown = true;
-    } else if (e.button === 2) {
-      this.isRightMouseButtonDown = true;
-    }
-  };
-
-  InputManager.prototype.onMouseUp = function onMouseUp(e) {
-    if (e.button === 0) {
-      this.isLeftMouseButtonDown = false;
-    } else if (e.button === 1) {
-      this.isMiddleMouseButtonDown = false;
-    } else if (e.button === 2) {
-      this.isRightMouseButtonDown = false;
-    }
-  };
-
-  InputManager.prototype.onKeyDown = function onKeyDown(e) {
-    var key = e.keyCode,
-        isFirstPress = !this.KEYS_DOWN[key];
-    
-    this.KEYS_DOWN[key] = true;
-
-    this[this.CODE_TO_KEY[key]] = true;
-
-    if (isFirstPress) {
-      var listeners = this.listeners['pressed'][key];
-      if (listeners) {
-        for (var i = 0, len = listeners.length; i < len; i++) {
-          listeners[i]();
-        }
-      }
-    }
-  };
-
-  InputManager.prototype.onKeyUp = function onKeyUp(e) {
-    var key = e.keyCode;
-
-    this[this.CODE_TO_KEY[key]] = false;
-    delete this.KEYS_DOWN[key];
-
-    var listeners = this.listeners['released'][key];
-    if (listeners) {
-      for (var i = 0, len = listeners.length; i < len; i++) {
-        listeners[i]();
-      }
-    }
-  };
-
-  return new InputManager();
-}());
-
-var AudioPlayer = (function AudioPlayer() {
-  function AudioPlayer() {
-    this.audioContext = null;
-    
-    this.baseSrc = '';
-    this.SOUNDS = {};
-    
-    this.isEnabled = true;
-  }
-  
-  AudioPlayer.prototype.init = function init(options) {
-    !options && (options = {});
-    
-    this.baseSrc = options.baseSrc || '';
-    this.isEnabled = Boolean(options.isEnabled);
-    this.volume = 'volume' in options? options.volume : 0.5;
-    
-    for (var id in options.sounds) {
-      this.SOUNDS[id] = {
-        'id': id,
-        'src': options.sounds[id]
-      };
-      this[id] = id;
-    }
-    
-    this.audioContext = new AudioContext();
-    
-    this.gainNode = this.audioContext.createGain();
-    this.gainNode.connect(this.audioContext.destination);
-    
-    this.setVolume(this.volume);
-  };
-  
-  AudioPlayer.prototype.setEnabled = function setEnabled(isEnabled) {
-    this.isEnabled = isEnabled;
-  };
-  
-  AudioPlayer.prototype.setVolume = function setVolume(volume) {
-    this.gainNode.gain.value = volume;
-  };
-
-  AudioPlayer.prototype.play = function play(id, shouldLoop) {
-    if (!this.isEnabled) {
-      return;
-    }
-    
-    var sound = this.SOUNDS[id];
-    
-    if (!sound) {
-      console.warn('Trying to play a missing sound', id);
-      return false;
-    }
-    
-    if (!sound.buffer) {
-      this.load(id, this.play.bind(this, id, shouldLoop));
-      return;
-    }
-    
-    var soundSource = this.audioContext.createBufferSource();
-    soundSource.buffer = sound.buffer;
-    soundSource.connect(this.gainNode);
-    soundSource.loop = Boolean(shouldLoop);
-    soundSource.start(0);
-    
-    this.SOUNDS[id].source = soundSource;
-    
-    //var obj = new Audio(this.baseSrc + '/' + sound.src);
-    //obj.loop = Boolean(shouldLoop);
-    //obj.autoplay = true;
-    
-    return sound.source;
-  };
-  
-  AudioPlayer.prototype.loop = function loop(id) {
-    this.play(id, true);
-  };
-  
-  AudioPlayer.prototype.load = function load(id, callback) {
-    var sound = this.SOUNDS[id],
-        request = new XMLHttpRequest();
-
-    request.open('GET', this.baseSrc + '/' + sound.src, true);
-    request.responseType = 'arraybuffer';
-
-    request.onload = function() {
-      var audioData = request.response;
-      
-      this.audioContext.decodeAudioData(audioData, function onAudioDecode(buffer) {
-        this.SOUNDS[id].buffer = buffer;
-        
-        callback();
-      }.bind(this));
-    }.bind(this);
-    
-    request.send();
-  };
-  
-  return new AudioPlayer();
-}());
-
-var Menu = (function Menu() {
-  function Menu() {
-    this.el;
-  }
-  
-  Menu.prototype.init = function init() {
-    this.el = document.querySelector('#menu');
-    
-    this.createVolume();
-    this.createKeys();
-  };
-  
-  Menu.prototype.createKeys = function createKeys() {
-    var html = '';
-    
-    function createKey(title, key) {
-      html += '<tr>' +
-                '<td>' + title + '</td>' +
-                '<td>' + key + '</td>' +
-              '</tr>';
-    }
-    
-    createKey('Move Up', 'W');
-    createKey('Move Down', 'S');
-    createKey('Move Left', 'A');
-    createKey('Move Right', 'D');
-    createKey('Boost', 'Shift');
-    createKey('Fire', 'Left Mouse Button');
-    createKey('Reload', 'Right Mouse Button');
-    
-    this.el.querySelector('#keys tbody').innerHTML = html;
-  };
-  
-  Menu.prototype.createVolume = function createVolume() {
-    var elVolume = this.el.querySelector('#effects-volume');
-    if (elVolume) {
-      var volume = UserSettings.get(UserSettings.VOLUME);
-      if (volume !== null) {
-        elVolume.value = volume;
-      }
-      
-      elVolume.addEventListener('change', this.onVolumeChange.bind(this));
-    }
-  };
-  
-  Menu.prototype.onVolumeChange = function onVolumeChange(e) {
-    var elVolume = e.target,
-        volume = elVolume.value * 1;
-    
-    AudioPlayer.setVolume(volume);
-    AudioPlayer.play(AudioPlayer.VOLUME_CHANGE);
-    UserSettings.set(UserSettings.VOLUME, volume);
-  };
-  
-  return new Menu();
-}());
-
-var UserSettings = (function UserSettings() {
-  function UserSettings() {
-    this.VOLUME = 'volume';
-    
-    this.init();
-  }
-  
-  UserSettings.prototype.init = function init() {
-    
-  };
-  
-  UserSettings.prototype.set = function set(key, value) {
-    var oldValue = this.get(key);
-    
-    localStorage[key] = value;
-    
-    return oldValue;
-  };
-  
-  UserSettings.prototype.get = function get(key) {
-    return key in localStorage? localStorage[key] : null; 
-  };
-  
-  UserSettings.prototype.remove = function remove(key) {
-    var value = this.get(key);
-    
-    delete localStorage[key];
-    
-    return value;
-  };
-  
-  return new UserSettings();
-}());
-
-/* helpers */
-function randF(from, to) {
-  !from && (from = 0);
-  !to && (to = 0);
-
-  return Math.random() * (to - from) + from;
-}
-
-function rand(from, to) {
-  return Math.round(randF(from, to));
-}
-
-function lerp(from, to, dt) {
-  return (1 - dt) * from + dt * to;
-}
-
-var REGEX_NUMBERS = /\B(?=(\d{3})+(?!\d))/g,
-    NUMBERS_DELIM = ',';
-
-function numberWithCommas(number) {
-  return ('' + number).replace(REGEX_NUMBERS, NUMBERS_DELIM);
-}
-
-function preventFunction(e) {
-  e.preventDefault();
-}
 
 init();
