@@ -198,6 +198,13 @@ canvas {
     #weapon .magazine .bullet {
       display: inline-block;
     }
+    #weapon .magazine .bullet .empty,
+    #weapon .magazine .bullet .full {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 100%;
+    }
     #weapon .magazine .bullet .empty {
       top: 0;
       background-position: 50% 0%;
@@ -233,13 +240,6 @@ canvas {
   height: 35px;
   margin-left: 5px;
 }
-#weapon.shotgun .magazine .bullet .empty,
-#weapon.shotgun .magazine .bullet .full {
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 100%;
-}
 #weapon.shotgun .magazine .bullet .empty {
   background-image: url(images/shotgun/bullet-empty.png);
 }
@@ -250,20 +250,15 @@ canvas {
 /* RIFLE */
 #weapon.rifle .magazine .bullet {
   position: relative;
-  width: 16px;
-  height: 35px;
+  width: 9px;
+  height: 55px;
   margin-left: 5px;
 }
-#weapon.rifle .magazine .bullet .empty,
-#weapon.rifle .magazine .bullet .full {
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 100%;
-  background-image: url(images/shotgun/bullet-empty.png);
-}
 #weapon.rifle .magazine .bullet .empty {
-  opacity: .5;
+  background-image: url(images/rifle/bullet-empty.png);
+}
+#weapon.rifle .magazine .bullet .full {
+  background-image: url(images/rifle/bullet-full.png);
 }
 
 /*
