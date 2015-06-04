@@ -39,10 +39,15 @@ var LocalPlayer = (function LocalPlayer() {
     this.elWeapon = document.getElementById('weapon');
     this.elWeaponMagazine = this.elWeapon.querySelector('.magazine');
     this.elWeaponCooldown = this.elWeapon.querySelector('.cooldown b');
+    
+    this.inventory = new Inventory({
+      'elContainer': document.querySelector('.inventory-wrapper'),
+      'player': this
+    });
 
-    this.weapons.push(new Pistol());
-    this.weapons.push(new Rifle());
-    this.weapons.push(new Shotgun());
+    this.weapons[0] = new Pistol();
+    this.weapons[1] = new Rifle();
+    this.weapons[2] = new Shotgun();
     
     InputManager.on('pressed', InputManager.KEYS.NUMBER_1, this.equipWeapon.bind(this, 0));
     InputManager.on('pressed', InputManager.KEYS.NUMBER_2, this.equipWeapon.bind(this, 1));
@@ -106,15 +111,22 @@ var LocalPlayer = (function LocalPlayer() {
   };
   
   LocalPlayer.prototype.equipWeapon = function equipWeapon(index) {
+    if (!this.weapons[index]) {
+      return;
+    }
+    
     if (this.equippedWeapon) {
       if (this.equippedWeapon.isReloading || this.equippedWeapon.isInCooldown) {
         return false;
       }
       
       this.elWeapon.classList.remove(this.equippedWeapon.type);
+      this.equippedWeapon.setEquipped(false);
     }
     
     this.equippedWeapon = this.weapons[index];
+    
+    this.equippedWeapon.setEquipped(true);
     
     this.elWeapon.classList.add(this.equippedWeapon.type);
     
@@ -128,6 +140,8 @@ var LocalPlayer = (function LocalPlayer() {
               '</li>';
     }
     this.elWeaponMagazine.innerHTML = html;
+    
+    this.inventory.updateWeapons();
     
     return true;
   };

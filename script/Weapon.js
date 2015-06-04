@@ -2,6 +2,7 @@ var Weapon = (function Weapon() {
   function Weapon(options) {
     !options && (options = {});
 
+    this.name = options.name || '';
     this.type = options.type || 'weapon';
     
     this.minSpreadAngle = 'minSpreadAngle' in options? options.minSpreadAngle : 15;
@@ -27,6 +28,8 @@ var Weapon = (function Weapon() {
     this.canFire = true;
     this.isEmpty = this.inMagazine <= 0;
     this.isReloading = false;
+    
+    this.isEquipped = false;
     
     this.timeFromAction = 0;
   }
@@ -161,6 +164,10 @@ var Weapon = (function Weapon() {
     this.spreadAngle = lerp(this.spreadAngle, this.minSpreadAngle, dt * 9);
   };
 
+  Weapon.prototype.setEquipped = function setEquipped(isEquipped) {
+    this.isEquipped = isEquipped;
+  };
+
   return Weapon;
 }());
 
@@ -168,6 +175,7 @@ var Shotgun = (function Shotgun() {
   function Shotgun(options) {
     !options && (options = {});
 
+    options.name = 'Shotgun';
     options.type = 'shotgun';
     options.bulletSpeed = 400;
     options.damagePerBullet = 1;
@@ -196,6 +204,7 @@ var Rifle = (function Rifle() {
   function Rifle(options) {
     !options && (options = {});
 
+    options.name = 'Rifle';
     options.type = 'rifle';
     options.bulletSpeed = 800;
     options.damagePerBullet = 10;
@@ -224,6 +233,7 @@ var Pistol = (function Pistol() {
   function Pistol(options) {
     !options && (options = {});
 
+    options.name = 'Pistol';
     options.type = 'pistol';
     options.bulletSpeed = 500;
     options.damagePerBullet = 4;

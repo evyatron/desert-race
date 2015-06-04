@@ -1,0 +1,95 @@
+#weapon {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+}
+  #weapon .magazine {
+    position: absolute;
+    bottom: 15px;
+    left: 10px;
+    white-space: nowrap;
+    list-style-type: none;
+  }
+    #weapon .magazine .bullet {
+      display: inline-block;
+    }
+    #weapon .magazine .bullet .empty,
+    #weapon .magazine .bullet .full {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 100%;
+    }
+    #weapon .magazine .bullet .empty {
+      top: 0;
+      background-position: 50% 0%;
+    }
+    #weapon .magazine .bullet .full {
+      bottom: 0;
+      background-position: 50% 100%;
+    }
+    
+  #weapon .cooldown {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    width: 48px;
+    height: 5px;
+    background: rgba(0, 0, 0, .3);
+    border-radius: 2px;
+  }
+    #weapon .cooldown b {
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      background: rgba(0, 0, 0, 1);
+      border-radius: 2px;
+    }
+
+/* PISTOL */
+#weapon.pistol .cooldown {
+  width: 64px;
+}
+#weapon.pistol .magazine .bullet {
+  position: relative;
+  width: 7px;
+  height: 26px;
+  margin-left: 3px;
+}
+#weapon.pistol .magazine .bullet .empty {
+  background-image: url(/images/pistol/bullet-empty.png);
+}
+#weapon.pistol .magazine .bullet .full {
+  background-image: url(/images/pistol/bullet-full.png);
+}
+/* SHOTGUN */
+#weapon.shotgun .magazine .bullet {
+  position: relative;
+  width: 16px;
+  height: 35px;
+  margin-left: 5px;
+}
+#weapon.shotgun .magazine .bullet .empty {
+  background-image: url(/images/shotgun/bullet-empty.png);
+}
+#weapon.shotgun .magazine .bullet .full {
+  background-image: url(/images/shotgun/bullet-full.png);
+}
+/* RIFLE */
+#weapon.rifle .cooldown {
+  width: 20px;
+}
+#weapon.rifle .magazine .bullet {
+  position: relative;
+  width: 9px;
+  height: 55px;
+  margin-left: 5px;
+}
+#weapon.rifle .magazine .bullet .empty {
+  background-image: url(/images/rifle/bullet-empty.png);
+}
+#weapon.rifle .magazine .bullet .full {
+  background-image: url(/images/rifle/bullet-full.png);
+}

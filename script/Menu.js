@@ -4,7 +4,7 @@ var Menu = (function Menu() {
   }
   
   Menu.prototype.init = function init() {
-    this.el = document.querySelector('#menu');
+    this.el = document.querySelector('.settings');
     
     this.createSoundEnabled();
     this.createVolume('effects-volume', UserSettings.EFFECTS_VOLUME);

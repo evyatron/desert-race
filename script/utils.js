@@ -50,6 +50,33 @@ function numberWithCommas(number) {
   return ('' + number).replace(REGEX_NUMBERS, NUMBERS_DELIM);
 }
 
+// A template formatting method
+// Replaces {{propertyName}} with properties from the 'args' object
+// Supports {{object.property}}
+// Use {{(f)valueHere}} to automatically format the value (1000 -> 1,000)
+String.prototype.REGEX_FORMAT = /(\{\{([^\}]+)\}\})/g;
+String.prototype.format = function format(args, shouldSanitise) {
+  !args && (args = {});
+
+  return this.replace(String.prototype.REGEX_FORMAT, function onMatch() {
+    var key = arguments[2],
+        properties = key.split('.'),
+        value = args;
+
+    // support nesting - "I AM {{ship.info.name}}"
+    for (var i = 0, len = properties.length; i < len; i++) {
+      value = value && value[properties[i]];
+    }
+
+    if (value === undefined || value === null) {
+      value = arguments[0];
+    }
+
+    return value;
+  });
+};
+
+
 function preventFunction(e) {
   e.preventDefault();
 }

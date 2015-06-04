@@ -1,0 +1,50 @@
+.inventory {
+  
+}
+
+.inventory .equipped {
+  
+}
+  .inventory .equipped .vehicle {
+    height: 200px;
+    background: rgba(255, 255, 255, .1);
+  }
+  .inventory .equipped .weapons {
+    text-align: center;
+    padding: 5px 0;
+    height: 42px;
+  }
+  .inventory .equipped .weapons .weapon {
+    display: inline-block;
+    width: 42px;
+    height: 42px;
+    padding: 2px;
+    margin: 0 5px;
+    border: 1px solid #444;
+    background: #000;
+    box-sizing: border-box;
+    background-position: 50% 50%;
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-origin: content-box;
+  }
+  .inventory .equipped .weapons .weapon.equipped-true {
+    border: 1px solid #aaa;
+  }
+  .inventory .equipped .weapons .weapon.equipped-false:hover {
+    border: 1px solid #888;
+  }
+  .inventory .equipped .weapons .weapon.shotgun {
+    background-image: url(/images/shotgun/bullet-full.png);
+  }
+  .inventory .equipped .weapons .weapon.pistol {
+    background-image: url(/images/pistol/bullet-full.png);
+  }
+  .inventory .equipped .weapons .weapon.rifle {
+    background-image: url(/images/rifle/bullet-full.png);
+  }
+  
+.inventory .owned {
+  border-top: 1px solid #444;
+  height: 100px;
+}

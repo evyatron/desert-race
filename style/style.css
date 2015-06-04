@@ -1,0 +1,213 @@
+body, div, p, canvas, h1, h2, h3, ul, li {
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  height: 100%;
+}
+body {
+  position: relative;
+  height: 100%;
+  background: #000;
+  overflow: hidden;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+
+canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: rgba(174, 157, 125, 1);
+}
+
+#game {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+#stats {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  font: normal 18px monospace;
+  color: #fff;
+  padding: 0 10px;
+  min-width: 50px;
+  text-align: right;
+  background: rgba(0, 0, 0, .2);
+  list-style-type: none;
+}
+  #stats li {
+    padding: 5px 0;
+  }
+  #stats span {
+    color: #aaa;
+    font-size: .7em;
+  }
+
+
+
+.menu {
+  position: absolute;
+  top: 0;
+  width: 400px;
+  padding-bottom: 20px;
+  z-index: 50;
+  color: #fff;
+  font-size: 1.2em;
+  background: rgba(0, 0, 0, .8);
+  transition: transform 250ms ease-in;
+}
+.menu:hover {
+  transition-timing-function: ease-out;
+  transform: translateX(0);
+  box-shadow: 0 0 3px 0 rgba(0, 0, 0, 1),
+              0 0 10px 0 rgba(0, 0, 0, .7);
+}
+  .menu .handle {
+    position: absolute;
+    top: 0;
+    width: 50px;
+    height: 50px;
+    background: rgba(0, 0, 0, .8);
+    transition: transform 210ms ease-in,
+                opacity 210ms ease-in;
+  }
+  .menu:hover .handle {
+    transition-timing-function: ease-out;
+    opacity: 0;
+  }
+    .menu .handle:before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 30px;
+      height: 40px;
+      margin: -20px 0 0 -15px;
+    }
+  .menu .title {
+    text-align: center;
+    font-size: 1.2em;
+    font-weight: 300;
+    height: 50px;
+    line-height: 50px;
+    border-bottom: 1px solid rgba(255, 255, 255, .5);
+  }
+
+.inventory-wrapper {
+  right: 0;
+  border-radius: 0 0 0 10px;
+  transform: translateX(100%);
+}
+  .inventory-wrapper .handle {
+    right: 100%;
+    border-radius: 0 0 0 5px;
+  }
+    .inventory-wrapper .handle:before {
+      height: 30px;
+      margin-top: -15px;
+      background-image: linear-gradient(to bottom, rgba(128, 128, 128, 0) 20%,
+                                                   rgba(128, 128, 128, 1) 25%,
+                                                   rgba(128, 128, 128, 0) 30%,
+                                                   rgba(128, 128, 128, 0) 45%,
+                                                   rgba(128, 128, 128, 1) 50%,
+                                                   rgba(128, 128, 128, 0) 55%,
+                                                   rgba(128, 128, 128, 0) 70%,
+                                                   rgba(128, 128, 128, 1) 75%,
+                                                   rgba(128, 128, 128, 0) 80%),
+                         linear-gradient(to right, rgba(128, 128, 128, 0) 20%,
+                                                   rgba(128, 128, 128, 1) 25%,
+                                                   rgba(128, 128, 128, 0) 30%,
+                                                   rgba(128, 128, 128, 0) 45%,
+                                                   rgba(128, 128, 128, 1) 50%,
+                                                   rgba(128, 128, 128, 0) 55%,
+                                                   rgba(128, 128, 128, 0) 70%,
+                                                   rgba(128, 128, 128, 1) 75%,
+                                                   rgba(128, 128, 128, 0) 80%);
+    }
+  .inventory-wrapper:hover .handle {
+    transform: translateX(100%);
+  }
+
+.settings {
+  left: 0;
+  border-radius: 0 0 10px 0;
+  transform: translateX(-100%);
+}
+  .settings .handle {
+    left: 100%;
+    border-radius: 0 0 5px 0;
+  }
+    .settings .handle:before {
+      background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0) 20%,
+                                                   rgba(255, 255, 255, 1) 25%,
+                                                   rgba(255, 255, 255, 0) 30%,
+                                                   rgba(255, 255, 255, 0) 45%,
+                                                   rgba(255, 255, 255, 1) 50%,
+                                                   rgba(255, 255, 255, 0) 55%,
+                                                   rgba(255, 255, 255, 0) 70%,
+                                                   rgba(255, 255, 255, 1) 75%,
+                                                   rgba(255, 255, 255, 0) 80%);
+    }
+  .settings:hover .handle {
+    transform: translateX(-100%);
+  }
+
+.settings .setting {
+  position: relative;
+  display: block;
+  padding: 0 5px;
+  background: rgba(0, 0, 0, .5);
+}
+.settings .setting span,
+.settings .setting b {
+  font-weight: 300;
+  display: inline-block;
+  vertical-align: middle;
+}
+.settings .setting.range b {
+  width: 150px;
+}
+.settings .setting.range span {
+  width: 234px;
+  text-align: center;
+}
+.settings .setting.checkbox {
+  padding: 5px;
+}
+.settings table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.settings table th:first-child {
+  width: 150px;
+}
+.settings table th,
+.settings table td {
+  text-align: left;
+  font-size: .8em;
+  font-weight: 300;
+  padding: 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, .2);
+}
+.settings table th:first-child,
+.settings table td:first-child {
+  border-right: 1px solid rgba(255, 255, 255, .2);
+}
+.settings table th {
+  background: rgba(0, 0, 0, .5);
+  font-size: .9em;
+}
+.settings table tr:nth-child(2n) {
+  background: rgba(0, 0, 0, .2);
+}
+.settings table tr:hover {
+  background: rgba(0, 0, 0, .3);
+}
