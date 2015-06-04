@@ -9,11 +9,12 @@ var LocalPlayer = (function LocalPlayer() {
     this.equippedWeapon = null;
     this.currentWeaponAmmo = -1;
     this.wasWeaponInCooldown = false;
+    
+    this.currentWorldSpeed = 0;
 
     this.onFireWeapon;
 
     options.id = 'localPlayer';
-    options.isLocalPlayer = true;
     options.width = 128;
     options.height = 128;
     options.speed = options.speed;
@@ -52,15 +53,19 @@ var LocalPlayer = (function LocalPlayer() {
     this.equipParts([
       new VehiclePart({
         'type': VEHICLE_PART_TYPES.BODY,
-        'src': 'images/parts/default/body.png'
+        'src': 'images/parts/default/body.png',
+        'obstacleFactor': 0.1
       }),
       new VehiclePart({
         'type': VEHICLE_PART_TYPES.ENGINE,
-        'src': 'images/parts/default/engine.png'
+        'src': 'images/parts/default/engine.png',
+        'speed': 400,
+        'boostFactor': 2
       }),
       new VehiclePart({
         'type': VEHICLE_PART_TYPES.WHEELS,
-        'src': 'images/parts/default/wheels.png'
+        'src': 'images/parts/default/wheels.png',
+        'obstacleFactor': 0.6
       })
     ]);
   };

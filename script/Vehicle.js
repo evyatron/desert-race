@@ -7,6 +7,10 @@ var Vehicle = (function Vehicle() {
     this.wheelsColour = options.wheelsColour || 'rgba(128, 128, 128, 1)';
     this.bodyColour = options.bodyColour || 'rgba(0, 0, 0, 1)';
     
+    this.worldSpeed = 0;
+    this.boostFactor = 1;
+    this.obstacleFactor = 1;
+    
     this.needsToCreateImage = true;
     this.parts = {};
 
@@ -45,6 +49,8 @@ var Vehicle = (function Vehicle() {
     this.parts[type] = part;
     this.needsToCreateImage = true;
     
+    this.updateStats();
+    
     return currentPart;
   };
   
@@ -59,6 +65,32 @@ var Vehicle = (function Vehicle() {
     }
 
     return previousParts;
+  };
+
+  Vehicle.prototype.updateStats = function updateStats() {
+    var worldSpeeds = [],
+        boostFactors = [],
+        obstacleFactors = [];
+    
+    for (var type in this.parts) {
+      var part = this.parts[type];
+      
+      if (part) {
+        if (typeof part.boostFactor === 'number') {
+          boostFactors.push(part.boostFactor);
+        }
+        if (typeof part.obstacleFactor === 'number') {
+          obstacleFactors.push(part.obstacleFactor);
+        }
+        if (typeof part.speed === 'number') {
+          worldSpeeds.push(part.speed);
+        }
+      }
+    }
+    
+    this.worldSpeed = Math.max.apply(Math, worldSpeeds);
+    this.boostFactor = sum(boostFactors);
+    this.obstacleFactor = sum(obstacleFactors);
   };
 
   Vehicle.prototype.createImage = function createImage() {
@@ -144,6 +176,10 @@ var VehiclePart = (function VehiclePart() {
     this.src = '';
     this.image = null;
     
+    this.boostFactor = null;
+    this.obstacleFactor = null;
+    this.speed = null;
+
     this.ready = false;
     
     this.init(options);
@@ -153,6 +189,10 @@ var VehiclePart = (function VehiclePart() {
     this.type = options.type;
     this.src = options.src;
     this.onReady = options.onReady;
+    
+    this.speed = typeof options.speed === 'number'? options.speed : null;
+    this.boostFactor = typeof options.boostFactor === 'number'? options.boostFactor : null;
+    this.obstacleFactor = typeof options.obstacleFactor === 'number'? options.obstacleFactor : null;
     
     this.image = new Image();
     

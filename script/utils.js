@@ -11,7 +11,28 @@ function rand(from, to) {
 }
 
 function lerp(from, to, dt) {
-  return (1 - dt) * from + dt * to;
+  var value = (1 - dt) * from + dt * to;
+  
+  if (Math.abs(Math.abs(to) - Math.abs(value)) < 1) {
+    value = to;
+  }
+  
+  return value;
+}
+
+function avg(array) {
+  return sum(array) / array.length;
+}
+
+function sum(array) {
+  var result = 0,
+      len = array.length;
+
+  for (var i = 0; i < len; i++) {
+    result += array[i];
+  }
+  
+  return result;
 }
 
 var REGEX_NUMBERS = /\B(?=(\d{3})+(?!\d))/g,

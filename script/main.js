@@ -7,14 +7,10 @@ var scene,
     timeToSpawnSideThing = 0,
     things = [];
 
-var speedIncrease = 0;
-
-var PLAYER_MOVEMENT_SPEED = 100;
-
-var currentWorldSpeed = 0,
+var PLAYER_MOVEMENT_SPEED = 100,
     NORMAL_WORLD_SPEED = 400,
-    WORLD_SPEED_WHEN_BOOST = 800,
-    WORLD_SPEED_WHEN_OVER_SOMETHING = 250,
+    BOOST_FACTOR = 2,
+    OBSTACLE_FACTOR = 0.6,
     PLAYER_DISTANCE_FROM_BOTTOM = 10,
     OVER_SOMETHING_RATTLE = 100;
 
@@ -111,6 +107,9 @@ function init() {
   });
 
   player = new LocalPlayer({
+    'worldSpeed': NORMAL_WORLD_SPEED,
+    'boostFactor': BOOST_FACTOR,
+    'obstacleFactor': OBSTACLE_FACTOR,
     'speed': PLAYER_MOVEMENT_SPEED,
     'position': new Victor(scene.width / 2, scene.height - 125)
   });
@@ -173,9 +172,8 @@ function onBeforeGameLoopUpdate(dt) {
 }
 
 function onAfterGameLoopUpdate(dt, context) {
-  var i, len, sprite;
-  
-  var worldSpeed = NORMAL_WORLD_SPEED;
+  var worldSpeed = player.currentWorldSpeed,
+      i, len, sprite;
   
   var isOverWheels = false;
   if (player.didHit) {
@@ -199,41 +197,32 @@ function onAfterGameLoopUpdate(dt, context) {
     }
     
     STATS.timeOverThings += dt;
+    
     player.position.y += rand(-OVER_SOMETHING_RATTLE, OVER_SOMETHING_RATTLE) * dt;
     player.position.x += rand(-OVER_SOMETHING_RATTLE, OVER_SOMETHING_RATTLE) * dt;
-    worldSpeed = WORLD_SPEED_WHEN_OVER_SOMETHING;
+    
+    worldSpeed = player.worldSpeed * player.obstacleFactor;
   } else {
     if (InputManager.SHIFT) {
       if (player.equippedWeapon) {
         player.equippedWeapon.increaseSpread(dt);
       }
       
+      worldSpeed = lerp(worldSpeed, player.worldSpeed * player.boostFactor, dt * 3);
+      
       STATS.turboTime += dt;
-
-      if (worldSpeed >= WORLD_SPEED_WHEN_BOOST) {
-        worldSpeed = WORLD_SPEED_WHEN_BOOST;
-      } else {
-        speedIncrease += 30 * dt;
-        worldSpeed += speedIncrease;
-      }
     } else {
       if (player.equippedWeapon) {
         player.equippedWeapon.decreaseSpread(dt);
       }
       
-      if (worldSpeed < NORMAL_WORLD_SPEED) {
-        speedIncrease = 0;
-        worldSpeed = NORMAL_WORLD_SPEED;
-      } else if (worldSpeed > NORMAL_WORLD_SPEED) {
-        speedIncrease += 50 * dt;
-        worldSpeed -= speedIncrease;
-      }
+      worldSpeed = lerp(worldSpeed, player.worldSpeed, dt * 3);
     }
   }
 
   // make sure everything always moves at the correct speed
-  if (worldSpeed !== currentWorldSpeed) {
-    currentWorldSpeed = worldSpeed;
+  if (worldSpeed !== player.currentWorldSpeed) {
+    player.currentWorldSpeed = worldSpeed;
 
     roadSprite1.velocity.y = worldSpeed;
     roadSprite2.velocity.y = worldSpeed;
@@ -289,7 +278,7 @@ function onAfterGameLoopUpdate(dt, context) {
 
   // update distance
   // currentWorldSpeed is in pixels per second
-  var kmph = currentWorldSpeed * 3600 / 20000,
+  var kmph = player.currentWorldSpeed * 3600 / 20000,
       distance = kmph * dt;
 
   STATS.distance += distance;
@@ -305,7 +294,7 @@ function onAfterGameLoopUpdate(dt, context) {
 function spawnRoadThing() {
   var width = rand(10, 50),
       height = rand(width, width * 2),
-      speed = currentWorldSpeed || NORMAL_WORLD_SPEED,
+      speed = player.currentWorldSpeed || player.worldSpeed,
       thing = new Sprite({
         'type': 'roadThing',
         'width': width,
@@ -327,7 +316,7 @@ function spawnRoadThing() {
 function spawnSideThing() {
   var width = rand(10, 100),
       height = width,
-      speed = currentWorldSpeed || NORMAL_WORLD_SPEED,
+      speed = player.currentWorldSpeed || player.worldSpeed,
       isOnLeftSide = Math.random() > 0.5,
       x = isOnLeftSide? rand(width / 2, ROAD_LEFT - width / 2) : rand(ROAD_RIGHT + width / 2, scene.width - width / 2),
       thing = new Sprite({
