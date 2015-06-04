@@ -65,7 +65,13 @@ var LocalPlayer = (function LocalPlayer() {
       new VehiclePart({
         'type': VEHICLE_PART_TYPES.WHEELS,
         'src': 'images/parts/default/wheels.png',
-        'obstacleFactor': 0.6
+        'obstacleFactor': 0.6,
+        'boundingBoxWidth': 50,
+        'boundingBoxHeight': 80
+      }),
+      new VehiclePart({
+        'type': VEHICLE_PART_TYPES.TURRET,
+        'weaponRotation': 90
       })
     ]);
   };
@@ -133,7 +139,6 @@ var LocalPlayer = (function LocalPlayer() {
         y = this.position.y,
         mouseX = InputManager.mousePosition.x,
         mouseY = InputManager.mousePosition.y,
-        angle = InputManager.mousePosition.clone().subtract(this.position).angle(),
         weapon = this.equippedWeapon,
         drawMouseLine = false;
 
@@ -147,13 +152,23 @@ var LocalPlayer = (function LocalPlayer() {
     }
 
     if (weapon) {
+      var angle = InputManager.mousePosition.clone().subtract(this.position).angle(),
+          centre = 90 * Math.PI / 180,
+          isLeft = angle < -centre || angle > centre;
+      
+      if (centre + angle > this.weaponRotation ||
+          centre + angle < -this.weaponRotation) {
+
+        angle = (isLeft? -1 : 1) * this.weaponRotation - centre;
+      }
+
       var weaponSpread = weapon.spreadAngle / 2 * Math.PI / 180,
           x1 = x + 150 * Math.cos(angle - weaponSpread),
           y1 = y + 150 * Math.sin(angle - weaponSpread),
           x2 = x + 150 * Math.cos(angle + weaponSpread),
           y2 = y + 150 * Math.sin(angle + weaponSpread);
 
-      context.fillStyle = 'rgba(255, 0, 0, .15)';
+      context.fillStyle = 'rgba(200, 200, 200, .1)';
       context.beginPath();
       context.moveTo(x, y);
       context.lineTo(x1, y1);

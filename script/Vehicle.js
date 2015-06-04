@@ -10,10 +10,11 @@ var Vehicle = (function Vehicle() {
     this.worldSpeed = 0;
     this.boostFactor = 1;
     this.obstacleFactor = 1;
+    this.weaponRotation = 0;
     
-    this.needsToCreateImage = true;
     this.parts = {};
 
+    options.colour = '';
     options.type = 'vehicle';
     options.doesCollide = true;
 
@@ -26,20 +27,24 @@ var Vehicle = (function Vehicle() {
   Vehicle.prototype.init = function init() {
     Sprite.prototype.init.apply(this, arguments);
     
-    // init empty loadout
     for (var id in VEHICLE_PART_TYPES) {
       this.parts[id] = null;
     }
-    
-    this.createImage();
   };
   
-  Vehicle.prototype.draw = function draw() {
-    if (this.needsToCreateImage) {
-      this.createImage();
+  Vehicle.prototype.draw = function draw(context) {
+    var x = this.position.x - this.width / 2,
+        y = this.position.y - this.height / 2;
+    
+    for (var i = 0, len = VEHICLE_PARTS_ORDER.length, part; i < len; i++) {
+      part = this.parts[VEHICLE_PARTS_ORDER[i]];
+
+      if (part && part.image) {
+        context.drawImage(part.image, x, y);
+      }
     }
     
-    Sprite.prototype.draw.apply(this, arguments);
+    //Sprite.prototype.draw.apply(this, arguments);
   };
   
   Vehicle.prototype.equipPart = function equipPart(part) {
@@ -47,7 +52,6 @@ var Vehicle = (function Vehicle() {
         currentPart = this.parts[type];
     
     this.parts[type] = part;
-    this.needsToCreateImage = true;
     
     this.updateStats();
     
@@ -70,20 +74,35 @@ var Vehicle = (function Vehicle() {
   Vehicle.prototype.updateStats = function updateStats() {
     var worldSpeeds = [],
         boostFactors = [],
-        obstacleFactors = [];
+        obstacleFactors = [],
+        boundingBoxWidth = 0,
+        boundingBoxHeight = 0,
+        weaponRotation = 0;
     
     for (var type in this.parts) {
       var part = this.parts[type];
       
       if (part) {
+        if (typeof part.speed === 'number') {
+          worldSpeeds.push(part.speed);
+        }
+        
         if (typeof part.boostFactor === 'number') {
           boostFactors.push(part.boostFactor);
         }
         if (typeof part.obstacleFactor === 'number') {
           obstacleFactors.push(part.obstacleFactor);
         }
-        if (typeof part.speed === 'number') {
-          worldSpeeds.push(part.speed);
+        
+        if (typeof part.weaponRotation === 'number') {
+          weaponRotation = Math.max(weaponRotation, part.weaponRotation);
+        }
+        
+        if (typeof part.boundingBoxWidth === 'number') {
+          boundingBoxWidth = Math.max(boundingBoxWidth, part.boundingBoxWidth);
+        }
+        if (typeof part.boundingBoxHeight === 'number') {
+          boundingBoxHeight = Math.max(boundingBoxHeight, part.boundingBoxHeight);
         }
       }
     }
@@ -91,57 +110,8 @@ var Vehicle = (function Vehicle() {
     this.worldSpeed = Math.max.apply(Math, worldSpeeds);
     this.boostFactor = sum(boostFactors);
     this.obstacleFactor = sum(obstacleFactors);
-  };
-
-  Vehicle.prototype.createImage = function createImage() {
-    for (var type in this.parts) {
-      var part = this.parts[type];
-      if (part) {
-        if (!part.ready) {
-          this.needsToCreateImage = true;
-          return;
-        }
-      }
-    }
-    
-    this.image = new Image();
-
-    var canvas = document.createElement('canvas'),
-        context = canvas.getContext('2d'),
-        w = this.width,
-        h = this.height,
-        bodyMargin = this.wheelsSize,
-        wheelHeight = 20,
-        gotParts = false;
-
-    canvas.width = w;
-    canvas.height = h;
-    
-    for (var i = 0, len = VEHICLE_PARTS_ORDER.length; i < len; i++) {
-      var type = VEHICLE_PARTS_ORDER[i],
-          part = this.parts[type];
-          
-      if (part) {
-        context.drawImage(part.image, 0, 0);
-        gotParts = true;
-      }
-    }
-    
-    if (!gotParts) {
-      context.fillStyle = this.wheelsColour;
-      context.fillRect(0, bodyMargin * 5, bodyMargin * 2, wheelHeight);
-      context.fillRect(0, h - bodyMargin * 2 - wheelHeight, bodyMargin * 2, wheelHeight);
-  
-      context.fillRect(w - bodyMargin * 2, bodyMargin * 5, bodyMargin * 2, wheelHeight);
-      context.fillRect(w - bodyMargin * 2, h - bodyMargin * 2 - wheelHeight, bodyMargin * 2, wheelHeight);
-  
-      context.fillStyle = this.bodyColour;
-      context.fillRect(bodyMargin * 2, bodyMargin, w - bodyMargin * 4, bodyMargin * 1.5);
-      context.fillRect(bodyMargin, bodyMargin * 2.5, w - bodyMargin * 2, h - bodyMargin * 2);
-    }
-
-    this.image.src = canvas.toDataURL();
-    this.needsToCreateImage = false;
+    this.weaponRotation = Math.max(Math.min(weaponRotation, 180), 0) * Math.PI / 180;
+    this.setBoundingBox(boundingBoxWidth, boundingBoxHeight);
   };
 
   return Vehicle;
@@ -176,11 +146,14 @@ var VehiclePart = (function VehiclePart() {
     this.src = '';
     this.image = null;
     
+    this.speed = null;
     this.boostFactor = null;
     this.obstacleFactor = null;
-    this.speed = null;
+    this.weaponRotation = null;
+    this.boundingBoxWidth = null;
+    this.boundingBoxHeight = null;
 
-    this.ready = false;
+    this.ready = true;
     
     this.init(options);
   }
@@ -190,10 +163,23 @@ var VehiclePart = (function VehiclePart() {
     this.src = options.src;
     this.onReady = options.onReady;
     
-    this.speed = typeof options.speed === 'number'? options.speed : null;
-    this.boostFactor = typeof options.boostFactor === 'number'? options.boostFactor : null;
-    this.obstacleFactor = typeof options.obstacleFactor === 'number'? options.obstacleFactor : null;
+    this.speed = initNumber(options.speed);
+    this.boostFactor = initNumber(options.boostFactor);
+    this.obstacleFactor = initNumber(options.obstacleFactor);
+    this.weaponRotation = initNumber(options.weaponRotation);
+    this.boundingBoxWidth = initNumber(options.boundingBoxWidth);
+    this.boundingBoxHeight = initNumber(options.boundingBoxHeight);
     
+    if (options.src) {
+      this.setImage(options.src);
+    }
+  };
+  
+  VehiclePart.prototype.update = function update(dt) {
+  };
+  
+  VehiclePart.prototype.setImage = function setImage(src) {
+    this.ready = false;
     this.image = new Image();
     
     this.image.onload = function onImageLoad() {
@@ -201,9 +187,6 @@ var VehiclePart = (function VehiclePart() {
     }.bind(this);
     
     this.image.src = this.src;
-  };
-  
-  VehiclePart.prototype.update = function update(dt) {
   };
 
   return VehiclePart;

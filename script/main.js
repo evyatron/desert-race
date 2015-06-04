@@ -175,23 +175,7 @@ function onAfterGameLoopUpdate(dt, context) {
   var worldSpeed = player.currentWorldSpeed,
       i, len, sprite;
   
-  var isOverWheels = false;
   if (player.didHit) {
-    for (i = 0, len = player.spritesHit.length; i < len; i++) {
-      sprite = player.spritesHit[i];
-      
-      if (sprite.left < player.left + player.wheelsHit || sprite.right > player.right - player.wheelsHit) {
-        isOverWheels = true;
-
-        if (!sprite.wasHitByPlayer) {
-          STATS.roadThingsHit++;
-          sprite.wasHitByPlayer = true;
-        }
-      }
-    }
-  }
-
-  if (isOverWheels) {
     if (player.equippedWeapon) {
       player.equippedWeapon.increaseSpread(dt);
     }

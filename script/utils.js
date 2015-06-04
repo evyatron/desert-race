@@ -1,4 +1,12 @@
 /* helpers */
+function initNumber(value, defaultValue) {
+  if (defaultValue === undefined) {
+    defaultValue = null;
+  }
+  
+  return typeof value === 'number'? value : defaultValue;
+}
+
 function randF(from, to) {
   !from && (from = 0);
   !to && (to = 0);

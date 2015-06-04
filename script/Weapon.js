@@ -228,12 +228,12 @@ var Pistol = (function Pistol() {
     options.bulletSpeed = 500;
     options.damagePerBullet = 4;
     options.bulletsPerShot = 1;
-    options.minSpreadAngle = 10;
+    options.minSpreadAngle = 15;
     options.maxSpreadAngle = 70;
     options.magazineSize = 6;
     options.bulletsPerReload = 6;
-    options.timeToReload = 0.35;
-    options.timeToCooldown = 0.35;
+    options.timeToReload = 0.45;
+    options.timeToCooldown = 0.45;
     
     options.soundFire = AudioPlayer.PISTOL_FIRE;
     options.soundEmpty = AudioPlayer.PISTOL_EMPTY;

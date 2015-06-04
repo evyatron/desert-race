@@ -16,8 +16,8 @@ var AudioPlayer = (function AudioPlayer() {
     
     this.baseSrc = options.baseSrc || '';
     this.isEnabled = typeof options.isEnabled === 'boolean'? options.isEnabled : true;
-    this.effectsVolume = typeof options.effectsVolume === 'number'? options.effectsVolume : 0.5;
-    this.musicVolume = typeof options.musicVolume === 'number'? options.musicVolume : 0.5;
+    this.effectsVolume = initNumber(options.effectsVolume, 0.5);
+    this.musicVolume = initNumber(options.musicVolume, 0.5);
     
     for (var id in options.sounds) {
       this.SOUNDS[id] = {

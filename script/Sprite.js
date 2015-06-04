@@ -16,6 +16,7 @@ var Sprite = (function Sprite() {
     this.halfHeight;
     this.position;
     this.velocity;
+    
     this.hitBounds = {
       'width': 0,
       'height': 0,
@@ -38,7 +39,7 @@ var Sprite = (function Sprite() {
     this.type = options.type || 'sprite';
     this.zIndex = options.zIndex || 0;
 
-    this.colour = options.colour || 'rgba(255, 0, 0, 1)';
+    this.colour = 'colour' in options? options.colour : 'rgba(255, 0, 0, 1)';
 
     if (options.image) {
       this.setImage(options.image);
@@ -55,13 +56,17 @@ var Sprite = (function Sprite() {
 
     this.halfWidth = this.width / 2;
     this.halfHeight = this.height / 2;
-    this.hitBounds.width = this.width;
-    this.hitBounds.height = this.height;
+    this.setBoundingBox(this.width, this.height);
   };
 
   Sprite.prototype.setImage = function setImage(src) {
     this.image = new Image();
     this.image.src = src;
+  };
+
+  Sprite.prototype.setBoundingBox = function setBoundingBox(width, height) {
+    this.hitBounds.width = width;
+    this.hitBounds.height = height;
   };
 
   Sprite.prototype.destroy = function destroy() {
@@ -101,10 +106,13 @@ var Sprite = (function Sprite() {
     this.left = x - this.halfWidth;
     this.right = x + this.halfWidth;
 
-    this.hitBounds.top = y - this.halfHeight;
-    this.hitBounds.bottom = y + this.halfHeight;
-    this.hitBounds.left = x - this.halfWidth;
-    this.hitBounds.right = x + this.halfWidth;
+    var halfWidth = this.hitBounds.width / 2,
+        halfHeight = this.hitBounds.height / 2;
+        
+    this.hitBounds.top = y - halfHeight;
+    this.hitBounds.bottom = y + halfHeight;
+    this.hitBounds.left = x - halfWidth;
+    this.hitBounds.right = x + halfWidth;
 
     if (this.destroyWhenOutOfBounds) {
       if (this.right < 0 || this.left > this.scene.width ||
@@ -146,10 +154,16 @@ var Sprite = (function Sprite() {
         h = this.height,
         x = this.position.x - w / 2,
         y = this.position.y - h / 2;
+    
+    if (DEBUG) {
+      var hitBounds = this.hitBounds;
+      context.fillStyle = 'rgba(255, 0, 0, .2)';
+      context.fillRect(hitBounds.left, hitBounds.top, hitBounds.width, hitBounds.height);
+    }
 
     if (this.image) {
       context.drawImage(this.image, x, y, w, h);
-    } else {
+    } else if (this.colour) {
       context.fillStyle = this.colour;
       context.fillRect(x, y, w, h);
     }
