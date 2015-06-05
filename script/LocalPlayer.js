@@ -5,7 +5,6 @@ var LocalPlayer = (function LocalPlayer() {
     this.elWeapon = null;
     this.elWeaponMagazine = null;
     this.elWeaponCooldown = null;
-    this.weapons = [];
     this.equippedWeapon = null;
     this.currentWeaponAmmo = -1;
     this.wasWeaponInCooldown = false;
@@ -44,17 +43,15 @@ var LocalPlayer = (function LocalPlayer() {
       'elContainer': document.querySelector('.inventory-wrapper'),
       'player': this
     });
-
-    this.weapons[0] = new Pistol();
-    this.weapons[1] = new Rifle();
-    this.weapons[2] = new Shotgun();
+    
+    this.pickupWeapon(new Pistol());
+    this.pickupWeapon(new Rifle());
+    this.pickupWeapon(new Shotgun());
     
     InputManager.on('pressed', InputManager.KEYS.NUMBER_1, this.equipWeapon.bind(this, 0));
     InputManager.on('pressed', InputManager.KEYS.NUMBER_2, this.equipWeapon.bind(this, 1));
     InputManager.on('pressed', InputManager.KEYS.NUMBER_3, this.equipWeapon.bind(this, 2));
 
-    this.equipWeapon(0);
-    
     this.equipParts([
       new VehiclePart({
         'type': VEHICLE_PART_TYPES.BODY,
@@ -110,8 +107,18 @@ var LocalPlayer = (function LocalPlayer() {
     }
   };
   
+  LocalPlayer.prototype.pickupWeapon = function pickupWeapon(weapon) {
+    this.inventory.addWeapon(weapon);
+    
+    if (!this.equippedWeapon) {
+      this.equipWeapon(0);
+    }
+  };
+  
   LocalPlayer.prototype.equipWeapon = function equipWeapon(index) {
-    if (!this.weapons[index]) {
+    var weapons = this.inventory.weaponsHeld || [];
+    
+    if (!weapons[index]) {
       return;
     }
     
@@ -124,7 +131,7 @@ var LocalPlayer = (function LocalPlayer() {
       this.equippedWeapon.setEquipped(false);
     }
     
-    this.equippedWeapon = this.weapons[index];
+    this.equippedWeapon = weapons[index];
     
     this.equippedWeapon.setEquipped(true);
     
@@ -141,7 +148,7 @@ var LocalPlayer = (function LocalPlayer() {
     }
     this.elWeaponMagazine.innerHTML = html;
     
-    this.inventory.updateWeapons();
+    this.inventory.updateHeldWeapons();
     
     return true;
   };

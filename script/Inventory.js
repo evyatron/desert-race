@@ -20,6 +20,12 @@ var Inventory = (function Inventory() {
     this.elOwned;
     this.elWeapons;
     
+    this.numberOfWeaponSlots = 3;
+    this.weaponsHeld = [];
+    
+    this.weapons = [];
+    this.parts = [];
+    
     this.player;
     
     this.init(options);
@@ -30,11 +36,22 @@ var Inventory = (function Inventory() {
     this.player = options.player;
     
     this.createHTML();
-    this.updateWeapons();
   };
   
-  Inventory.prototype.updateWeapons = function updateWeapons() {
-    var weapons = this.player.weapons,
+  Inventory.prototype.addWeapon = function addWeapon(weapon) {
+    this.weapons.push(weapon);
+    
+    if (this.weaponsHeld.length < this.numberOfWeaponSlots) {
+      this.weaponsHeld.push(weapon);
+      this.updateHeldWeapons();
+    } else {
+      this.updateWeapons();
+    }
+      this.updateWeapons();
+  };
+  
+  Inventory.prototype.updateHeldWeapons = function updateHeldWeapons() {
+    var weapons = this.weaponsHeld,
         html = '';
     
     for (var i = 0, len = weapons.length;  i < len; i++) {
@@ -44,6 +61,21 @@ var Inventory = (function Inventory() {
     }
     
     this.elWeapons.innerHTML = html;
+  };
+  
+  Inventory.prototype.updateWeapons = function updateWeapons() {
+    var weapons = this.weapons,
+        html = '';
+    
+    for (var i = 0, len = weapons.length, weapon;  i < len; i++) {
+      weapon = weapons[i];
+      
+      if (this.weaponsHeld.indexOf(weapon) !== -1) {
+        continue;
+      }
+      
+      html += TEMPLATE_GRID_WEAPON.format(weapon);
+    }
   };
   
   Inventory.prototype.onClickWeapons = function onClickWeapons(e) {
