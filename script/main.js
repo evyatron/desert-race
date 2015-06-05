@@ -32,6 +32,8 @@ var STATS = {
 var DEBUG = /DEBUG/.test(window.location.href);
 
 function init() {
+  bindInputActions();
+  
   AudioPlayer.init({
     'isEnabled': UserSettings.get(UserSettings.SOUND_ENABLED),
     'baseSrc': 'sounds',
@@ -49,6 +51,9 @@ function init() {
       'RIFLE_EMPTY': 'shotgun/empty.mp3',
       'RIFLE_FIRE': 'rifle/fire.wav',
       'RIFLE_RELOAD': 'rifle/reload-bullet.wav',
+      'ASSAULT_RIFLE_EMPTY': 'shotgun/empty.mp3',
+      'ASSAULT_RIFLE_FIRE': 'rifle/fire.wav',
+      'ASSAULT_RIFLE_RELOAD': 'rifle/reload-bullet.wav',
       
       'VOLUME_CHANGE': 'shotgun/empty.mp3'
     }
@@ -143,6 +148,20 @@ function init() {
   });
 }
 
+function bindInputActions() {
+  InputManager.bindAction('MoveRight', InputManager.KEYS.D);
+  InputManager.bindAction('MoveLeft', InputManager.KEYS.A);
+  InputManager.bindAction('MoveUp', InputManager.KEYS.W);
+  InputManager.bindAction('MoveDown', InputManager.KEYS.S);
+  InputManager.bindAction('Boost', InputManager.KEYS.SHIFT);
+  
+  InputManager.bindAction('WeaponFire', InputManager.KEYS.LEFT_MOUSE_BUTTON);
+  InputManager.bindAction('WeaponReload', InputManager.KEYS.RIGHT_MOUSE_BUTTON);
+  InputManager.bindAction('EquipWeapon0', InputManager.KEYS.NUMBER_1);
+  InputManager.bindAction('EquipWeapon1', InputManager.KEYS.NUMBER_2);
+  InputManager.bindAction('EquipWeapon2', InputManager.KEYS.NUMBER_3);
+}
+
 function onSceneResize(width, height) {
   ROAD_LEFT = (width - ROAD_WIDTH) / 2;
   ROAD_RIGHT = ROAD_LEFT + ROAD_WIDTH;
@@ -150,23 +169,23 @@ function onSceneResize(width, height) {
 }
 
 function onBeforeGameLoopUpdate(dt) {
-  if (InputManager.D) {
+  if (InputManager.actionsActive.MoveRight) {
     player.velocity.x += player.speed;
   }
-  if (InputManager.A) {
+  if (InputManager.actionsActive.MoveLeft) {
     player.velocity.x -= player.speed;
   }
-  if (InputManager.W) {
+  if (InputManager.actionsActive.MoveUp) {
     player.velocity.y -= player.speed;
   }
-  if (InputManager.S) {
+  if (InputManager.actionsActive.MoveDown) {
     player.velocity.y += player.speed;
   }
 
-  if (InputManager.isLeftMouseButtonDown) {
+  if (InputManager.actionsActive.WeaponFire) {
     player.fireWeapon();
   }
-  if (InputManager.isRightMouseButtonDown) {
+  if (InputManager.actionsActive.WeaponReload) {
     player.reloadWeapon();
   }
 }
@@ -187,7 +206,7 @@ function onAfterGameLoopUpdate(dt, context) {
     
     worldSpeed = player.worldSpeed * player.obstacleFactor;
   } else {
-    if (InputManager.SHIFT) {
+    if (InputManager.actionsActive.Boost) {
       if (player.equippedWeapon) {
         player.equippedWeapon.increaseSpread(dt);
       }

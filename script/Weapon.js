@@ -178,7 +178,7 @@ var Shotgun = (function Shotgun() {
     options.name = 'Shotgun';
     options.type = 'shotgun';
     options.bulletSpeed = 400;
-    options.damagePerBullet = 1;
+    options.damagePerBullet = 3;
     options.bulletsPerShot = 10;
     options.minSpreadAngle = 45;
     options.maxSpreadAngle = 90;
@@ -207,7 +207,7 @@ var Rifle = (function Rifle() {
     options.name = 'Rifle';
     options.type = 'rifle';
     options.bulletSpeed = 800;
-    options.damagePerBullet = 10;
+    options.damagePerBullet = 20;
     options.bulletsPerShot = 1;
     options.minSpreadAngle = 3;
     options.maxSpreadAngle = 60;
@@ -241,8 +241,8 @@ var Pistol = (function Pistol() {
     options.minSpreadAngle = 15;
     options.maxSpreadAngle = 70;
     options.magazineSize = 6;
-    options.bulletsPerReload = 6;
-    options.timeToReload = 0.45;
+    options.bulletsPerReload = 1;
+    options.timeToReload = 0.35;
     options.timeToCooldown = 0.45;
     
     options.soundFire = AudioPlayer.PISTOL_FIRE;
@@ -256,6 +256,35 @@ var Pistol = (function Pistol() {
   Pistol.prototype.constructor = Pistol;
 
   return Pistol;
+}());
+
+var AssaultRifle = (function AssaultRifle() {
+  function AssaultRifle(options) {
+    !options && (options = {});
+
+    options.name = 'Assault Rifle';
+    options.type = 'assault';
+    options.bulletSpeed = 500;
+    options.damagePerBullet = 1;
+    options.bulletsPerShot = 1;
+    options.minSpreadAngle = 25;
+    options.maxSpreadAngle = 70;
+    options.magazineSize = 30;
+    options.bulletsPerReload = 30;
+    options.timeToReload = 4;
+    options.timeToCooldown = 0.08;
+    
+    options.soundFire = AudioPlayer.ASSAULT_RIFLE_FIRE;
+    options.soundEmpty = AudioPlayer.ASSAULT_RIFLE_EMPTY;
+    options.soundReload = AudioPlayer.ASSAULT_RIFLE_RELOAD;
+
+    Weapon.call(this, options);
+  }
+
+  AssaultRifle.prototype = Object.create(Weapon.prototype);
+  AssaultRifle.prototype.constructor = AssaultRifle;
+
+  return AssaultRifle;
 }());
 
 var Bullet = (function Bullet() {

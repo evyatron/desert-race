@@ -9,9 +9,26 @@ var Inventory = (function Inventory() {
                            '<div class="owned">' +
                            '</div>';
 
-  var TEMPLATE_WEAPON = '<div title="{{name}}" data-slot="{{index}}" '+
+  var TEMPLATE_HELD_WEAPON = '<div title="{{name}}" data-slot="{{index}}" '+
                               'class="weapon {{type}} equipped-{{isEquipped}}">' +
-                        '</div>';
+                              '<b class="key">{{key}}</b>' +
+                             '</div>';
+                             
+  var TEMPLATE_GRID_ITEM = '<div title="{{name}}" class="item {{type}}" data-tab-id="{{tabId}}" data-index="{{index}}"></div>';
+  
+  var TEMPLATE_TAB_LABEL = '<div class="tab-label {{id}}" data-tab-id="{{id}}">{{name}}</div>';
+  var TEMPLATE_TAB_CONTENT = '<div class="tab-content {{id}}" data-tab-id="{{id}}"></div>';
+  
+  var VEHICLE_PART_NAMES = {};
+  VEHICLE_PART_NAMES[VEHICLE_PART_TYPES.ENGINE] = 'Engine';
+  VEHICLE_PART_NAMES[VEHICLE_PART_TYPES.WHEELS] = 'Wheels';
+  VEHICLE_PART_NAMES[VEHICLE_PART_TYPES.BODY] = 'Body';
+  VEHICLE_PART_NAMES[VEHICLE_PART_TYPES.FRONT] = 'Front';
+  VEHICLE_PART_NAMES[VEHICLE_PART_TYPES.REAR] = 'Rear';
+  VEHICLE_PART_NAMES[VEHICLE_PART_TYPES.TURRET] = 'Turret';
+  VEHICLE_PART_NAMES[VEHICLE_PART_TYPES.VANITY] = 'Vanity';
+  VEHICLE_PART_NAMES[VEHICLE_PART_TYPES.MORALE] = 'Morale';
+  
   
   function Inventory(options) {
     this.elContainer;
@@ -19,6 +36,10 @@ var Inventory = (function Inventory() {
     this.elEquipped;
     this.elOwned;
     this.elWeapons;
+    this.elTabLabels;
+    this.elTabContents;
+    
+    this.currentTabId;
     
     this.numberOfWeaponSlots = 3;
     this.weaponsHeld = [];
@@ -36,6 +57,38 @@ var Inventory = (function Inventory() {
     this.player = options.player;
     
     this.createHTML();
+    
+    this.showOwnedTab('weapon');
+  };
+  
+  Inventory.prototype.showOwnedTab = function showOwnedTab(id) {
+    if (this.currentTabId) {
+      if (this.currentTabId === id) {
+        return;
+      }
+      
+      var elCurrentTabLabel = this.elTabLabels.querySelector('.active'),
+          elCurrentTabContent = this.elTabContents.querySelector('.active');
+      
+      if (elCurrentTabLabel) {
+        elCurrentTabLabel.classList.remove('active');
+      }
+      if (elCurrentTabContent) {
+        elCurrentTabContent.classList.remove('active');
+      }
+    }
+    
+    var elTabLabel = this.elTabLabels.querySelector('[data-tab-id = "' +id + '"]'),
+        elTabContent = this.elTabContents.querySelector('[data-tab-id = "' +id + '"]');
+    
+    if (elTabLabel) {
+      elTabLabel.classList.add('active');
+    }
+    if (elTabContent) {
+      elTabContent.classList.add('active');
+    }
+    
+    this.currentTabId = id;
   };
   
   Inventory.prototype.addWeapon = function addWeapon(weapon) {
@@ -45,9 +98,8 @@ var Inventory = (function Inventory() {
       this.weaponsHeld.push(weapon);
       this.updateHeldWeapons();
     } else {
-      this.updateWeapons();
+      this.updateTab('weapon');
     }
-      this.updateWeapons();
   };
   
   Inventory.prototype.updateHeldWeapons = function updateHeldWeapons() {
@@ -55,27 +107,64 @@ var Inventory = (function Inventory() {
         html = '';
     
     for (var i = 0, len = weapons.length;  i < len; i++) {
-      html += TEMPLATE_WEAPON.format(weapons[i]).format({
-        'index': i
+      html += TEMPLATE_HELD_WEAPON.format(weapons[i]).format({
+        'index': i,
+        'key': InputManager.KEY_NAMES[InputManager.getActionKey('EquipWeapon' + i)] || ''
       });
     }
     
     this.elWeapons.innerHTML = html;
   };
   
-  Inventory.prototype.updateWeapons = function updateWeapons() {
-    var weapons = this.weapons,
+  Inventory.prototype.updateTab = function updateTab(tabId) {
+    var items = this.weapons,
+        elTabContent = this.elTabContents.querySelector('[data-tab-id = "' +tabId + '"]'),
         html = '';
     
-    for (var i = 0, len = weapons.length, weapon;  i < len; i++) {
-      weapon = weapons[i];
+    for (var i = 0, len = items.length, item;  i < len; i++) {
+      item = items[i];
       
-      if (this.weaponsHeld.indexOf(weapon) !== -1) {
+      if (this.weaponsHeld.indexOf(item) !== -1) {
         continue;
       }
       
-      html += TEMPLATE_GRID_WEAPON.format(weapon);
+      html += TEMPLATE_GRID_ITEM.format(item).format({
+        'tabId': tabId,
+        'index': i
+      });
     }
+    
+    elTabContent.innerHTML = html;
+  };
+  
+  Inventory.prototype.createTabs = function createTabs() {
+    var htmlTabs = '<div class="tab-labels">',
+        htmlContents = '<div class="tab-contents">';
+    
+    htmlTabs += TEMPLATE_TAB_LABEL.format({
+      'id': 'weapon',
+      'name': 'Weapons'
+    });
+    htmlContents += TEMPLATE_TAB_CONTENT.format({
+      'id': 'weapon',
+      'name': 'Weapons'
+    });
+
+    for (var id in VEHICLE_PART_TYPES) {
+      htmlTabs += TEMPLATE_TAB_LABEL.format({
+        'id': id,
+        'name': VEHICLE_PART_NAMES[id] || id
+      });
+      htmlContents += TEMPLATE_TAB_CONTENT.format({
+        'id': id,
+        'name': VEHICLE_PART_NAMES[id] || id
+      });
+    }
+    
+    htmlTabs += '</div>';
+    htmlContents += '</div>';
+    
+    this.elOwned.innerHTML = htmlTabs + htmlContents;
   };
   
   Inventory.prototype.onClickWeapons = function onClickWeapons(e) {
@@ -86,7 +175,28 @@ var Inventory = (function Inventory() {
       return;
     }
     
-    this.player.equipWeapon(slot * 1);
+    this.player.equipWeapon(this.weaponsHeld[slot * 1]);
+  };
+  
+  Inventory.prototype.onClickTabLabel = function onClickTabLabel(e) {
+    var elClicked = e.target,
+        tabId = elClicked.dataset.tabId;
+    
+    if (tabId) {
+      this.showOwnedTab(tabId);
+    }
+  };
+  
+  Inventory.prototype.onClickTabContent = function onClickTabContent(e) {
+    var elClicked = e.target,
+        tabId = elClicked.dataset.tabId,
+        index = elClicked.dataset.index * 1;
+    
+    console.warn('click inventory:', tabId, index);
+    
+    if (tabId === 'weapon') {
+      this.player.equipWeapon(this.weapons[index]);
+    }
   };
   
   Inventory.prototype.createHTML = function createHTML() {
@@ -98,7 +208,14 @@ var Inventory = (function Inventory() {
     this.elOwned = this.el.querySelector('.owned');
     this.elWeapons = this.el.querySelector('.weapons');
     
+    this.createTabs();
+    
+    this.elTabLabels = this.elOwned.querySelector('.tab-labels');
+    this.elTabContents = this.elOwned.querySelector('.tab-contents');
+    
     this.elWeapons.addEventListener('click', this.onClickWeapons.bind(this));
+    this.elTabLabels.addEventListener('click', this.onClickTabLabel.bind(this));
+    this.elTabContents.addEventListener('click', this.onClickTabContent.bind(this));
     
     this.elContainer.appendChild(this.el);
   };

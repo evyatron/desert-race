@@ -44,13 +44,14 @@ var LocalPlayer = (function LocalPlayer() {
       'player': this
     });
     
+    this.pickupWeapon(new AssaultRifle());
     this.pickupWeapon(new Pistol());
     this.pickupWeapon(new Rifle());
     this.pickupWeapon(new Shotgun());
     
-    InputManager.on('pressed', InputManager.KEYS.NUMBER_1, this.equipWeapon.bind(this, 0));
-    InputManager.on('pressed', InputManager.KEYS.NUMBER_2, this.equipWeapon.bind(this, 1));
-    InputManager.on('pressed', InputManager.KEYS.NUMBER_3, this.equipWeapon.bind(this, 2));
+    InputManager.on('pressed', 'EquipWeapon0', this.equipHeldWeapon.bind(this, 0));
+    InputManager.on('pressed', 'EquipWeapon1', this.equipHeldWeapon.bind(this, 1));
+    InputManager.on('pressed', 'EquipWeapon2', this.equipHeldWeapon.bind(this, 2));
 
     this.equipParts([
       new VehiclePart({
@@ -86,10 +87,8 @@ var LocalPlayer = (function LocalPlayer() {
       weapon.update(dt);
       
       if (weapon.isReloading) {
-        var reloadProgress = Math.min(weapon.reloadTime / weapon.timeToReload * 100, 100),
-            numberOfBullets = Math.min(weapon.inMagazine + weapon.bulletsPerReload, weapon.magazineSize);
-
-        this.setBulletFill(weapon.inMagazine, numberOfBullets, reloadProgress);
+        var reloadProgress = Math.min(weapon.reloadTime / weapon.timeToReload * 100, 100);
+        this.setBulletFill(weapon.inMagazine, weapon.bulletsPerReload, reloadProgress);
       }
 
       if (weapon.isInCooldown) {
@@ -111,17 +110,16 @@ var LocalPlayer = (function LocalPlayer() {
     this.inventory.addWeapon(weapon);
     
     if (!this.equippedWeapon) {
-      this.equipWeapon(0);
+      this.equipWeapon(weapon);
     }
   };
   
-  LocalPlayer.prototype.equipWeapon = function equipWeapon(index) {
-    var weapons = this.inventory.weaponsHeld || [];
-    
-    if (!weapons[index]) {
-      return;
-    }
-    
+  LocalPlayer.prototype.equipHeldWeapon = function equipHeldWeapon(index) {
+    var weapon = this.inventory.weaponsHeld[index];
+    this.equipWeapon(weapon);
+  };
+  
+  LocalPlayer.prototype.equipWeapon = function equipWeapon(weapon) {
     if (this.equippedWeapon) {
       if (this.equippedWeapon.isReloading || this.equippedWeapon.isInCooldown) {
         return false;
@@ -131,7 +129,7 @@ var LocalPlayer = (function LocalPlayer() {
       this.equippedWeapon.setEquipped(false);
     }
     
-    this.equippedWeapon = weapons[index];
+    this.equippedWeapon = weapon;
     
     this.equippedWeapon.setEquipped(true);
     
@@ -226,7 +224,7 @@ var LocalPlayer = (function LocalPlayer() {
   };
   
   LocalPlayer.prototype.setBulletFill = function setBulletFill(bulletIndex, numberOfBullets, fill) {
-    for (var i = bulletIndex; i < bulletIndex + numberOfBullets; i++) {
+    for (var i = bulletIndex, len = bulletIndex + numberOfBullets; i < len; i++) {
       var elBullet = this.elWeaponMagazine.children[i];
       if (elBullet) {
         var elBulletLoadedEmpty = elBullet.querySelector('.empty'),
@@ -238,6 +236,8 @@ var LocalPlayer = (function LocalPlayer() {
         if (elBulletLoadedFull) {
           elBulletLoadedFull.style.height = fill + '%';
         }
+      } else {
+        break;
       }
     }
   };

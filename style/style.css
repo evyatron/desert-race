@@ -64,7 +64,9 @@ canvas {
   background: rgba(0, 0, 0, .8);
   transition: transform 250ms ease-in;
 }
-.menu:hover {
+.menu:hover,
+.menu.left:hover,
+.menu.right:hover {
   transition-timing-function: ease-out;
   transform: translateX(0);
   box-shadow: 0 0 3px 0 rgba(0, 0, 0, 1),
@@ -101,16 +103,16 @@ canvas {
     border-bottom: 1px solid rgba(255, 255, 255, .5);
   }
 
-.inventory-wrapper {
+.menu.right {
   right: 0;
   border-radius: 0 0 0 10px;
   transform: translateX(100%);
 }
-  .inventory-wrapper .handle {
+  .menu.right .handle {
     right: 100%;
     border-radius: 0 0 0 5px;
   }
-    .inventory-wrapper .handle:before {
+    .menu.right .handle:before {
       height: 30px;
       margin-top: -15px;
       background-image: linear-gradient(to bottom, rgba(128, 128, 128, 0) 20%,
@@ -132,20 +134,20 @@ canvas {
                                                    rgba(128, 128, 128, 1) 75%,
                                                    rgba(128, 128, 128, 0) 80%);
     }
-  .inventory-wrapper:hover .handle {
+  .menu.right:hover .handle {
     transform: translateX(100%);
   }
 
-.settings {
+.menu.left {
   left: 0;
   border-radius: 0 0 10px 0;
   transform: translateX(-100%);
 }
-  .settings .handle {
+  .menu.left .handle {
     left: 100%;
     border-radius: 0 0 5px 0;
   }
-    .settings .handle:before {
+    .menu.left .handle:before {
       background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0) 20%,
                                                    rgba(255, 255, 255, 1) 25%,
                                                    rgba(255, 255, 255, 0) 30%,
@@ -156,7 +158,7 @@ canvas {
                                                    rgba(255, 255, 255, 1) 75%,
                                                    rgba(255, 255, 255, 0) 80%);
     }
-  .settings:hover .handle {
+  .menu.left:hover .handle {
     transform: translateX(-100%);
   }
 

@@ -1,5 +1,5 @@
-.inventory {
-  
+.inventory-wrapper {
+  width: 500px;
 }
 
 .inventory .equipped {
@@ -14,37 +14,107 @@
     padding: 5px 0;
     height: 42px;
   }
-  .inventory .equipped .weapons .weapon {
-    display: inline-block;
-    width: 42px;
-    height: 42px;
-    padding: 2px;
-    margin: 0 5px;
-    border: 1px solid #444;
-    background: #000;
-    box-sizing: border-box;
-    background-position: 50% 50%;
-    background-repeat: no-repeat;
-    background-size: contain;
-    background-origin: content-box;
-  }
-  .inventory .equipped .weapons .weapon.equipped-true {
-    border: 1px solid #aaa;
-  }
-  .inventory .equipped .weapons .weapon.equipped-false:hover {
-    border: 1px solid #888;
-  }
-  .inventory .equipped .weapons .weapon.shotgun {
-    background-image: url(/images/shotgun/bullet-full.png);
-  }
-  .inventory .equipped .weapons .weapon.pistol {
-    background-image: url(/images/pistol/bullet-full.png);
-  }
-  .inventory .equipped .weapons .weapon.rifle {
-    background-image: url(/images/rifle/bullet-full.png);
-  }
+    .inventory .equipped .weapons .weapon {
+      position: relative;
+      display: inline-block;
+      width: 42px;
+      height: 42px;
+      padding: 2px;
+      margin: 0 5px;
+      border: 1px solid #444;
+      background: #000;
+      box-sizing: border-box;
+      background-position: 50% 50%;
+      background-repeat: no-repeat;
+      background-size: contain;
+      background-origin: content-box;
+    }
+      .inventory .equipped .weapons .weapon .key {
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        line-height: 1;
+        margin: 1px;
+        font-size: .8em;
+        opacity: .4;
+      }
+      .inventory .equipped .weapons .weapon.equipped-true .key,
+      .inventory .equipped .weapons .weapon.equipped-false:hover .key {
+        opacity: .6;
+      }
+    .inventory .equipped .weapons .weapon.equipped-true {
+      border: 1px solid #aaa;
+    }
+    .inventory .equipped .weapons .weapon.equipped-false:hover {
+      border: 1px solid #888;
+    }
+    .inventory .equipped .weapons .weapon.shotgun {
+      background-image: url(/images/shotgun/bullet-full.png);
+    }
+    .inventory .equipped .weapons .weapon.pistol {
+      background-image: url(/images/pistol/bullet-full.png);
+    }
+    .inventory .equipped .weapons .weapon.rifle {
+      background-image: url(/images/rifle/bullet-full.png);
+    }
+    .inventory .equipped .weapons .weapon.assault {
+      background: red;
+    }
   
 .inventory .owned {
-  border-top: 1px solid #444;
-  height: 100px;
+  position: relative;
+  height: 250px;
 }
+  .inventory .owned .tab-labels {
+    position: relative;
+    z-index: 5;
+    height: 34px;
+    line-height: 34px;
+    font-size: .6em;
+    text-transform: capitalize;
+  }
+    .inventory .owned .tab-labels .tab-label {
+      display: inline-block;
+      margin-left: 3px;
+      width: 50px;
+      height: 34px;
+      text-align: center;
+      border: 1px solid #fff;
+      border-radius: 4px 4px 0 0;
+      border-bottom-width: 0;
+      cursor: pointer;
+    }
+    .inventory .owned .tab-labels .tab-label:hover {
+      background: #333;
+    }
+    .inventory .owned .tab-labels .tab-label.active {
+      background: #fff;
+      color: #000;
+    }
+  .inventory .owned .tab-contents {
+    position: absolute;
+    top: 35px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 4;
+    border-top: 1px solid #fff;
+  }
+    .inventory .owned .tab-contents .tab-content {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 1px 0 0 1px;
+      display: none;
+    }
+    .inventory .owned .tab-contents .tab-content.active {
+      display: block;
+    }
+      .inventory .owned .tab-contents .tab-content .item {
+        width: 32px;
+        height: 32px;
+        border: 1px solid #aaa;
+        margin: 5px;
+      }

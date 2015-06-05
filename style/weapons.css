@@ -93,3 +93,32 @@
 #weapon.rifle .magazine .bullet .full {
   background-image: url(/images/rifle/bullet-full.png);
 }
+/* ASSAULT RIFLE */
+#weapon.assault .magazine {
+  bottom: 10px;
+  width: 90px;
+  height: 60px;
+  display: flex;
+  flex-flow: row wrap;
+  flex-direction: column-reverse;
+}
+#weapon.assault .cooldown {
+  display: none;
+}
+#weapon.assault .magazine .bullet {
+  position: relative;
+  width: 5px;
+  height: 28px;
+  margin-right: 1px;
+  margin-top: 2px;
+}
+#weapon.assault .magazine .bullet b {
+  background-repeat: no-repeat;
+  background-size: 4.5px 27.5px;
+}
+#weapon.assault .magazine .bullet .empty {
+  background-image: url(/images/rifle/bullet-empty.png);
+}
+#weapon.assault .magazine .bullet .full {
+  background-image: url(/images/rifle/bullet-full.png);
+}
