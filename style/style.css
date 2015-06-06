@@ -218,16 +218,32 @@ canvas {
   position: absolute;
   bottom: 0;
   left: 50%;
-  width: 400px;
-  padding: 6px 20px;
-  margin-left: -220px;
-  text-align: center;
+  width: 250px;
+  height: 32px;
+  line-height: 32px;
+  padding: 0 10px;
+  margin-left: -135px;
+  text-align: left;
+  font-size: 1.1em;
   border-radius: 6px 6px 0 0;
   color: #fff;
   background: rgba(0, 0, 0, .7);
   transform: translateY(100%);
-  transition: transform 150ms ease-in-out;
+  transition: transform 170ms ease-in-out;
 }
 .status.visible {
   transform: translateY(0%);
 }
+  .status .icon {
+    display: inline-block;
+    vertical-align: middle;
+    height: 26px;
+    width: 26px;
+    margin-top: -4px;
+    margin-right: 4px;
+    border-radius: 5px;
+    background-color: rgba(0, 0, 0, .5);
+    background-position: 50% 50%;
+    background-repeat: no-repeat;
+    background-size: contain;
+  }
