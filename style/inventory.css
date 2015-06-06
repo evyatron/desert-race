@@ -37,6 +37,7 @@
         margin: 1px;
         font-size: .8em;
         opacity: .4;
+        pointer-events: none;
       }
       .inventory .equipped .weapons .weapon.equipped-true .key,
       .inventory .equipped .weapons .weapon.equipped-false:hover .key {

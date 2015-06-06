@@ -113,14 +113,11 @@ var Weapon = (function Weapon() {
 
   Weapon.prototype.createBullet = function createBullet(player) {
     var playerPosition = player.position,
-        mousePosition = InputManager.mousePosition,
-        angle = mousePosition.clone().subtract(playerPosition).angleDeg();
+        angleDeg = player.weaponAimAngle * 180 / Math.PI;
 
-    for (var i = 0; i <this.bulletsPerShot; i++) {
-      var angleOffset = rand(-this.spreadAngle / 2, this.spreadAngle / 2);
-      
+    for (var i = 0; i < this.bulletsPerShot; i++) {
       var bullet = new Bullet({
-        'angle': angle + angleOffset,
+        'angle': angleDeg + rand(-this.spreadAngle / 2, this.spreadAngle / 2),
         'speed': this.bulletSpeed,
         'position': playerPosition.clone()
       });

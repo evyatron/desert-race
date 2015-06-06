@@ -8,6 +8,7 @@ var LocalPlayer = (function LocalPlayer() {
     this.equippedWeapon = null;
     this.currentWeaponAmmo = -1;
     this.wasWeaponInCooldown = false;
+    this.weaponAimAngle = 0;
     
     this.currentWorldSpeed = 0;
 
@@ -81,11 +82,14 @@ var LocalPlayer = (function LocalPlayer() {
 
   LocalPlayer.prototype.update = function update(dt) {
     Sprite.prototype.update.apply(this, arguments);
+    
+    // Save current weapon aim angle
+    this.weaponAimAngle = this.getWeaponAngle();
 
     var weapon = this.equippedWeapon;
     if (weapon) {
       weapon.update(dt);
-      
+
       if (weapon.isReloading) {
         var reloadProgress = Math.min(weapon.reloadTime / weapon.timeToReload * 100, 100);
         this.setBulletFill(weapon.inMagazine, weapon.bulletsPerReload, reloadProgress);
@@ -156,36 +160,24 @@ var LocalPlayer = (function LocalPlayer() {
 
     var x = this.position.x,
         y = this.position.y,
-        mouseX = InputManager.mousePosition.x,
-        mouseY = InputManager.mousePosition.y,
-        weapon = this.equippedWeapon,
-        drawMouseLine = false;
+        weapon = this.equippedWeapon;
 
-    if (drawMouseLine) {
+    if (DEBUG) {
       context.strokeStyle = 'rgba(0, 0, 0, .1)';
       context.beginPath();
-      context.moveTo(x, y);
-      context.lineTo(mouseX, mouseY);
+      context.moveTo(x, InputManager.mousePosition.y);
+      context.lineTo(InputManager.mousePosition.x, mouseY);
       context.stroke();
       context.closePath();
     }
 
     if (weapon) {
-      var angle = InputManager.mousePosition.clone().subtract(this.position).angle(),
-          centre = 90 * Math.PI / 180,
-          isLeft = angle < -centre || angle > centre;
-      
-      if (centre + angle > this.weaponRotation ||
-          centre + angle < -this.weaponRotation) {
-
-        angle = (isLeft? -1 : 1) * this.weaponRotation - centre;
-      }
-
-      var weaponSpread = weapon.spreadAngle / 2 * Math.PI / 180,
-          x1 = x + 150 * Math.cos(angle - weaponSpread),
-          y1 = y + 150 * Math.sin(angle - weaponSpread),
-          x2 = x + 150 * Math.cos(angle + weaponSpread),
-          y2 = y + 150 * Math.sin(angle + weaponSpread);
+      var weaponAngle = this.weaponAimAngle,
+          weaponSpread = weapon.spreadAngle / 2 * Math.PI / 180,
+          x1 = x + 150 * Math.cos(weaponAngle - weaponSpread),
+          y1 = y + 150 * Math.sin(weaponAngle - weaponSpread),
+          x2 = x + 150 * Math.cos(weaponAngle + weaponSpread),
+          y2 = y + 150 * Math.sin(weaponAngle + weaponSpread);
 
       context.fillStyle = 'rgba(200, 200, 200, .1)';
       context.beginPath();
@@ -196,13 +188,28 @@ var LocalPlayer = (function LocalPlayer() {
       context.closePath();
     }
   };
+  
+  LocalPlayer.prototype.getWeaponAngle = function getWeaponAngle() {
+    var weapon = this.equippedWeapon;
+        
+    angle = InputManager.mousePosition.clone().subtract(this.position).angle();
+    
+    var centre = 90 * Math.PI / 180,
+        isLeft = angle < -centre || angle > centre;
+    
+    if (centre + angle > this.weaponRotation ||
+        centre + angle < -this.weaponRotation) {
+
+      angle = (isLeft? -1 : 1) * this.weaponRotation - centre;
+    }
+    
+    return angle;
+  };
 
   LocalPlayer.prototype.fireWeapon = function fireWeapon() {
-    if (!this.equippedWeapon) {
-      return;
+    if (this.equippedWeapon) {
+      this.equippedWeapon.fire(this);
     }
-
-    this.equippedWeapon.fire(this);
   };
 
   LocalPlayer.prototype.reloadWeapon = function reloadWeapon() {
