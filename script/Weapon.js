@@ -21,6 +21,8 @@ var Weapon = (function Weapon() {
     this.soundEmpty = options.soundEmpty;
     this.soundFire = options.soundFire;
     this.soundReload = options.soundReload;
+    
+    this.iconSrc = options.iconSrc || '';
 
     this.reloadTime = 0;
     this.cooldownTime = 0;
@@ -187,6 +189,8 @@ var Shotgun = (function Shotgun() {
     options.soundFire = AudioPlayer.SHOTGUN_FIRE;
     options.soundEmpty = AudioPlayer.SHOTGUN_EMPTY;
     options.soundReload = AudioPlayer.SHOTGUN_RELOAD;
+    
+    options.iconSrc = '/images/shotgun/bullet-full.png';
 
     Weapon.call(this, options);
   }
@@ -216,6 +220,8 @@ var Rifle = (function Rifle() {
     options.soundFire = AudioPlayer.RIFLE_FIRE;
     options.soundEmpty = AudioPlayer.RIFLE_EMPTY;
     options.soundReload = AudioPlayer.RIFLE_RELOAD;
+    
+    options.iconSrc = '/images/rifle/bullet-full.png';
 
     Weapon.call(this, options);
   }
@@ -245,6 +251,8 @@ var Pistol = (function Pistol() {
     options.soundFire = AudioPlayer.PISTOL_FIRE;
     options.soundEmpty = AudioPlayer.PISTOL_EMPTY;
     options.soundReload = AudioPlayer.PISTOL_RELOAD;
+    
+    options.iconSrc = '/images/pistol/bullet-full.png';
 
     Weapon.call(this, options);
   }
@@ -274,6 +282,8 @@ var AssaultRifle = (function AssaultRifle() {
     options.soundFire = AudioPlayer.ASSAULT_RIFLE_FIRE;
     options.soundEmpty = AudioPlayer.ASSAULT_RIFLE_EMPTY;
     options.soundReload = AudioPlayer.ASSAULT_RIFLE_RELOAD;
+    
+    options.iconSrc = '/images/rifle/bullet-full.png';
 
     Weapon.call(this, options);
   }

@@ -1,0 +1,30 @@
+var l10n = (function l10n() {
+  function l10n() {
+    this.strings = {};
+    this.onReady;
+    this.isReady = false;
+  }
+  
+  l10n.prototype.init = function init(options) {
+    !options && (options = {});
+    
+    this.onReady = options.onReady;
+    
+    getJSON('/data/texts.json', this.onGotStrings.bind(this));
+  };
+  
+  l10n.prototype.onGotStrings = function onGotStrings(data) {
+    this.strings = data;
+    this.isReady = true;
+    
+    if (this.onReady) {
+      this.onReady();
+    }
+  };
+  
+  l10n.prototype.get = function get(key) {
+    return this.strings[key] || null;
+  };
+  
+  return new l10n();
+}());

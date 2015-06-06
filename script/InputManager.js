@@ -107,6 +107,14 @@ var InputManager = (function InputManager() {
     return false;
   };
   
+  InputManager.prototype.getBoundActions = function getBoundActions() {
+    return this.actionKeys;
+  };
+  
+  InputManager.prototype.getKeyName = function getKeyName(key) {
+    return this.KEY_NAMES[key];
+  };
+  
   InputManager.prototype.listenTo = function listenTo(scene) {
     window.addEventListener('keydown', this.onKeyDown.bind(this));
     window.addEventListener('keyup', this.onKeyUp.bind(this));

@@ -45,11 +45,6 @@ var LocalPlayer = (function LocalPlayer() {
       'player': this
     });
     
-    this.pickupWeapon(new AssaultRifle());
-    this.pickupWeapon(new Pistol());
-    this.pickupWeapon(new Rifle());
-    this.pickupWeapon(new Shotgun());
-    
     InputManager.on('pressed', 'EquipWeapon0', this.equipHeldWeapon.bind(this, 0));
     InputManager.on('pressed', 'EquipWeapon1', this.equipHeldWeapon.bind(this, 1));
     InputManager.on('pressed', 'EquipWeapon2', this.equipHeldWeapon.bind(this, 2));
@@ -112,6 +107,8 @@ var LocalPlayer = (function LocalPlayer() {
   
   LocalPlayer.prototype.pickupWeapon = function pickupWeapon(weapon) {
     this.inventory.addWeapon(weapon);
+    
+    Status.show(STATUS_TYPES.PICKUP_WEAPON, weapon);
     
     if (!this.equippedWeapon) {
       this.equipWeapon(weapon);
@@ -190,9 +187,7 @@ var LocalPlayer = (function LocalPlayer() {
   };
   
   LocalPlayer.prototype.getWeaponAngle = function getWeaponAngle() {
-    var weapon = this.equippedWeapon;
-        
-    angle = InputManager.mousePosition.clone().subtract(this.position).angle();
+    var angle = InputManager.mousePosition.clone().subtract(this.position).angle();
     
     var centre = 90 * Math.PI / 180,
         isLeft = angle < -centre || angle > centre;

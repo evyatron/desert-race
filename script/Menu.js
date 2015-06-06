@@ -6,20 +6,22 @@ var Menu = (function Menu() {
   Menu.prototype.init = function init() {
     this.el = document.querySelector('.settings');
     
+    this.createKeys();
     this.createSoundEnabled();
     this.createVolume('effects-volume', UserSettings.EFFECTS_VOLUME);
     this.createVolume('music-volume', UserSettings.MUSIC_VOLUME);
   };
   
-  Menu.prototype.createKeys = function createKeys(actions) {
-    var html = '';
+  Menu.prototype.createKeys = function createKeys() {
+    var actions = InputManager.getBoundActions(),
+        html = '';
     
     for (var actionId in actions) {
-      var action = actions[actionId];
+      var actionName = l10n.get('action-' + actionId) || actionId;
       
       html += '<tr>' +
-                '<td>' + action.title + '</td>' +
-                '<td>' + action.key + '</td>' +
+                '<td>' + actionName + '</td>' +
+                '<td>' + InputManager.getKeyName(actions[actionId]) + '</td>' +
               '</tr>';
     }
     

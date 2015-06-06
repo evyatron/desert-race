@@ -32,6 +32,13 @@ var STATS = {
 var DEBUG = /DEBUG/.test(window.location.href);
 
 function init() {
+  if (!l10n.isReady) {
+    l10n.init({
+      'onReady': init
+    });
+    return;
+  }
+  
   bindInputActions();
   
   AudioPlayer.init({
@@ -59,50 +66,9 @@ function init() {
     }
   });
   
-  Menu.init();
+  Status.init();
   
-  Menu.createKeys({
-    'moveUp': {
-      'title': 'Move Up',
-      'key': 'W',
-    },
-    'moveDown': {
-      'title': 'Move Down',
-      'key': 'S',
-    },
-    'moveLeft': {
-      'title': 'Move Left',
-      'key': 'A',
-    },
-    'moveRight': {
-      'title': 'Move Right',
-      'key': 'D',
-    },
-    'boost': {
-      'title': 'Boost',
-      'key': 'Shift',
-    },
-    'fire': {
-      'title': 'Fire',
-      'key': 'Left Mouse Button',
-    },
-    'reload': {
-      'title': 'Reload',
-      'key': 'Right Mouse Button',
-    },
-    'equip1': {
-      'title': 'Equip Pistol',
-      'key': '1',
-    },
-    'equip2': {
-      'title': 'Equip Rifle',
-      'key': '2',
-    },
-    'equip3': {
-      'title': 'Equip Shotgun',
-      'key': '3',
-    }
-  });
+  Menu.init();
   
   scene = new Scene({
     'elParent': document.getElementById('game'),
@@ -145,7 +111,20 @@ function init() {
   createRoad(function onRoadCreated() {
     //AudioPlayer.loop(AudioPlayer.ENGINE);
     scene.start();
+    addDefaultWeapons();
   });
+}
+
+function addDefaultWeapons() {
+  player.inventory.addWeapon(new Pistol());
+  player.inventory.addWeapon(new Rifle());
+  player.inventory.addWeapon(new Shotgun());
+  
+  window.setTimeout(function() {
+    player.pickupWeapon(new AssaultRifle());
+  }, 500);
+  
+  player.equipHeldWeapon(0);
 }
 
 function bindInputActions() {

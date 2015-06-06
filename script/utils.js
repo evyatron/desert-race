@@ -43,6 +43,16 @@ function sum(array) {
   return result;
 }
 
+function getJSON(url, callback) {
+  var request = new XMLHttpRequest();
+  request.open('GET', url, true);
+  request.responseType = 'json';
+  request.onload = function() {
+    callback(request.response);
+  };
+  request.send();
+}
+
 var REGEX_NUMBERS = /\B(?=(\d{3})+(?!\d))/g,
     NUMBERS_DELIM = ',';
 

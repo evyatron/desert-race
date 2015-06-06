@@ -10,7 +10,7 @@ var Inventory = (function Inventory() {
                            '</div>';
 
   var TEMPLATE_HELD_WEAPON = '<div title="{{name}}" data-slot="{{index}}" '+
-                              'class="weapon {{type}} equipped-{{isEquipped}}">' +
+                              'class="item weapon {{type}} equipped-{{isEquipped}}">' +
                               '<b class="key">{{key}}</b>' +
                              '</div>';
                              
@@ -28,7 +28,6 @@ var Inventory = (function Inventory() {
   VEHICLE_PART_NAMES[VEHICLE_PART_TYPES.TURRET] = 'Turret';
   VEHICLE_PART_NAMES[VEHICLE_PART_TYPES.VANITY] = 'Vanity';
   VEHICLE_PART_NAMES[VEHICLE_PART_TYPES.MORALE] = 'Morale';
-  
   
   function Inventory(options) {
     this.elContainer;
@@ -191,9 +190,7 @@ var Inventory = (function Inventory() {
     var elClicked = e.target,
         tabId = elClicked.dataset.tabId,
         index = elClicked.dataset.index * 1;
-    
-    console.warn('click inventory:', tabId, index);
-    
+
     if (tabId === 'weapon') {
       this.player.equipWeapon(this.weapons[index]);
     }

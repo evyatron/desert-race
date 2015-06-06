@@ -22,12 +22,8 @@
       padding: 2px;
       margin: 0 5px;
       border: 1px solid #444;
-      background: #000;
+      background-color: #000;
       box-sizing: border-box;
-      background-position: 50% 50%;
-      background-repeat: no-repeat;
-      background-size: contain;
-      background-origin: content-box;
     }
       .inventory .equipped .weapons .weapon .key {
         position: absolute;
@@ -49,19 +45,26 @@
     .inventory .equipped .weapons .weapon.equipped-false:hover {
       border: 1px solid #888;
     }
-    .inventory .equipped .weapons .weapon.shotgun {
-      background-image: url(/images/shotgun/bullet-full.png);
-    }
-    .inventory .equipped .weapons .weapon.pistol {
-      background-image: url(/images/pistol/bullet-full.png);
-    }
-    .inventory .equipped .weapons .weapon.rifle {
-      background-image: url(/images/rifle/bullet-full.png);
-    }
-    .inventory .equipped .weapons .weapon.assault {
-      background: red;
-    }
   
+.inventory .item {
+  background-position: 50% 50%;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-origin: content-box;
+}
+.inventory .item.shotgun {
+  background-image: url(/images/shotgun/bullet-full.png);
+}
+.inventory .item.pistol {
+  background-image: url(/images/pistol/bullet-full.png);
+}
+.inventory .item.rifle {
+  background-image: url(/images/rifle/bullet-full.png);
+}
+.inventory .item.assault {
+  background-image: url(/images/rifle/bullet-full.png);
+}
+
 .inventory .owned {
   position: relative;
   height: 250px;
@@ -118,4 +121,5 @@
         height: 32px;
         border: 1px solid #aaa;
         margin: 5px;
+        padding: 5px;
       }
