@@ -38,13 +38,15 @@
       width: 128px;
       height: 128px;
       margin: -64px -64px;
-      box-shadow: 0 0 0 1px rgba(170, 170, 170, 1);
-      background-color: rgba(0, 0, 0, .2);
+      box-shadow: 0 0 0 1px rgba(90, 90, 90, 1),
+                  2px 2px 2px 1px rgba(0, 0, 0, .7) inset;
+      background-color: rgba(0, 0, 0, .3);
       background-position: 50% 50%;
       background-repeat: no-repeat;
       background-size: 128px 128px;
       transition: transform 250ms ease,
-                  background-color 250ms ease;
+                  background-color 250ms ease,
+                  box-shadow 250ms ease;
     }
     .inventory .equipped .vehicle .part.wheels {
       transform: translate(0, calc(50% + 5px)) scale(.5);

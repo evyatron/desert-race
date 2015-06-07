@@ -278,6 +278,10 @@ var Engine = (function Engine() {
     
     // Design
     this.colour = null;
+    this.isFront = false;
+    this.exhaustWidth = 0;
+    this.exhaustHeight = 0;
+    this.exhaustDistance = 0;
     
     // Gameplay
     this.speed = 0;
@@ -290,7 +294,8 @@ var Engine = (function Engine() {
   Engine.prototype.constructor = Engine;
   
   Engine.prototype.init = function init(options) {
-    this.colour = new Colour(options.colour || rand(20, 100));
+    this.colour = new Colour(options.colour || rand(50, 100));
+    this.isFront = initBool(options.isFront, false);
     this.exhaustWidth = initNumber(options.exhaustWidth, rand(3, 10));
     this.exhaustHeight = initNumber(options.exhaustHeight, rand(this.exhaustWidth, this.exhaustWidth * 2));
     this.exhaustDistance = initNumber(options.exhaustDistance, rand(0, 10));
@@ -308,21 +313,59 @@ var Engine = (function Engine() {
         h = this.height,
         midX = w / 2,
         midY = h / 2,
-        bodyWidth = 44,
-        bodyBottom = 116,
-        x = midX + bodyWidth / 2 - this.exhaustWidth / 2 - this.exhaustDistance;
-    
+        body = {
+          'top': 36,
+          'left': 42,
+          'right': 86,
+          'bottom': 116,
+          'width': 44,
+          'height': 80
+        },
+        x = midX + body.width / 2 - this.exhaustWidth / 2 - this.exhaustDistance,
+        posY = this.isFront? body.top + body.height / 3 : body.top + body.height * 2 / 3,
+        width = body.width * 2 / 3,
+        height = width / 2,
+        left = body.left + body.width / 2 - width / 2,
+        top = posY - height / 2,
+        pipeColour = new Colour(this.colour).brighten(0.5),
+        pipeWidth = 2,
+        pipeLeft = left + width - pipeWidth,
+        pipeTop = top + height;
+
     elCanvas.width = this.width;
     elCanvas.height = this.height;
     
 
-    // Exhaust
     context.fillStyle = this.colour;
-    context.fillRect(x - this.exhaustWidth / 2,
-                     bodyBottom - this.exhaustHeight / 2,
-                     this.exhaustWidth, this.exhaustHeight);
     
-
+    // Engine
+    context.fillRect(left, top, width, height - 1);
+    
+    context.fillRect(midY - width / 4, this.isFront? body.bottom - height / 3 - 5 : body.top,
+                     width / 2, height / 3);
+    
+    // Exhaust
+    context.fillRect(x - this.exhaustWidth / 2,
+                     body.bottom - this.exhaustHeight / 2,
+                     this.exhaustWidth, this.exhaustHeight - 1);
+    context.fillRect(x - this.exhaustWidth / 2 + 1,
+                     body.bottom - this.exhaustHeight / 2 + this.exhaustHeight - 1,
+                     this.exhaustWidth - 2, 1);
+    
+    // Pipes
+    context.fillStyle = pipeColour;
+    
+    if (this.isFront) {
+      context.fillRect(midY - pipeWidth / 2, top + height,
+                       pipeWidth, body.bottom - height / 3 - (top + height));
+    } else {
+      context.fillRect(pipeLeft, pipeTop,
+                       pipeWidth, body.bottom - this.exhaustHeight / 2 - pipeTop);
+      context.fillRect(midY - pipeWidth / 2, body.top + height / 3 - 3,
+                       pipeWidth, top - body.top + height / 3);
+    }
+    
+    
     var src = elCanvas.toDataURL();
     VehiclePart.prototype.setImage.call(this, src);
   };

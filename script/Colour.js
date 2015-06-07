@@ -30,7 +30,10 @@ var Colour = (function Colour() {
     this.blue = options.blue;
     this.alpha = options.alpha;
     
-    this.rgba = 'rgba(' + this.red + ',' + this.green + ',' + this.blue + ',' + this.alpha + ')';
+    this.rgba = '';
+    this.hex = '';
+    
+    this.updateValues();
   }
   
   Colour.prototype.toString = function toString() {
@@ -39,6 +42,28 @@ var Colour = (function Colour() {
   
   Colour.prototype.getRGBA = function getRGBA() {
     return this.rgba;
+  };
+  
+  
+  Colour.prototype.updateValues = function updateValues() {
+    this.red = Math.round(Math.max(Math.min(this.red, 255), 0));
+    this.green = Math.round(Math.max(Math.min(this.green, 255), 0));
+    this.blue = Math.round(Math.max(Math.min(this.blue, 255), 0));
+    this.alpha = Math.max(Math.min(this.alpha, 1), 0);
+    
+    this.rgba = 'rgba(' + this.red + ',' + this.green + ',' + this.blue + ',' + this.alpha + ')';
+  };
+  
+  Colour.prototype.brighten = function brighten(val) {
+    val = 1 + Math.max(Math.min(val, 1), 0);
+    
+    this.red *= val;
+    this.green *= val;
+    this.blue *= val;
+    
+    this.updateValues();
+    
+    return this;
   };
   
   return Colour;
