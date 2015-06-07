@@ -53,6 +53,30 @@ function getJSON(url, callback) {
   request.send();
 }
 
+function addClick(elOrSelector, callback) {
+  var el = typeof elOrSelector === 'string'? document.querySelector(elOrSelector) : elOrSelector;
+  
+  if (el) {
+    el.addEventListener('click', callback);
+  } else {
+    console.warn('Invalid element to attach click to', elOrSelector);
+  }
+}
+
+function addHover(elOrSelector, callbackOver, callbackOut) {
+  var el = typeof elOrSelector === 'string'? document.querySelector(elOrSelector) : elOrSelector;
+  
+  if (el) {
+    el.addEventListener('mouseover', callbackOver);
+    if (callbackOut) {
+      el.addEventListener('mouseout', callbackOut);
+    }
+  } else {
+    console.warn('Invalid element to attach hover to', elOrSelector);
+  }
+}
+
+
 var REGEX_NUMBERS = /\B(?=(\d{3})+(?!\d))/g,
     NUMBERS_DELIM = ',';
 
@@ -63,19 +87,25 @@ function numberWithCommas(number) {
 // A template formatting method
 // Replaces {{propertyName}} with properties from the 'args' object
 // Supports {{object.property}}
-// Use {{(f)valueHere}} to automatically format the value (1000 -> 1,000)
+// Use {{l10n(key-name)}} to automatically get from l10n object
 String.prototype.REGEX_FORMAT = /(\{\{([^\}]+)\}\})/g;
+String.prototype.REGEX_FORMAT_L10N = /l10n\(([^\)]*)\)/;
 String.prototype.format = function format(args, shouldSanitise) {
   !args && (args = {});
 
   return this.replace(String.prototype.REGEX_FORMAT, function onMatch() {
     var key = arguments[2],
         properties = key.split('.'),
-        value = args;
-
-    // support nesting - "I AM {{ship.info.name}}"
-    for (var i = 0, len = properties.length; i < len; i++) {
-      value = value && value[properties[i]];
+        value = args,
+        l10nMatch = key.match(String.prototype.REGEX_FORMAT_L10N);
+    
+    if (l10nMatch) {
+      value = l10n.get(l10nMatch[1]);
+    } else {
+      // support nesting - "I AM {{ship.info.name}}"
+      for (var i = 0, len = properties.length; i < len; i++) {
+        value = value && value[properties[i]];
+      }
     }
 
     if (value === undefined || value === null) {

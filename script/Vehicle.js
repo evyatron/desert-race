@@ -43,8 +43,6 @@ var Vehicle = (function Vehicle() {
         context.drawImage(part.image, x, y);
       }
     }
-    
-    //Sprite.prototype.draw.apply(this, arguments);
   };
   
   Vehicle.prototype.equipPart = function equipPart(part) {
@@ -128,8 +126,8 @@ var VEHICLE_PART_TYPES = {
   'MORALE': 'MORALE'
 };
 var VEHICLE_PARTS_ORDER = [
-  VEHICLE_PART_TYPES.ENGINE,
   VEHICLE_PART_TYPES.WHEELS,
+  VEHICLE_PART_TYPES.ENGINE,
   VEHICLE_PART_TYPES.BODY,
   VEHICLE_PART_TYPES.FRONT,
   VEHICLE_PART_TYPES.REAR,

@@ -5,8 +5,12 @@ var Inventory = (function Inventory() {
                               '<div class="weapons">' +
                                 '<ul></ul>' +
                               '</div>' +
+                              '<b class="button toggle-built">{{l10n(inventory-show-built)}}</b>' +
                            '</div>' +
                            '<div class="owned">' +
+                           '</div>' +
+                           '<div class="status">' +
+                            '0' +
                            '</div>';
 
   var TEMPLATE_HELD_WEAPON = '<div title="{{name}}" data-slot="{{index}}" '+
@@ -18,6 +22,8 @@ var Inventory = (function Inventory() {
   
   var TEMPLATE_TAB_LABEL = '<div class="tab-label {{id}}" data-tab-id="{{id}}">{{name}}</div>';
   var TEMPLATE_TAB_CONTENT = '<div class="tab-content {{id}}" data-tab-id="{{id}}"></div>';
+  
+  var TEMPLATE_PART_SLOT = '<div class="part {{id}}" title="{{name}}" style="z-index: {{order}};"></div>';
   
   var VEHICLE_PART_NAMES = {};
   VEHICLE_PART_NAMES[VEHICLE_PART_TYPES.ENGINE] = 'Engine';
@@ -32,9 +38,9 @@ var Inventory = (function Inventory() {
   function Inventory(options) {
     this.elContainer;
     this.el;
-    this.elEquipped;
-    this.elOwned;
     this.elWeapons;
+    this.elVehicle;
+    this.elOwned;
     this.elTabLabels;
     this.elTabContents;
     
@@ -44,7 +50,8 @@ var Inventory = (function Inventory() {
     this.weaponsHeld = [];
     
     this.weapons = [];
-    this.parts = [];
+    this.parts = {};
+    this.equippedParts = {};
     
     this.player;
     
@@ -88,6 +95,24 @@ var Inventory = (function Inventory() {
     }
     
     this.currentTabId = id;
+  };
+  
+  Inventory.prototype.addPart = function addPart(part) {
+    var type = part.type;
+    
+    this.parts[type].push(part);
+
+    if (!this.equippedParts[type]) {
+      var elSlot = this.elVehicle.querySelector('.' + type.toLowerCase());
+
+      if (elSlot) {
+        if (part.src) {
+          elSlot.style.backgroundImage = 'url(' + part.src + ')';
+        }
+      }
+    } else {
+      this.updateTab(type);
+    }
   };
   
   Inventory.prototype.addWeapon = function addWeapon(weapon) {
@@ -136,34 +161,12 @@ var Inventory = (function Inventory() {
     elTabContent.innerHTML = html;
   };
   
-  Inventory.prototype.createTabs = function createTabs() {
-    var htmlTabs = '<div class="tab-labels">',
-        htmlContents = '<div class="tab-contents">';
-    
-    htmlTabs += TEMPLATE_TAB_LABEL.format({
-      'id': 'weapon',
-      'name': 'Weapons'
-    });
-    htmlContents += TEMPLATE_TAB_CONTENT.format({
-      'id': 'weapon',
-      'name': 'Weapons'
-    });
-
-    for (var id in VEHICLE_PART_TYPES) {
-      htmlTabs += TEMPLATE_TAB_LABEL.format({
-        'id': id,
-        'name': VEHICLE_PART_NAMES[id] || id
-      });
-      htmlContents += TEMPLATE_TAB_CONTENT.format({
-        'id': id,
-        'name': VEHICLE_PART_NAMES[id] || id
-      });
-    }
-    
-    htmlTabs += '</div>';
-    htmlContents += '</div>';
-    
-    this.elOwned.innerHTML = htmlTabs + htmlContents;
+  Inventory.prototype.showBuiltVehicle = function showBuiltVehicle(e) {
+    this.elVehicle.classList.add('show-built');
+  };
+  
+  Inventory.prototype.hideBuiltVehicle = function hideBuiltVehicle(e) {
+    this.elVehicle.classList.remove('show-built');
   };
   
   Inventory.prototype.onClickWeapons = function onClickWeapons(e) {
@@ -177,7 +180,7 @@ var Inventory = (function Inventory() {
     this.player.equipWeapon(this.weaponsHeld[slot * 1]);
   };
   
-  Inventory.prototype.onClickTabLabel = function onClickTabLabel(e) {
+  Inventory.prototype.onClickOwnedTabLabel = function onClickOwnedTabLabel(e) {
     var elClicked = e.target,
         tabId = elClicked.dataset.tabId;
     
@@ -186,33 +189,84 @@ var Inventory = (function Inventory() {
     }
   };
   
-  Inventory.prototype.onClickTabContent = function onClickTabContent(e) {
+  Inventory.prototype.onClickOwned = function onClickOwned(e) {
     var elClicked = e.target,
-        tabId = elClicked.dataset.tabId,
-        index = elClicked.dataset.index * 1;
+        data = elClicked.dataset,
+        tabId = data.tabId;
 
     if (tabId === 'weapon') {
-      this.player.equipWeapon(this.weapons[index]);
+      if ('index' in data) {
+        this.player.equipWeapon(this.weapons[data.index * 1]);
+      }
     }
   };
   
+  Inventory.prototype.createItemSlots = function createItemSlots() {
+    var htmlOwnedTabs = '<div class="tab-labels">',
+        htmlOwnedContents = '<div class="tab-contents">',
+        htmlEquippedParts = '';
+    
+    htmlOwnedTabs += TEMPLATE_TAB_LABEL.format({
+      'id': 'weapon',
+      'name': 'Weapons'
+    });
+    htmlOwnedContents += TEMPLATE_TAB_CONTENT.format({
+      'id': 'weapon',
+      'name': 'Weapons'
+    });
+
+    for (var id in VEHICLE_PART_TYPES) {
+      var name = VEHICLE_PART_NAMES[id] || id,
+          partOrder = VEHICLE_PARTS_ORDER.indexOf(id);
+      
+      this.parts[id] = [];
+      this.equippedParts[id] = null;
+      
+      htmlOwnedTabs += TEMPLATE_TAB_LABEL.format({
+        'id': id,
+        'name': name
+      });
+      htmlOwnedContents += TEMPLATE_TAB_CONTENT.format({
+        'id': id,
+        'name': name
+      });
+      
+      htmlEquippedParts += TEMPLATE_PART_SLOT.format({
+        'id': id.toLowerCase(),
+        'name': name,
+        'order': partOrder
+      });
+    }
+    
+    htmlOwnedTabs += '</div>';
+    htmlOwnedContents += '</div>';
+    
+    this.elOwned.innerHTML = htmlOwnedTabs + htmlOwnedContents;
+    this.elVehicle.innerHTML = htmlEquippedParts;
+  };
+
   Inventory.prototype.createHTML = function createHTML() {
     this.el = document.createElement('div');
     this.el.className = 'inventory';
-    this.el.innerHTML = TEMPLATE_INVENTORY;
-    
-    this.elEquipped = this.el.querySelector('.equipped');
+    this.el.innerHTML = TEMPLATE_INVENTORY.format();
     this.elOwned = this.el.querySelector('.owned');
-    this.elWeapons = this.el.querySelector('.weapons');
+    this.elWeapons = this.el.querySelector('.equipped .weapons');
+    this.elVehicle = this.el.querySelector('.equipped .vehicle');
     
-    this.createTabs();
+    this.createItemSlots();
     
     this.elTabLabels = this.elOwned.querySelector('.tab-labels');
     this.elTabContents = this.elOwned.querySelector('.tab-contents');
     
-    this.elWeapons.addEventListener('click', this.onClickWeapons.bind(this));
-    this.elTabLabels.addEventListener('click', this.onClickTabLabel.bind(this));
-    this.elTabContents.addEventListener('click', this.onClickTabContent.bind(this));
+    this.elShowBuiltVehicle = this.el.querySelector('.toggle-built');
+
+    addClick(this.elWeapons, this.onClickWeapons.bind(this));
+    addClick(this.elWeapons, this.onClickOwnedTabLabel.bind(this));
+    addClick(this.elTabContents, this.onClickOwned.bind(this));
+    
+    if (this.elShowBuiltVehicle) {
+      addHover(this.elShowBuiltVehicle, this.showBuiltVehicle.bind(this), this.hideBuiltVehicle.bind(this));
+    }
     
     this.elContainer.appendChild(this.el);
   };

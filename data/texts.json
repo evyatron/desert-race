@@ -2,6 +2,8 @@
   "status-weapon": "<span class='icon' style='background-image: url({{iconSrc}});'></span> Picked up <b>{{name}}</b>",
   "status-part": "<span class='icon' style='background-image: url({{iconSrc}});'></span> Picked up <b>{{name}}</b>",
   
+  "inventory-show-built": "Construct",
+  
   "action-MoveUp": "Move Up",
   "action-MoveDown": "Move Down",
   "action-MoveLeft": "Move Left",

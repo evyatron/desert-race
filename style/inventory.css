@@ -24,12 +24,57 @@
 }
 
 .inventory .equipped {
-  
+  position: relative;
 }
   .inventory .equipped .vehicle {
-    height: 200px;
+    position: relative;
+    height: 240px;
     background: rgba(255, 255, 255, .1);
   }
+    .inventory .equipped .vehicle .part {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 128px;
+      height: 128px;
+      margin: -64px -64px;
+      box-shadow: 0 0 0 1px rgba(170, 170, 170, 1);
+      background-color: rgba(0, 0, 0, .2);
+      background-position: 50% 50%;
+      background-repeat: no-repeat;
+      background-size: 128px 128px;
+      transition: transform 350ms ease-in-out,
+                  background-color 350ms ease-in-out;
+    }
+    .inventory .equipped .vehicle .part.wheels {
+      transform: translate(0, calc(50% + 5px)) scale(.5);
+    }
+    .inventory .equipped .vehicle .part.engine {
+      transform: translate(0, 0) scale(.5);
+    }
+    .inventory .equipped .vehicle .part.body {
+      transform: translate(0px, calc(-50% - 5px)) scale(.5);
+    }
+    .inventory .equipped .vehicle .part.front {
+      transform: translate(calc(50% + 5px), calc(-25% - 3px)) scale(.5);
+    }
+    .inventory .equipped .vehicle .part.rear {
+      transform: translate(calc(50% + 5px), calc(25% + 2px)) scale(.5);
+    }
+    .inventory .equipped .vehicle .part.turret {
+      transform: translate(calc(100% + 10px), 0) scale(.5);
+    }
+    .inventory .equipped .vehicle .part.vanity {
+      transform: translate(calc(-50% - 5px), calc(-25% - 3px)) scale(.5);
+    }
+    .inventory .equipped .vehicle .part.morale {
+      transform: translate(calc(-50% - 5px), calc(25% + 2px)) scale(.5);
+    }
+    .inventory .equipped .vehicle.show-built .part {
+      transform: translate(0, 0) scale(1);
+      background-color: transparent;
+    }
+    
   .inventory .equipped .weapons {
     text-align: center;
     padding: 5px 0;
@@ -66,6 +111,20 @@
     .inventory .equipped .weapons .weapon.equipped-false:hover {
       border: 1px solid #888;
     }
+    
+    .inventory .equipped .toggle-built {
+      position: absolute;
+      top: 0;
+      right: 0;
+      margin: 5px;
+      height: 30px;
+      line-height: 30px;
+      padding: 0 10px;
+      border: 1px solid #aaa;
+      background: rgba(0, 0, 0, .8);
+      color: #fff;
+      border-radius: 4px;
+    }
   
 .inventory .item {
   background-position: 50% 50%;
@@ -88,7 +147,7 @@
 
 .inventory .owned {
   position: relative;
-  height: 250px;
+  height: 200px;
 }
   .inventory .owned .tab-labels {
     position: relative;
@@ -144,3 +203,9 @@
         margin: 5px;
         padding: 5px;
       }
+
+.inventory .status {
+  height: 24px;
+  line-height: 24px;
+  text-align: center;
+}

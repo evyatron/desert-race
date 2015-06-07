@@ -66,7 +66,7 @@ function init() {
     }
   });
   
-  Status.init();
+  Notification.init();
   
   Menu.init();
   

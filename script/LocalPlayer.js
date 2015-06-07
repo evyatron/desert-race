@@ -48,31 +48,35 @@ var LocalPlayer = (function LocalPlayer() {
     InputManager.on('pressed', 'EquipWeapon0', this.equipHeldWeapon.bind(this, 0));
     InputManager.on('pressed', 'EquipWeapon1', this.equipHeldWeapon.bind(this, 1));
     InputManager.on('pressed', 'EquipWeapon2', this.equipHeldWeapon.bind(this, 2));
-
-    this.equipParts([
-      new VehiclePart({
-        'type': VEHICLE_PART_TYPES.BODY,
-        'src': 'images/parts/default/body.png',
-        'obstacleFactor': 0.1
-      }),
-      new VehiclePart({
+    
+    
+    var defaultBody = new VehiclePart({
+      'type': VEHICLE_PART_TYPES.BODY,
+      'src': 'images/parts/default/body.png',
+      'obstacleFactor': 0.1
+    });
+    var defaultEngine = new VehiclePart({
         'type': VEHICLE_PART_TYPES.ENGINE,
         'src': 'images/parts/default/engine.png',
         'speed': 400,
         'boostFactor': 2
-      }),
-      new VehiclePart({
+    });
+    var defaultWheels = new VehiclePart({
         'type': VEHICLE_PART_TYPES.WHEELS,
         'src': 'images/parts/default/wheels.png',
         'obstacleFactor': 0.6,
         'boundingBoxWidth': 50,
         'boundingBoxHeight': 80
-      }),
-      new VehiclePart({
+    });
+    var defaultTurret = new VehiclePart({
         'type': VEHICLE_PART_TYPES.TURRET,
         'weaponRotation': 90
-      })
-    ]);
+    });
+    
+    this.pickupPart(defaultBody);
+    this.pickupPart(defaultEngine);
+    this.pickupPart(defaultWheels);
+    this.pickupPart(defaultTurret);
   };
 
   LocalPlayer.prototype.update = function update(dt) {
@@ -108,7 +112,7 @@ var LocalPlayer = (function LocalPlayer() {
   LocalPlayer.prototype.pickupWeapon = function pickupWeapon(weapon) {
     this.inventory.addWeapon(weapon);
     
-    Status.show(STATUS_TYPES.PICKUP_WEAPON, weapon);
+    Notification.show(STATUS_TYPES.PICKUP_WEAPON, weapon);
     
     if (!this.equippedWeapon) {
       this.equipWeapon(weapon);
@@ -152,6 +156,14 @@ var LocalPlayer = (function LocalPlayer() {
     return true;
   };
 
+  LocalPlayer.prototype.pickupPart = function pickupPart(part) {
+    if (!this.parts[part.type]) {
+      this.equipPart(part);
+    }
+    
+    this.inventory.addPart(part);
+  };
+  
   LocalPlayer.prototype.draw = function draw(context) {
     Vehicle.prototype.draw.apply(this, arguments);
 
