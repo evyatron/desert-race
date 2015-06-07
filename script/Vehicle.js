@@ -203,7 +203,7 @@ var Turret = (function Turret() {
     // Design
     this.size = 0;
     this.isRound = false;
-    this.colour = '';
+    this.colour = null;
     this.borderColour = '';
     this.borderSize = 0;
     
@@ -219,9 +219,10 @@ var Turret = (function Turret() {
   Turret.prototype.init = function init(options) {
     this.size = options.size || rand(4, 20);
     this.isRound = initBool(options.isRound, rand());
-    this.colour = options.colour || 'rgba(0, 0, 0, 1)';
-    this.borderColour = options.borderColour || 'rgba(0, 0, 0)';
+    this.colour = new Colour(options.colour || rand(0, 100));
+    this.borderColour = new Colour(options.borderColour || rand(0, 50));
     this.borderSize = initNumber(options.borderSize, rand(0, this.size / 2));
+    
     this.weaponRotation = initNumber(options.weaponRotation, rand(0, 90));
     
     VehiclePart.prototype.init.call(this, options);
@@ -245,7 +246,7 @@ var Turret = (function Turret() {
     context.beginPath();
     
     if (this.isRound) {
-      context.arc(midX, midY, this.size / 2, 0, Math.PI * 2);
+      context.arc(midX, midY, size / 2, 0, Math.PI * 2);
       context.fill();
     } else {
       context.fillRect(midX - halfSize, midY - halfSize, size, size);
@@ -267,4 +268,64 @@ var Turret = (function Turret() {
   };
 
   return Turret;
+}());
+
+var Engine = (function Engine() {
+  function Engine(options) {
+    !options && (options = {});
+    
+    options.type = VEHICLE_PART_TYPES.ENGINE;
+    
+    // Design
+    this.colour = null;
+    
+    // Gameplay
+    this.speed = 0;
+    this.boostFactor = 0;
+    
+    VehiclePart.call(this, options);
+  }
+
+  Engine.prototype = Object.create(VehiclePart.prototype);
+  Engine.prototype.constructor = Engine;
+  
+  Engine.prototype.init = function init(options) {
+    this.colour = new Colour(options.colour || rand(20, 100));
+    this.exhaustWidth = initNumber(options.exhaustWidth, rand(3, 10));
+    this.exhaustHeight = initNumber(options.exhaustHeight, rand(this.exhaustWidth, this.exhaustWidth * 2));
+    this.exhaustDistance = initNumber(options.exhaustDistance, rand(0, 10));
+    
+    this.speed = initNumber(options.speed, rand(200, 700));
+    this.boostFactor = initNumber(options.boostFactor, randF(1.2, 3));
+
+    VehiclePart.prototype.init.call(this, options);
+  };
+
+  Engine.prototype.setImage = function setImage() {
+    var elCanvas = document.createElement('canvas'),
+        context = elCanvas.getContext('2d'),
+        w = this.width,
+        h = this.height,
+        midX = w / 2,
+        midY = h / 2,
+        bodyWidth = 44,
+        bodyBottom = 116,
+        x = midX + bodyWidth / 2 - this.exhaustWidth / 2 - this.exhaustDistance;
+    
+    elCanvas.width = this.width;
+    elCanvas.height = this.height;
+    
+
+    // Exhaust
+    context.fillStyle = this.colour;
+    context.fillRect(x - this.exhaustWidth / 2,
+                     bodyBottom - this.exhaustHeight / 2,
+                     this.exhaustWidth, this.exhaustHeight);
+    
+
+    var src = elCanvas.toDataURL();
+    VehiclePart.prototype.setImage.call(this, src);
+  };
+
+  return Engine;
 }());

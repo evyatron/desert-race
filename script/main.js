@@ -125,37 +125,31 @@ function addDefaultLoadout() {
   }, 500);
   
   
-  var defaultBody = new VehiclePart({
+  player.pickupPart(new VehiclePart({
     'type': VEHICLE_PART_TYPES.BODY,
     'src': 'images/parts/default/body.png',
     'obstacleFactor': 0.1
-  });
-  var defaultEngine = new VehiclePart({
-    'type': VEHICLE_PART_TYPES.ENGINE,
+  }));
+  player.pickupPart(new Engine({
     'src': 'images/parts/default/engine.png',
     'speed': 400,
     'boostFactor': 2
-  });
-  var defaultWheels = new VehiclePart({
+  }));
+  player.pickupPart(new VehiclePart({
     'type': VEHICLE_PART_TYPES.WHEELS,
     'src': 'images/parts/default/wheels.png',
     'obstacleFactor': 0.6,
     'boundingBoxWidth': 50,
     'boundingBoxHeight': 80
-  });
-  var defaultTurret = new Turret({
+  }));
+  player.pickupPart(new Turret({
     'size': 16,
     'isRound': true,
     'colour': 'rgba(20, 20, 20, 1)',
     'borderColour': 'rgba(40, 40, 40, 1)',
     'borderSize': 2,
     'weaponRotation': 45
-  });
-  
-  player.pickupPart(defaultBody);
-  player.pickupPart(defaultEngine);
-  player.pickupPart(defaultWheels);
-  player.pickupPart(defaultTurret);
+  }));
 }
 
 function bindInputActions() {
