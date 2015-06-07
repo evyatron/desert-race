@@ -40,7 +40,11 @@ var Vehicle = (function Vehicle() {
       part = this.parts[VEHICLE_PARTS_ORDER[i]];
 
       if (part && part.image) {
-        context.drawImage(part.image, x, y);
+        if (part.type === VEHICLE_PART_TYPES.WHEELS) {
+          context.drawImage(part.image, x + randF(-.4, .4), y + randF(-.4, .4));
+        } else {
+          context.drawImage(part.image, x, y);
+        }
       }
     }
   };
