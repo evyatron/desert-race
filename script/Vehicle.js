@@ -200,12 +200,14 @@ var Turret = (function Turret() {
     
     options.type = VEHICLE_PART_TYPES.TURRET;
     
+    // Design
     this.size = 0;
     this.isRound = false;
     this.colour = '';
     this.borderColour = '';
     this.borderSize = 0;
     
+    // Gameplay
     this.weaponRotation = 0;
     
     VehiclePart.call(this, options);
@@ -215,12 +217,12 @@ var Turret = (function Turret() {
   Turret.prototype.constructor = Turret;
   
   Turret.prototype.init = function init(options) {
-    this.size = options.size || 10;
-    this.isRound = initBool(options.isRound, false);
+    this.size = options.size || rand(4, 20);
+    this.isRound = initBool(options.isRound, rand());
     this.colour = options.colour || 'rgba(0, 0, 0, 1)';
     this.borderColour = options.borderColour || 'rgba(0, 0, 0)';
-    this.borderSize = initNumber(options.borderSize, 0);
-    this.weaponRotation = initNumber(options.weaponRotation, 0);
+    this.borderSize = initNumber(options.borderSize, rand(0, this.size / 2));
+    this.weaponRotation = initNumber(options.weaponRotation, rand(0, 90));
     
     VehiclePart.prototype.init.call(this, options);
   };

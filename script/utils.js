@@ -23,7 +23,9 @@ function randF(from, to) {
 }
 
 function rand(from, to) {
-  return Math.round(randF(from, to));
+  return from === undefined && to === undefined?
+          Math.random() > 0.5 :
+          Math.round(randF(from, to));
 }
 
 function lerp(from, to, dt) {
