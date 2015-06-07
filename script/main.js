@@ -131,7 +131,6 @@ function addDefaultLoadout() {
     'obstacleFactor': 0.1
   }));
   player.pickupPart(new Engine({
-    'src': 'images/parts/default/engine.png',
     'speed': 400,
     'boostFactor': 2
   }));
@@ -150,6 +149,11 @@ function addDefaultLoadout() {
     'borderSize': 2,
     'weaponRotation': 45
   }));
+  
+  
+  player.pickupPart(new Engine());
+  player.pickupPart(new Engine());
+  player.pickupPart(new Engine());
 }
 
 function bindInputActions() {

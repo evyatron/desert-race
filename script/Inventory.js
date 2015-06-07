@@ -18,7 +18,10 @@ var Inventory = (function Inventory() {
                               '<b class="key">{{key}}</b>' +
                              '</div>';
                              
-  var TEMPLATE_GRID_ITEM = '<div title="{{name}}" class="item {{type}}" data-tab-id="{{tabId}}" data-index="{{index}}"></div>';
+  var TEMPLATE_GRID_ITEM = '<div title="{{name}}" ' +
+                                  'class="item {{type}}" ' +
+                                  'data-tab-id="{{tabId}}" ' +
+                                  'data-index="{{index}}"></div>';
   
   var TEMPLATE_TAB_LABEL = '<div class="tab-label {{id}}" data-tab-id="{{id}}">{{name}}</div>';
   var TEMPLATE_TAB_CONTENT = '<div class="tab-content {{id}}" data-tab-id="{{id}}"></div>';
@@ -103,6 +106,7 @@ var Inventory = (function Inventory() {
     this.parts[type].push(part);
 
     if (!this.equippedParts[type]) {
+      this.equippedParts[type] = part;
       var elSlot = this.elVehicle.querySelector('.' + type.toLowerCase());
 
       if (elSlot) {
@@ -141,14 +145,16 @@ var Inventory = (function Inventory() {
   };
   
   Inventory.prototype.updateTab = function updateTab(tabId) {
-    var items = this.weapons,
-        elTabContent = this.elTabContents.querySelector('[data-tab-id = "' +tabId + '"]'),
+    var isWeapon = tabId === 'weapon',
+        items = isWeapon? this.weapons : this.parts[tabId],
+        elTabContent = this.elTabContents.querySelector('[data-tab-id = "' + tabId + '"]'),
         html = '';
     
     for (var i = 0, len = items.length, item;  i < len; i++) {
       item = items[i];
       
-      if (this.weaponsHeld.indexOf(item) !== -1) {
+      if (this.weaponsHeld.indexOf(item) !== -1 ||
+          this.equippedParts[item.type] === item) {
         continue;
       }
       
