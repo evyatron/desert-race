@@ -305,6 +305,8 @@ var Bullet = (function Bullet() {
 
     options.velocity = new Victor(options.speed, 0);
     options.velocity.rotateDeg(options.angle || 0);
+    
+    options.zIndex = 500;
 
     Sprite.apply(this, arguments);
   }

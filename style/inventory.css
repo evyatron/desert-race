@@ -43,36 +43,45 @@
       background-position: 50% 50%;
       background-repeat: no-repeat;
       background-size: 128px 128px;
-      transition: transform 350ms ease-in-out,
-                  background-color 350ms ease-in-out;
+      transition: transform 250ms ease-in-out,
+                  background-color 250ms ease-in-out;
     }
     .inventory .equipped .vehicle .part.wheels {
       transform: translate(0, calc(50% + 5px)) scale(.5);
+      transition-delay: 0ms;
     }
     .inventory .equipped .vehicle .part.engine {
       transform: translate(0, 0) scale(.5);
+      transition-delay: 0ms;
     }
     .inventory .equipped .vehicle .part.body {
       transform: translate(0px, calc(-50% - 5px)) scale(.5);
+      transition-delay: 100ms;
     }
     .inventory .equipped .vehicle .part.front {
       transform: translate(calc(50% + 5px), calc(-25% - 3px)) scale(.5);
+      transition-delay: 250ms;
     }
     .inventory .equipped .vehicle .part.rear {
       transform: translate(calc(50% + 5px), calc(25% + 2px)) scale(.5);
+      transition-delay: 250ms;
     }
     .inventory .equipped .vehicle .part.turret {
       transform: translate(calc(100% + 10px), 0) scale(.5);
+      transition-delay: 300ms;
     }
     .inventory .equipped .vehicle .part.vanity {
       transform: translate(calc(-50% - 5px), calc(-25% - 3px)) scale(.5);
+      transition-delay: 350ms;
     }
     .inventory .equipped .vehicle .part.morale {
       transform: translate(calc(-50% - 5px), calc(25% + 2px)) scale(.5);
+      transition-delay: 350ms;
     }
     .inventory .equipped .vehicle.show-built .part {
       transform: translate(0, 0) scale(1);
       background-color: transparent;
+      box-shadow: 0 0 0 1px rgba(170, 170, 170, 0);
     }
     
   .inventory .equipped .weapons {

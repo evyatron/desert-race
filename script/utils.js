@@ -7,6 +7,14 @@ function initNumber(value, defaultValue) {
   return typeof value === 'number'? value : defaultValue;
 }
 
+function initBool(value, defaultValue) {
+  if (defaultValue === undefined) {
+    defaultValue = false;
+  }
+  
+  return typeof value === 'boolean'? value : defaultValue;
+}
+
 function randF(from, to) {
   !from && (from = 0);
   !to && (to = 0);

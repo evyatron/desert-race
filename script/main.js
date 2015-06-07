@@ -105,26 +105,57 @@ function init() {
   scene.addSprite(roadSprite1);
   scene.addSprite(roadSprite2);
   scene.addSprite(player);
-  
-  spawnRoadThing();
 
   createRoad(function onRoadCreated() {
     //AudioPlayer.loop(AudioPlayer.ENGINE);
     scene.start();
-    addDefaultWeapons();
+    
+    addDefaultLoadout();
   });
 }
 
-function addDefaultWeapons() {
+function addDefaultLoadout() {
   player.inventory.addWeapon(new Pistol());
   player.inventory.addWeapon(new Rifle());
   player.inventory.addWeapon(new Shotgun());
+  player.equipHeldWeapon(0);
   
   window.setTimeout(function() {
     player.pickupWeapon(new AssaultRifle());
   }, 500);
   
-  player.equipHeldWeapon(0);
+  
+  var defaultBody = new VehiclePart({
+    'type': VEHICLE_PART_TYPES.BODY,
+    'src': 'images/parts/default/body.png',
+    'obstacleFactor': 0.1
+  });
+  var defaultEngine = new VehiclePart({
+    'type': VEHICLE_PART_TYPES.ENGINE,
+    'src': 'images/parts/default/engine.png',
+    'speed': 400,
+    'boostFactor': 2
+  });
+  var defaultWheels = new VehiclePart({
+    'type': VEHICLE_PART_TYPES.WHEELS,
+    'src': 'images/parts/default/wheels.png',
+    'obstacleFactor': 0.6,
+    'boundingBoxWidth': 50,
+    'boundingBoxHeight': 80
+  });
+  var defaultTurret = new Turret({
+    'size': 16,
+    'isRound': true,
+    'colour': 'rgba(20, 20, 20, 1)',
+    'borderColour': 'rgba(40, 40, 40, 1)',
+    'borderSize': 2,
+    'weaponRotation': 45
+  });
+  
+  player.pickupPart(defaultBody);
+  player.pickupPart(defaultEngine);
+  player.pickupPart(defaultWheels);
+  player.pickupPart(defaultTurret);
 }
 
 function bindInputActions() {
@@ -276,7 +307,7 @@ function onAfterGameLoopUpdate(dt, context) {
 function spawnRoadThing() {
   var width = rand(10, 50),
       height = rand(width, width * 2),
-      speed = player.currentWorldSpeed || player.worldSpeed,
+      speed = Math.max(player.currentWorldSpeed || player.worldSpeed, player.worldSpeed / 2),
       thing = new Sprite({
         'type': 'roadThing',
         'width': width,
@@ -298,7 +329,7 @@ function spawnRoadThing() {
 function spawnSideThing() {
   var width = rand(10, 100),
       height = width,
-      speed = player.currentWorldSpeed || player.worldSpeed,
+      speed = Math.max(player.currentWorldSpeed || player.worldSpeed, player.worldSpeed / 2),
       isOnLeftSide = Math.random() > 0.5,
       x = isOnLeftSide? rand(width / 2, ROAD_LEFT - width / 2) : rand(ROAD_RIGHT + width / 2, scene.width - width / 2),
       thing = new Sprite({

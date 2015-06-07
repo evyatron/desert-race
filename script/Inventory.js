@@ -261,7 +261,7 @@ var Inventory = (function Inventory() {
     this.elShowBuiltVehicle = this.el.querySelector('.toggle-built');
 
     addClick(this.elWeapons, this.onClickWeapons.bind(this));
-    addClick(this.elWeapons, this.onClickOwnedTabLabel.bind(this));
+    addClick(this.elTabLabels, this.onClickOwnedTabLabel.bind(this));
     addClick(this.elTabContents, this.onClickOwned.bind(this));
     
     if (this.elShowBuiltVehicle) {

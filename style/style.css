@@ -132,7 +132,7 @@ canvas {
 .menu.right {
   right: 0;
   border-radius: 0 0 0 10px;
-  .transform: translateX(100%);
+  transform: translateX(100%);
 }
   .menu.right:before {
     right: 100%;
