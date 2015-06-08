@@ -139,22 +139,22 @@
       cursor: default;
     }
   
-.inventory .item {
+.inventory .held-weapon {
   background-position: 50% 50%;
   background-repeat: no-repeat;
   background-size: contain;
   background-origin: content-box;
 }
-.inventory .item.shotgun {
+.inventory .held-weapon.shotgun {
   background-image: url(/images/shotgun/bullet-full.png);
 }
-.inventory .item.pistol {
+.inventory .held-weapon.pistol {
   background-image: url(/images/pistol/bullet-full.png);
 }
-.inventory .item.rifle {
+.inventory .held-weapon.rifle {
   background-image: url(/images/rifle/bullet-full.png);
 }
-.inventory .item.assault {
+.inventory .held-weapon.assault {
   background-image: url(/images/rifle/bullet-full.png);
 }
 
@@ -203,19 +203,39 @@
       left: 0;
       right: 0;
       bottom: 0;
-      padding: 1px 0 0 1px;
+      padding: 10px;
+      background: rgba(10, 10, 10, 0.1);
       display: none;
     }
     .inventory .owned .tab-contents .tab-content.active {
       display: block;
     }
       .inventory .owned .tab-contents .tab-content .item {
-        width: 32px;
-        height: 32px;
-        border: 1px solid #aaa;
-        margin: 5px;
-        padding: 5px;
+        position: relative;
+        float: left;
+        width: 48px;
+        height: 48px;
+        box-shadow: 0 0 0 1px rgba(100, 100, 100, 0.1),
+                    1px 1px 3px 0 rgba(0, 0, 0, .6) inset;
+        background-color: rgba(0, 0, 0, .2);
       }
+      .inventory .owned .tab-contents .tab-content .item:hover {
+        background-color: rgba(30, 30, 30, .2);
+      }
+        .inventory .owned .tab-contents .tab-content .item * {
+          pointer-events: none;
+        }
+        .inventory .owned .tab-contents .tab-content .item .icon {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          margin: 5px;
+          background-repeat: no-repeat;
+          background-position: 50% 50%;
+          background-size: contain;
+        }
 
 .inventory .status {
   height: 24px;

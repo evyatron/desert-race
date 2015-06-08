@@ -2,6 +2,7 @@ var Weapon = (function Weapon() {
   function Weapon(options) {
     !options && (options = {});
 
+    this.id = options.id || ('weapon_' + Date.now() + '_' + rand(0, 10000));
     this.name = options.name || '';
     this.type = options.type || 'weapon';
     

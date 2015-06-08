@@ -151,6 +151,9 @@ function addDefaultLoadout() {
   }));
   
   
+  player.pickupPart(new Turret());
+  player.pickupPart(new Turret());
+  player.pickupPart(new Turret());
   player.pickupPart(new Engine());
   player.pickupPart(new Engine());
   player.pickupPart(new Engine());

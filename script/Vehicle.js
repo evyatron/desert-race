@@ -74,9 +74,9 @@ var Vehicle = (function Vehicle() {
   };
 
   Vehicle.prototype.updateStats = function updateStats() {
-    var worldSpeeds = [],
-        boostFactors = [],
-        obstacleFactors = [],
+    var worldSpeeds = [0],
+        boostFactors = [0],
+        obstacleFactors = [0],
         boundingBoxWidth = 0,
         boundingBoxHeight = 0,
         weaponRotation = 0;
@@ -144,12 +144,11 @@ var VehiclePart = (function VehiclePart() {
   function VehiclePart(options) {
     !options && (options = {});
 
+    this.id = '';
     this.type;
     this.src = '';
     this.image = null;
     
-    this.speed = null;
-    this.boostFactor = null;
     this.obstacleFactor = null;
     this.boundingBoxWidth = null;
     this.boundingBoxHeight = null;
@@ -163,10 +162,11 @@ var VehiclePart = (function VehiclePart() {
   }
 
   VehiclePart.prototype.init = function init(options) {
-    this.type = options.type;
+    !options && (options = {});
     
-    this.speed = initNumber(options.speed);
-    this.boostFactor = initNumber(options.boostFactor);
+    this.type = options.type;
+    this.id = options.id || (this.type + '_' + Date.now() + '_' + rand(0, 10000));
+    
     this.obstacleFactor = initNumber(options.obstacleFactor);
     this.boundingBoxWidth = initNumber(options.boundingBoxWidth);
     this.boundingBoxHeight = initNumber(options.boundingBoxHeight);
@@ -192,7 +192,7 @@ var VehiclePart = (function VehiclePart() {
       this.ready = true;
     }.bind(this);
     
-    this.image.src = this.src = src;
+    this.image.src = this.src = this.iconSrc = src;
   };
 
   return VehiclePart;
@@ -221,13 +221,13 @@ var Turret = (function Turret() {
   Turret.prototype.constructor = Turret;
   
   Turret.prototype.init = function init(options) {
-    this.size = options.size || rand(4, 20);
-    this.isRound = initBool(options.isRound, rand());
+    this.weaponRotation = initNumber(options.weaponRotation, rand(0, 90));
+    
+    this.size = options.size || rand(8, 22);
+    this.isRound = initBool(options.isRound, this.weaponRotation > 45);
     this.colour = new Colour(options.colour || rand(0, 100));
     this.borderColour = new Colour(options.borderColour || rand(0, 50));
     this.borderSize = initNumber(options.borderSize, rand(0, this.size / 2));
-    
-    this.weaponRotation = initNumber(options.weaponRotation, rand(0, 90));
     
     VehiclePart.prototype.init.call(this, options);
   };
@@ -304,7 +304,7 @@ var Engine = (function Engine() {
     this.exhaustHeight = initNumber(options.exhaustHeight, rand(this.exhaustWidth, this.exhaustWidth * 2));
     this.exhaustDistance = initNumber(options.exhaustDistance, rand(0, 10));
     
-    this.speed = initNumber(options.speed, rand(200, 700));
+    this.speed = initNumber(options.speed, rand(200, 1000));
     this.boostFactor = initNumber(options.boostFactor, randF(1.2, 3));
 
     VehiclePart.prototype.init.call(this, options);
