@@ -286,6 +286,9 @@ var Engine = (function Engine() {
     this.exhaustWidth = 0;
     this.exhaustHeight = 0;
     this.exhaustDistance = 0;
+    this.engineWidth = 0;
+    this.engineHeight = 0;
+    this.pipeWidth = 0;
     
     // Gameplay
     this.speed = 0;
@@ -298,11 +301,23 @@ var Engine = (function Engine() {
   Engine.prototype.constructor = Engine;
   
   Engine.prototype.init = function init(options) {
+    var body = {
+          'top': 36,
+          'left': 42,
+          'right': 86,
+          'bottom': 116,
+          'width': 44,
+          'height': 80
+        };
+        
     this.colour = new Colour(options.colour || rand(50, 100));
     this.isFront = initBool(options.isFront, false);
     this.exhaustWidth = initNumber(options.exhaustWidth, rand(3, 10));
     this.exhaustHeight = initNumber(options.exhaustHeight, rand(this.exhaustWidth, this.exhaustWidth * 2));
     this.exhaustDistance = initNumber(options.exhaustDistance, rand(0, 10));
+    this.engineWidth = body.width * randF(0.4, 0.8);
+    this.engineHeight = this.engineWidth * randF(0.5, 1.2);
+    this.pipeWidth = rand(1, 3);
     
     this.speed = initNumber(options.speed, rand(200, 1000));
     this.boostFactor = initNumber(options.boostFactor, randF(1.2, 3));
@@ -327,12 +342,12 @@ var Engine = (function Engine() {
         },
         x = midX + body.width / 2 - this.exhaustWidth / 2 - this.exhaustDistance,
         posY = this.isFront? body.top + body.height / 3 : body.top + body.height * 2 / 3,
-        width = body.width * 2 / 3,
-        height = width / 2,
+        width = this.engineWidth,
+        height = this.engineHeight,
         left = body.left + body.width / 2 - width / 2,
         top = posY - height / 2,
         pipeColour = new Colour(this.colour).brighten(0.5),
-        pipeWidth = 2,
+        pipeWidth = this.pipeWidth,
         pipeLeft = left + width - pipeWidth,
         pipeTop = top + height;
 
