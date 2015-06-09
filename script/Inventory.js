@@ -112,17 +112,41 @@ var Inventory = (function Inventory() {
     this.partsMap[part.id] = part;
 
     if (!this.equippedParts[type]) {
-      this.equippedParts[type] = part;
-      var elSlot = this.elVehicle.querySelector('.' + type.toLowerCase());
-
-      if (elSlot) {
-        if (part.src) {
-          elSlot.style.backgroundImage = 'url(' + part.src + ')';
-        }
-      }
+      this.equipPart(part);
     } else {
       this.addItemToTab(type, part);
     }
+  };
+  
+  Inventory.prototype.equipPart = function equipPart(part) {
+    console.log('[Inventory] Equip part', part);
+    
+    var type = part.type;
+    
+    this.unequipType(type);
+    
+    this.removeItemFromTab(type, part);
+    this.equippedParts[type] = part;
+    
+    var elSlot = this.elVehicle.querySelector('.' + type.toLowerCase());
+    if (elSlot) {
+      if (part.src) {
+        elSlot.style.backgroundImage = 'url(' + part.src + ')';
+      }
+    }
+  };
+  
+  Inventory.prototype.unequipType = function unequipType(type) {
+    var currentlyEquipped = this.equippedParts[type];
+    
+    if (currentlyEquipped) {
+      console.log('[Inventory] Unequip part', currentlyEquipped);
+      
+      this.equippedParts[type] = null;
+      this.addItemToTab(type, currentlyEquipped);
+    }
+    
+    return currentlyEquipped;
   };
   
   Inventory.prototype.addWeapon = function addWeapon(weapon) {
@@ -152,21 +176,51 @@ var Inventory = (function Inventory() {
   };
   
   Inventory.prototype.addItemToTab = function addItemToTab(tabId, item) {
-    if (this.weaponsHeld.indexOf(item) !== -1 || this.equippedParts[item.type] === item) {
+    if (this.weaponsHeld.indexOf(item) !== -1 ||
+        this.equippedParts[item.type] === item) {
       return;
     }
+    
+    console.log('[Inventory] Add item to tab', tabId, item);
 
-    var elTabContent = this.elTabContents.querySelector('[data-tab-id = "' + tabId + '"]'),
-        el = document.createElement('div');
+    var elTabContent = this.getTabElement(tabId),
+        el = this.getTabItemElement(tabId, item);
+        
+    if (!el) {
+      el = document.createElement('div');
+      
+      el.innerHTML = TEMPLATE_GRID_ITEM.format(item);
+      el.className = 'item ' + item.type;
+      el.dataset.tabId = tabId;
+      el.dataset.id = item.id;
+      
+      el.title = item.title;
+      
+      elTabContent.appendChild(el);
+    }
+  };
+  
+  Inventory.prototype.removeItemFromTab = function removeItemFromTab(tabId, item) {
+    var elItem = this.getTabItemElement(tabId, item);
+    if (elItem) {
+      console.log('[Inventory] Remove item from owned tab', item);
+      elItem.parentNode.removeChild(elItem);
+    }
+  };
+  
+  Inventory.prototype.getTabElement = function getTabElement(tabId) {
+    return this.elTabContents.querySelector('[data-tab-id = "' + tabId + '"]');
+  };
+  
+  Inventory.prototype.getTabItemElement = function getTabItemElement(tabId, item) {
+    var elTab = this.getTabElement(tabId),
+        elItem = null;
+        
+    if (elTab) {
+      elItem = elTab.querySelector('[data-id = "' + item.id + '"]');
+    }
     
-    el.innerHTML = TEMPLATE_GRID_ITEM.format(item);
-    el.className = 'item ' + item.type;
-    el.dataset.tabId = tabId;
-    el.dataset.id = item.id;
-    
-    el.title = item.title;
-    
-    elTabContent.appendChild(el);
+    return elItem;
   };
   
   Inventory.prototype.showBuiltVehicle = function showBuiltVehicle(e) {
@@ -206,9 +260,7 @@ var Inventory = (function Inventory() {
     if (!id) {
       return;
     }
-    
-    console.warn('click ', id)
-    
+
     if (tabId === 'weapon') {
       this.player.equipWeapon(this.weaponsMap[id]);
     } else {

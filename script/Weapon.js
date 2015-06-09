@@ -18,6 +18,8 @@ var Weapon = (function Weapon() {
     this.bulletsPerReload = options.bulletsPerReload || this.magazineSize;
     this.timeToReload = options.timeToReload || 1;
     this.timeToCooldown = options.timeToCooldown || 1;
+    this.recoil = options.recoil || 0;
+    this.recoilSpeed = options.recoilSpeed || 1;
     
     this.soundEmpty = options.soundEmpty;
     this.soundFire = options.soundFire;
@@ -26,7 +28,7 @@ var Weapon = (function Weapon() {
     this.iconSrc = options.iconSrc || '';
 
     this.reloadTime = 0;
-    this.cooldownTime = 0;
+    this.cooldownTime = 0;23
     this.isInCooldown = false;
     this.canFire = true;
     this.isEmpty = this.inMagazine <= 0;
@@ -116,11 +118,12 @@ var Weapon = (function Weapon() {
 
   Weapon.prototype.createBullet = function createBullet(player) {
     var playerPosition = player.position,
-        angleDeg = player.weaponAimAngle * 180 / Math.PI;
+        angleDeg = player.weaponAimAngle * 180 / Math.PI,
+        spread = this.spreadAngle / 2 * (1 + player.weaponRecoil);
 
     for (var i = 0; i < this.bulletsPerShot; i++) {
       var bullet = new Bullet({
-        'angle': angleDeg + rand(-this.spreadAngle / 2, this.spreadAngle / 2),
+        'angle': angleDeg + rand(-spread, spread),
         'speed': this.bulletSpeed,
         'position': playerPosition.clone()
       });
@@ -186,6 +189,8 @@ var Shotgun = (function Shotgun() {
     options.bulletsPerReload = 1;
     options.timeToReload = 0.6;
     options.timeToCooldown = 0.5;
+    options.recoil = 1;
+    options.recoilSpeed = 1;
     
     options.soundFire = AudioPlayer.SHOTGUN_FIRE;
     options.soundEmpty = AudioPlayer.SHOTGUN_EMPTY;
@@ -217,6 +222,8 @@ var Rifle = (function Rifle() {
     options.bulletsPerReload = 1;
     options.timeToReload = 2;
     options.timeToCooldown = 0.5;
+    options.recoil = 3;
+    options.recoilSpeed = 3;
     
     options.soundFire = AudioPlayer.RIFLE_FIRE;
     options.soundEmpty = AudioPlayer.RIFLE_EMPTY;
@@ -248,6 +255,8 @@ var Pistol = (function Pistol() {
     options.bulletsPerReload = 1;
     options.timeToReload = 0.35;
     options.timeToCooldown = 0.45;
+    options.recoil = 0.9;
+    options.recoilSpeed = 1;
     
     options.soundFire = AudioPlayer.PISTOL_FIRE;
     options.soundEmpty = AudioPlayer.PISTOL_EMPTY;
@@ -279,6 +288,7 @@ var AssaultRifle = (function AssaultRifle() {
     options.bulletsPerReload = 30;
     options.timeToReload = 4;
     options.timeToCooldown = 0.08;
+    options.recoil = 0.6;
     
     options.soundFire = AudioPlayer.ASSAULT_RIFLE_FIRE;
     options.soundEmpty = AudioPlayer.ASSAULT_RIFLE_EMPTY;

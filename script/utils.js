@@ -28,10 +28,12 @@ function rand(from, to) {
           Math.round(randF(from, to));
 }
 
-function lerp(from, to, dt) {
+function lerp(from, to, dt, limit) {
+  !limit && (limit = 1);
+  
   var value = (1 - dt) * from + dt * to;
   
-  if (Math.abs(Math.abs(to) - Math.abs(value)) < 1) {
+  if (Math.abs(Math.abs(to) - Math.abs(value)) < limit) {
     value = to;
   }
   
