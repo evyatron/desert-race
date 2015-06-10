@@ -153,7 +153,8 @@ function addDefaultLoadout() {
   player.pickupPart(new VanityWings({
     'colour': 'rgba(55, 120, 120, 1)',
     'span': 20,
-    'size': 6
+    'size': 6,
+    'areWingsEqual': true
   }));
   
   

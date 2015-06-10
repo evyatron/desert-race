@@ -411,10 +411,10 @@ var VanityWings = (function VanityWings() {
   function VanityWings(options) {
     !options && (options = {});
 
-    this.colour = '';
-    this.span = 0;
-    this.size = 0;
-    this.offset = 0;
+  
+    this.areWingsEqual;
+    this.leftWing;
+    this.rightWing;
     
     Vanity.call(this, options);
   }
@@ -432,13 +432,29 @@ var VanityWings = (function VanityWings() {
       'height': 80
     };
     
-    this.colour = new Colour(options.colour || rand(50, 100));
-    this.span = initNumber(options.span, rand(10, (this.width - body.width) / 2));
-    this.size = initNumber(options.size, rand(4, 12));
-    this.offset = initNumber(options.offset, 0);
+    this.areWingsEqual = initBool(options.areWingsEqual, rand());
+    
+    this.leftWing = {
+      'colour': new Colour(options.colour || Colour.RANDOM),
+      'span': initNumber(options.span, rand(10, (this.width - body.width) / 3)),
+      'size': initNumber(options.size, rand(4, this.span / 2)),
+      'offset': initNumber(options.offset, 0)
+    };
+    
+    this.leftWing.span = Math.min(this.leftWing.span, (this.width - body.width) / 2);
+    
+    if (this.areWingsEqual) {
+      this.rightWing = this.leftWing;
+    } else {
+      this.rightWing = {
+        'colour': new Colour(Colour.RANDOM),
+        'span': initNumber(rand(10, (this.width - body.width) / 3)),
+        'size': initNumber(rand(4, this.span / 2)),
+        'offset': initNumber(0)
+      };
+    }
     
     // Make sure it doesn't go outside the image
-    this.span = Math.min(this.span, (this.width - body.width) / 2);
 
     Vanity.prototype.init.call(this, options);
   };
@@ -446,10 +462,6 @@ var VanityWings = (function VanityWings() {
   VanityWings.prototype.setImage = function setImage() {
     var elCanvas = document.createElement('canvas'),
         context = elCanvas.getContext('2d'),
-        w = this.width,
-        h = this.height,
-        midX = w / 2,
-        midY = h / 2,
         body = {
           'top': 36,
           'left': 42,
@@ -458,24 +470,24 @@ var VanityWings = (function VanityWings() {
           'width': 44,
           'height': 80
         },
-        bodyMidY = body.top + body.height / 2 + this.offset,
-        height = this.size;
+        leftBodyMidY = body.top + body.height / 2 + this.leftWing.offset,
+        rightBodyMidY = body.top + body.height / 2 + this.rightWing.offset;
 
     elCanvas.width = this.width;
     elCanvas.height = this.height;
     
-    context.fillStyle = this.colour;
-    
+    context.fillStyle = this.leftWing.colour;
     context.beginPath();
-    context.moveTo(body.right, bodyMidY + height);
-    context.lineTo(body.right + this.span, bodyMidY + height);
-    context.lineTo(body.right, bodyMidY - height);
+    context.moveTo(body.left, leftBodyMidY + this.leftWing.size);
+    context.lineTo(body.left - this.leftWing.span, leftBodyMidY + this.leftWing.size);
+    context.lineTo(body.left, leftBodyMidY - this.leftWing.size);
     context.fill();
     
+    context.fillStyle = this.rightWing.colour;
     context.beginPath();
-    context.moveTo(body.left, bodyMidY + height);
-    context.lineTo(body.left - this.span, bodyMidY + height);
-    context.lineTo(body.left, bodyMidY - height);
+    context.moveTo(body.right, rightBodyMidY + this.rightWing.size);
+    context.lineTo(body.right + this.rightWing.span, rightBodyMidY + this.rightWing.size);
+    context.lineTo(body.right, rightBodyMidY - this.rightWing.size);
     context.fill();
 
     var src = elCanvas.toDataURL();

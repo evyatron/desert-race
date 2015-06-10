@@ -4,16 +4,21 @@ var Colour = (function Colour() {
       options = 0;
     }
     
-    if (typeof options === 'number') {
+    if (options === Colour.RANDOM) {
+      options = {
+        'red': rand(0, 255),
+        'green': rand(0, 255),
+        'blue': rand(0, 255),
+        'alpha': 1
+      };
+    } else if (typeof options === 'number') {
       options = {
         'red': options,
         'green': options,
         'blue': options,
         'alpha': 1
       };
-    }
-    
-    if (typeof options === 'string') {
+    } else if (typeof options === 'string') {
       var rgba = options.replace(/\s/g, '').match(/rgba\((\d+)\,(\d+)\,(\d+)\,(\.?\d+)\)/);
       if (rgba) {
         options = {
@@ -35,6 +40,8 @@ var Colour = (function Colour() {
     
     this.updateValues();
   }
+  
+  Colour.RANDOM = 'random';
   
   Colour.prototype.toString = function toString() {
     return this.rgba;
