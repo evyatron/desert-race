@@ -150,6 +150,14 @@ function addDefaultLoadout() {
     'weaponRotation': 45
   }));
   
+  player.pickupPart(new VanityWings({
+    'colour': 'rgba(55, 120, 120, 1)',
+    'span': 20,
+    'size': 6
+  }));
+  
+  
+  
   
   player.pickupPart(new Turret());
   player.pickupPart(new Turret());
@@ -180,6 +188,32 @@ function onSceneResize(width, height) {
 }
 
 function onBeforeGameLoopUpdate(dt) {
+  /*
+    Move world around instead of the player itself
+    
+  var velocityX = 0,
+      velocityY = 0;
+      
+  if (InputManager.actionsActive.MoveRight) {
+    velocityX += player.speed;
+  }
+  if (InputManager.actionsActive.MoveLeft) {
+    velocityX -= player.speed;
+  }
+  if (InputManager.actionsActive.MoveUp) {
+    velocityY -= player.speed;
+  }
+  if (InputManager.actionsActive.MoveDown) {
+    velocityY += player.speed;
+  }
+  
+  for (var i = 0, len = things.length; i < len; i++) {
+    things[i].velocity.x = -velocityX;
+  }
+  roadSprite1.velocity.x = -velocityX;
+  roadSprite2.velocity.x = -velocityX;
+  */
+  
   if (InputManager.actionsActive.MoveRight) {
     player.velocity.x += player.speed;
   }

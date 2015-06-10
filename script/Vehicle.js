@@ -391,3 +391,96 @@ var Engine = (function Engine() {
 
   return Engine;
 }());
+
+var Vanity = (function Vanity() {
+  function Vanity(options) {
+    !options && (options = {});
+    
+    options.type = VEHICLE_PART_TYPES.VANITY;
+    
+    VehiclePart.call(this, options);
+  }
+
+  Vanity.prototype = Object.create(VehiclePart.prototype);
+  Vanity.prototype.constructor = Vanity;
+
+  return Vanity;
+}());
+
+var VanityWings = (function VanityWings() {
+  function VanityWings(options) {
+    !options && (options = {});
+
+    this.colour = '';
+    this.span = 0;
+    this.size = 0;
+    this.offset = 0;
+    
+    Vanity.call(this, options);
+  }
+
+  VanityWings.prototype = Object.create(Vanity.prototype);
+  VanityWings.prototype.constructor = VanityWings;
+
+  VanityWings.prototype.init = function init(options) {
+    var body = {
+      'top': 36,
+      'left': 42,
+      'right': 86,
+      'bottom': 116,
+      'width': 44,
+      'height': 80
+    };
+    
+    this.colour = new Colour(options.colour || rand(50, 100));
+    this.span = initNumber(options.span, rand(10, (this.width - body.width) / 2));
+    this.size = initNumber(options.size, rand(4, 12));
+    this.offset = initNumber(options.offset, 0);
+    
+    // Make sure it doesn't go outside the image
+    this.span = Math.min(this.span, (this.width - body.width) / 2);
+
+    Vanity.prototype.init.call(this, options);
+  };
+  
+  VanityWings.prototype.setImage = function setImage() {
+    var elCanvas = document.createElement('canvas'),
+        context = elCanvas.getContext('2d'),
+        w = this.width,
+        h = this.height,
+        midX = w / 2,
+        midY = h / 2,
+        body = {
+          'top': 36,
+          'left': 42,
+          'right': 86,
+          'bottom': 116,
+          'width': 44,
+          'height': 80
+        },
+        bodyMidY = body.top + body.height / 2 + this.offset,
+        height = this.size;
+
+    elCanvas.width = this.width;
+    elCanvas.height = this.height;
+    
+    context.fillStyle = this.colour;
+    
+    context.beginPath();
+    context.moveTo(body.right, bodyMidY + height);
+    context.lineTo(body.right + this.span, bodyMidY + height);
+    context.lineTo(body.right, bodyMidY - height);
+    context.fill();
+    
+    context.beginPath();
+    context.moveTo(body.left, bodyMidY + height);
+    context.lineTo(body.left - this.span, bodyMidY + height);
+    context.lineTo(body.left, bodyMidY - height);
+    context.fill();
+
+    var src = elCanvas.toDataURL();
+    VehiclePart.prototype.setImage.call(this, src);
+  };
+  
+  return VanityWings;
+}());
