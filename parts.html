@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Desert Race</title>
+
+    <script src="script/victor.min.js"></script>
+    <script src="script/utils.js"></script>
+    <script src="script/Colour.js"></script>
+    <script src="script/l10n.js"></script>
+    <script src="script/InputManager.js"></script>
+    <script src="script/UserSettings.js"></script>
+    <script src="script/AudioPlayer.js"></script>
+    <script src="script/Menu.js"></script>
+    <script src="script/Sprite.js"></script>
+    <script src="script/Vehicle.js"></script>
+    <script src="script/LocalPlayer.js"></script>
+    <script src="script/Weapon.js"></script>
+    <script src="script/Inventory.js"></script>
+    <script src="script/Notification.js"></script>
+    
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+      }
+      
+      body {
+        background: rgba(174, 157, 125, 1);
+      }
+      
+      #part-types {
+        list-style-type: none;
+      }
+        #part-types > li {
+          padding: 5px;
+          margin: 10px;
+            border: 1px solid #000;
+        }
+        #part-types h2 {
+          background: rgba(0, 0, 0, .1);
+          margin-bottom: 5px;
+          padding: 0 5px;
+        }
+        #part-types .parts {
+          list-style-type: none;
+        }
+          #part-types .parts li {
+            position: relative;
+            display: inline-block;
+            margin-right: 5px;
+            background-position: 50% 50%;
+            border: 1px solid #000;
+          }
+          #part-types .parts li:hover {
+            z-index: 10;
+          }
+          #part-types .parts li .stats {
+            position: absolute;
+            top: 0;
+            left: 100%;
+            white-space: nowrap;
+            padding: 5px;
+            color: #fff;
+            display: none;
+            background: rgba(0, 0, 0, .9);
+            border: 1px solid #fff;
+            box-shadow: 0 0 0 2px #000;
+          }
+          #part-types .parts li:hover .stats {
+            display: block;
+          }
+            #part-types .parts li .stats div {
+              padding: 2px 0;
+            }
+    </style>
+  </head>
+  <body>
+    <ul id="part-types"></ul>
+    
+    <script>
+      var ignoredStats = ['id', 'type', 'src', 'image', 'iconSrc', 'height', 'width', 'ready'];
+      
+      function init() {
+        createTypes();
+        
+      
+        for (var i = 0; i < 20; i++) {
+          createItemElement(new Turret());
+        }
+        for (var i = 0; i < 20; i++) {
+          createItemElement(new Engine());
+        }
+        for (var i = 0; i < 20; i++) {
+          createItemElement(new VanityWings());
+        }
+      }
+      
+      function createItemElement(item) {
+        var elList = getList(item.type),
+            el = document.createElement('li');
+        
+        el.style.width = item.width + 'px';
+        el.style.height = item.height + 'px';
+        el.style.backgroundImage = 'url(' + item.src + ')';
+        
+        var html = '<div class="stats">';
+        for (var k in item) {
+          if (ignoredStats.indexOf(k) === -1 && item.hasOwnProperty(k)) {
+            var value = item[k];
+            
+            if (typeof value === 'object') {
+              value = JSON.stringify(value);
+            }
+            
+            html += '<div><b>' + k + '</b>: ' +  value + '</div>';
+          }
+        }
+        html += '</div>';
+        
+        el.innerHTML = html;
+
+        elList.appendChild(el);
+      }
+      
+      function createTypes() {
+        var el = document.querySelector('#part-types');
+      
+        var html = '';
+        for (var k in VEHICLE_PART_TYPES) {
+          html += '<li class="' + k + '">' +
+                    '<h2>' + k + '</h2>' +
+                    '<ul class="parts"></ul>' +
+                  '</li>';
+        }
+        
+        el.innerHTML = html;
+      }
+      
+      function getList(type) {
+        return document.querySelector('#part-types .' + type + ' .parts');
+      }
+      
+      init();
+      
+    </script>
+  </body>
+</html>

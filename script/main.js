@@ -27,7 +27,7 @@ var STATS = {
   turboTime: 0,
   timeOverThings: 0,
   distance: 0
-};
+}; 
 
 var DEBUG = /DEBUG/.test(window.location.href);
 
