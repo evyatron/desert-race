@@ -58,7 +58,8 @@
             position: absolute;
             top: 0;
             left: 100%;
-            white-space: nowrap;
+            min-width: 300px;
+            min-height: 300px;
             padding: 5px;
             color: #fff;
             display: none;
@@ -110,6 +111,7 @@
             
             if (typeof value === 'object') {
               value = JSON.stringify(value);
+              value = value.replace(/\,\"/g, ', "');
             }
             
             html += '<div><b>' + k + '</b>: ' +  value + '</div>';

@@ -411,7 +411,6 @@ var VanityWings = (function VanityWings() {
   function VanityWings(options) {
     !options && (options = {});
 
-  
     this.areWingsEqual;
     this.leftWing;
     this.rightWing;
@@ -437,11 +436,11 @@ var VanityWings = (function VanityWings() {
     this.leftWing = {
       'colour': new Colour(options.colour || Colour.RANDOM),
       'span': initNumber(options.span, rand(10, (this.width - body.width) / 3)),
-      'size': initNumber(options.size, rand(4, this.span / 2)),
       'offset': initNumber(options.offset, 0)
     };
     
     this.leftWing.span = Math.min(this.leftWing.span, (this.width - body.width) / 2);
+    this.leftWing.size = initNumber(options.size, rand(4, this.leftWing.span / 2));
     
     if (this.areWingsEqual) {
       this.rightWing = this.leftWing;
@@ -449,9 +448,10 @@ var VanityWings = (function VanityWings() {
       this.rightWing = {
         'colour': new Colour(Colour.RANDOM),
         'span': initNumber(rand(10, (this.width - body.width) / 3)),
-        'size': initNumber(rand(4, this.span / 2)),
         'offset': initNumber(0)
       };
+      
+      this.rightWing.size = initNumber(rand(4, this.rightWing.span / 2));
     }
     
     // Make sure it doesn't go outside the image
