@@ -33,8 +33,8 @@ var Vehicle = (function Vehicle() {
   };
   
   Vehicle.prototype.draw = function draw(context) {
-    var x = this.position.x - this.width / 2,
-        y = this.position.y - this.height / 2;
+    var x = Math.round(this.position.x - this.width / 2),
+        y = Math.round(this.position.y - this.height / 2);
     
     for (var i = 0, len = VEHICLE_PARTS_ORDER.length, part; i < len; i++) {
       part = this.parts[VEHICLE_PARTS_ORDER[i]];
@@ -129,6 +129,7 @@ var VEHICLE_PART_TYPES = {
   'VANITY': 'VANITY',
   'MORALE': 'MORALE'
 };
+
 var VEHICLE_PARTS_ORDER = [
   VEHICLE_PART_TYPES.WHEELS,
   VEHICLE_PART_TYPES.ENGINE,
@@ -390,6 +391,105 @@ var Engine = (function Engine() {
   };
 
   return Engine;
+}());
+
+var Wheels = (function Wheels() {
+  function Wheels(options) {
+    !options && (options = {});
+    
+    options.type = VEHICLE_PART_TYPES.WHEELS;
+    
+    // Design
+    this.colour = null;
+    this.frameThickness = 0;
+    this.wheelWidth = 0;
+    this.wheelHeight = 0;
+    this.wheelMargin = 0;
+    this.numberOfFrontWheels = 0;
+    this.numberOfBackWheels = 0;
+    
+    // Gameplay
+    this.obstacleFactor = 0;
+    
+    VehiclePart.call(this, options);
+  }
+
+  Wheels.prototype = Object.create(VehiclePart.prototype);
+  Wheels.prototype.constructor = Wheels;
+  
+  Wheels.prototype.init = function init(options) {
+    
+    var body = {
+      'top': 36,
+      'left': 42,
+      'right': 86,
+      'bottom': 116,
+      'width': 44,
+      'height': 80
+    };
+    
+    this.obstacleFactor = initNumber(options.obstacleFactor, randF(0.2, 0.8));
+    this.boundingBoxWidth = body.width;
+    this.boundingBoxHeight = body.height;
+    
+    this.colour = new Colour(options.colour || rand(0, 50));
+    this.frameThickness = Math.round(initNumber(options.frameThickness, rand(2, 6)));
+    this.wheelWidth = Math.round(initNumber(options.wheelWidth, rand(this.frameThickness + 2, this.frameThickness * 2)));
+    this.wheelHeight = Math.round(initNumber(options.wheelHeight, this.wheelWidth * 1.5));
+    this.wheelMargin = Math.round(initNumber(options.wheelMargin, rand(2, 4)));
+    this.numberOfFrontWheels = Math.round(initNumber(options.numberOfFrontWheels, rand(1, 2)));
+    this.numberOfBackWheels = Math.round(initNumber(options.numberOfBackWheels, rand(1, 2)));
+    
+    VehiclePart.prototype.init.call(this, options);
+  };
+
+  Wheels.prototype.setImage = function setImage() {
+    var elCanvas = document.createElement('canvas'),
+        context = elCanvas.getContext('2d'),
+        w = this.width,
+        h = this.height,
+        wheelWidth = this.wheelWidth,
+        wheelHeight = this.wheelHeight,
+        frameSize = this.frameThickness;
+    
+    var body = {
+      'top': 36,
+      'left': 42,
+      'right': 86,
+      'bottom': 116,
+      'width': 44,
+      'height': 80
+    };
+    
+    elCanvas.width = this.width;
+    elCanvas.height = this.height;
+    
+    context.fillStyle = this.colour;
+    
+    context.fillRect(body.left + body.width / 2 - frameSize / 2, body.top,
+                     frameSize, body.height);
+   
+    for (var i = 0; i < this.numberOfFrontWheels; i++) {
+      var top = body.top + i * (wheelHeight + this.wheelMargin) + wheelHeight / 2;
+      
+      context.fillRect(body.left, top, body.width, frameSize);
+      context.fillRect(body.left - wheelWidth / 2, top - wheelHeight / 2 + frameSize / 2, wheelWidth, wheelHeight);
+      context.fillRect(body.right - wheelWidth / 2, top - wheelHeight / 2 + frameSize / 2, wheelWidth, wheelHeight);
+    }
+    
+    for (var i = 0; i < this.numberOfBackWheels; i++) {
+      var top = body.bottom - frameSize - i * (wheelHeight + this.wheelMargin) - wheelHeight / 2;
+      
+      context.fillRect(body.left, top, body.width, frameSize);
+      context.fillRect(body.left - wheelWidth / 2, top - wheelHeight / 2 + frameSize / 2, wheelWidth, wheelHeight);
+      context.fillRect(body.right - wheelWidth / 2, top - wheelHeight / 2 + frameSize / 2, wheelWidth, wheelHeight);
+    }
+
+    var src = elCanvas.toDataURL();
+    VehiclePart.prototype.setImage.call(this, src);
+  };
+
+  return Wheels;
 }());
 
 var Vanity = (function Vanity() {

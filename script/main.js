@@ -134,12 +134,8 @@ function addDefaultLoadout() {
     'speed': 400,
     'boostFactor': 2
   }));
-  player.pickupPart(new VehiclePart({
-    'type': VEHICLE_PART_TYPES.WHEELS,
-    'src': 'images/parts/default/wheels.png',
-    'obstacleFactor': 0.6,
-    'boundingBoxWidth': 50,
-    'boundingBoxHeight': 80
+  player.pickupPart(new Wheels({
+    'obstacleFactor': 0.6
   }));
   player.pickupPart(new Turret({
     'size': 16,
