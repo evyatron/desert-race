@@ -88,6 +88,61 @@ function addHover(elOrSelector, callbackOver, callbackOut) {
   }
 }
 
+var Benchmarker = (function Benchmarker() {
+  function Benchmarker() {
+    this.timings = {};
+    this.active = {};
+  }
+  
+  Benchmarker.prototype.start = function start(id) {
+    this.timings[id] = {
+      'id': id,
+      'startTime': Date.now(),
+      'endTime': 0,
+      'duration': 0
+    };
+    
+    this.active[id] = true;
+  };
+  
+  Benchmarker.prototype.end = function end(id) {
+    if (!this.active[id]) {
+      console.warn('[Benchmarker] Trying to finish timer on a missing benchmark', id);
+      return;
+    }
+    
+    this.timings[id].endTime = Date.now();
+    this.timings[id].duration = this.timings[id].endTime - this.timings[id].startTime;
+    
+    console.info('[Benchmarker]', id, ':', this.timings[id].duration, 'ms');
+    
+    this.timings[id + '_' + Date.now()] = this.timings[id];
+    
+    delete this.timings[id];
+    delete this.active[id];
+  };
+  
+  Benchmarker.prototype.printAll = function printAll(shouldSortByTime) {
+    var ids = Object.keys(this.timings);
+    
+    if (shouldSortByTime) {
+      ids.sort(function(a, b){ 
+        return this.timings[a].duration > this.timings[b].duration? -1 :
+               this.timings[a].duration < this.timings[b].duration? 1 :
+               0;
+      }.bind(this));
+    }
+    
+    console.group('Benchmarker');
+    for (var i = 0, len = ids.length, timing; i < len; i++) {
+      timing = this.timings[ids[i]];
+      console.log(timing.id, ':', timing.duration, 'ms');
+    }
+    console.groupEnd('Benchmarker');
+  };
+  
+  return new Benchmarker();
+}());
 
 var REGEX_NUMBERS = /\B(?=(\d{3})+(?!\d))/g,
     NUMBERS_DELIM = ',';

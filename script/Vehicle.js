@@ -150,10 +150,6 @@ var VehiclePart = (function VehiclePart() {
     this.src = '';
     this.image = null;
     
-    this.obstacleFactor = null;
-    this.boundingBoxWidth = null;
-    this.boundingBoxHeight = null;
-    
     this.width = 128;
     this.height = 128;
 
@@ -167,10 +163,6 @@ var VehiclePart = (function VehiclePart() {
     
     this.type = options.type;
     this.id = options.id || (this.type + '_' + Date.now() + '_' + rand(0, 10000));
-    
-    this.obstacleFactor = initNumber(options.obstacleFactor);
-    this.boundingBoxWidth = initNumber(options.boundingBoxWidth);
-    this.boundingBoxHeight = initNumber(options.boundingBoxHeight);
     
     this.width = initNumber(options.width, 128);
     this.height = initNumber(options.height, 128);
@@ -234,6 +226,8 @@ var Turret = (function Turret() {
   };
 
   Turret.prototype.setImage = function setImage() {
+    Benchmarker.start('Turret Create Image');
+    
     var elCanvas = document.createElement('canvas'),
         context = elCanvas.getContext('2d'),
         w = this.width,
@@ -269,6 +263,8 @@ var Turret = (function Turret() {
     }
 
     var src = elCanvas.toDataURL();
+    Benchmarker.end('Turret Create Image');
+    
     VehiclePart.prototype.setImage.call(this, src);
   };
 
@@ -327,6 +323,8 @@ var Engine = (function Engine() {
   };
 
   Engine.prototype.setImage = function setImage() {
+    Benchmarker.start('Engine Create Image');
+    
     var elCanvas = document.createElement('canvas'),
         context = elCanvas.getContext('2d'),
         w = this.width,
@@ -387,6 +385,8 @@ var Engine = (function Engine() {
     
     
     var src = elCanvas.toDataURL();
+    Benchmarker.end('Engine Create Image');
+    
     VehiclePart.prototype.setImage.call(this, src);
   };
 
@@ -444,6 +444,8 @@ var Wheels = (function Wheels() {
   };
 
   Wheels.prototype.setImage = function setImage() {
+    Benchmarker.start('Wheels Create Image');
+    
     var elCanvas = document.createElement('canvas'),
         context = elCanvas.getContext('2d'),
         w = this.width,
@@ -486,6 +488,8 @@ var Wheels = (function Wheels() {
     }
 
     var src = elCanvas.toDataURL();
+    Benchmarker.end('Wheels Create Image');
+    
     VehiclePart.prototype.setImage.call(this, src);
   };
 
@@ -560,6 +564,8 @@ var VanityWings = (function VanityWings() {
   };
   
   VanityWings.prototype.setImage = function setImage() {
+    Benchmarker.start('Vanity Wings Create Image');
+    
     var elCanvas = document.createElement('canvas'),
         context = elCanvas.getContext('2d'),
         body = {
@@ -591,6 +597,8 @@ var VanityWings = (function VanityWings() {
     context.fill();
 
     var src = elCanvas.toDataURL();
+    Benchmarker.end('Vanity Wings Create Image');
+    
     VehiclePart.prototype.setImage.call(this, src);
   };
   

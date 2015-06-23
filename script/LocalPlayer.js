@@ -159,8 +159,8 @@ var LocalPlayer = (function LocalPlayer() {
     if (DEBUG) {
       context.strokeStyle = 'rgba(0, 0, 0, .1)';
       context.beginPath();
-      context.moveTo(x, InputManager.mousePosition.y);
-      context.lineTo(InputManager.mousePosition.x, mouseY);
+      context.moveTo(x, y);
+      context.lineTo(InputManager.mousePosition.x, InputManager.mousePosition.y);
       context.stroke();
       context.closePath();
     }

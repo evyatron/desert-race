@@ -154,18 +154,18 @@ var Sprite = (function Sprite() {
         h = this.height,
         x = this.position.x - w / 2,
         y = this.position.y - h / 2;
-    
-    if (DEBUG) {
-      var hitBounds = this.hitBounds;
-      context.fillStyle = 'rgba(255, 0, 0, .2)';
-      context.fillRect(hitBounds.left, hitBounds.top, hitBounds.width, hitBounds.height);
-    }
 
     if (this.image) {
       context.drawImage(this.image, x, y, w, h);
     } else if (this.colour) {
       context.fillStyle = this.colour;
       context.fillRect(x, y, w, h);
+    }
+    
+    if (DEBUG) {
+      var hitBounds = this.hitBounds;
+      context.fillStyle = 'rgba(255, 0, 0, .2)';
+      context.fillRect(hitBounds.left, hitBounds.top, hitBounds.width, hitBounds.height);
     }
   };
 

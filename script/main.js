@@ -115,6 +115,8 @@ function init() {
 }
 
 function addDefaultLoadout() {
+  Benchmarker.start('Default Loadout');
+  
   player.inventory.addWeapon(new Pistol());
   player.inventory.addWeapon(new Rifle());
   player.inventory.addWeapon(new Shotgun());
@@ -154,14 +156,14 @@ function addDefaultLoadout() {
   }));
   
   
+  player.pickupPart(new Turret());
+  player.pickupPart(new Turret());
+  player.pickupPart(new Turret());
+  player.pickupPart(new Engine());
+  player.pickupPart(new Engine());
+  player.pickupPart(new Engine());
   
-  
-  player.pickupPart(new Turret());
-  player.pickupPart(new Turret());
-  player.pickupPart(new Turret());
-  player.pickupPart(new Engine());
-  player.pickupPart(new Engine());
-  player.pickupPart(new Engine());
+  Benchmarker.end('Default Loadout');
 }
 
 function bindInputActions() {
@@ -385,6 +387,8 @@ function createRoad(callback) {
   if (!scene) {
     return;
   }
+  
+  Benchmarker.start('Create Road');
 
   var canvas = document.createElement('canvas'),
       context = canvas.getContext('2d'),
@@ -426,6 +430,8 @@ function createRoad(callback) {
   roadSprite2.image = image;
   roadSprite1.position = new Victor(scene.width / 2, scene.height / 2);
   roadSprite2.position = new Victor(scene.width / 2, -scene.height / 2);
+  
+  Benchmarker.end('Create Road');
   
   if (callback) {
     callback();

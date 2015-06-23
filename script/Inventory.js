@@ -79,6 +79,8 @@ var Inventory = (function Inventory() {
           player.pickupPart(new Turret());
         } else if (id === VEHICLE_PART_TYPES.VANITY) {
           player.pickupPart(new VanityWings());
+        } else if (id === VEHICLE_PART_TYPES.WHEELS) {
+          player.pickupPart(new Wheels());
         }
         return;
       }
