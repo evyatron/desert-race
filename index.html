@@ -32,35 +32,39 @@
     </div>
     
     <div class="menu left settings">
-      <h1 class="title">Settings</h1>
-      <b class="handle"></b>
-      <label class="setting checkbox" for="enable-sound">
-        <span><input type="checkbox" id="enable-sound" name="enable-sound" /></span>
-        <b>Enable Sound</b>
-      </label>
-      <label class="setting range" for="music-volume">
-        <b>Music Volume:</b>
-        <span><input type="range" min="0" max="1" step="0.01" id="music-volume" name="music-volume" /></span>
-      </label>
-      <label class="setting range" for="effects-volume">
-        <b>Effects Volume:</b>
-        <span><input type="range" min="0" max="1" step="0.01" id="effects-volume" name="effects-volume" /></span>
-      </label>
-      <h2 class="title">Controls</h2>
-      <table id="keys">
-        <thead>
-          <tr>
-            <th>Action</th>
-            <th>Key</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+      <div class="content">
+        <h1 class="title">Settings</h1>
+        <b class="handle"></b>
+        <label class="setting checkbox" for="enable-sound">
+          <span><input type="checkbox" id="enable-sound" name="enable-sound" /></span>
+          <b>Enable Sound</b>
+        </label>
+        <label class="setting range" for="music-volume">
+          <b>Music Volume:</b>
+          <span><input type="range" min="0" max="1" step="0.01" id="music-volume" name="music-volume" /></span>
+        </label>
+        <label class="setting range" for="effects-volume">
+          <b>Effects Volume:</b>
+          <span><input type="range" min="0" max="1" step="0.01" id="effects-volume" name="effects-volume" /></span>
+        </label>
+        <h2 class="title">Controls</h2>
+        <table id="keys">
+          <thead>
+            <tr>
+              <th>Action</th>
+              <th>Key</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
     </div>
     
     <div class="menu right inventory-wrapper">
-      <h1 class="title">Inventory</h1>
-      <b class="handle"></b>
+      <div class="content">
+        <h1 class="title">Inventory</h1>
+        <b class="handle"></b>
+      </div>
     </div>
     
     <ul id="stats"></ul>

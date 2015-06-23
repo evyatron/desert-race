@@ -42,7 +42,7 @@ var LocalPlayer = (function LocalPlayer() {
     this.elWeaponCooldown = this.elWeapon.querySelector('.cooldown b');
     
     this.inventory = new Inventory({
-      'elContainer': document.querySelector('.inventory-wrapper'),
+      'elContainer': document.querySelector('.inventory-wrapper .content'),
       'player': this
     });
     
