@@ -62,6 +62,9 @@ var Inventory = (function Inventory() {
   Inventory.prototype.init = function init(options) {
     this.elContainer = options.elContainer;
     this.player = options.player;
+    
+    this.dropMovedItem_bound = this.dropMovedItem.bind(this);
+    this.moveMovedItem_bound = this.moveMovedItem.bind(this);
 
     for (var id in VEHICLE_PART_TYPES) {
       this.equippedParts[id] = null;
@@ -189,41 +192,125 @@ var Inventory = (function Inventory() {
     return true;
   };
   
-  Inventory.prototype.onClickOwned = function onClickOwned(e) {
-    var elClicked = e.target,
-        data = elClicked.dataset,
-        row = data.row,
-        col = data.col;
-
-    if (!row || !col) {
+  Inventory.prototype.onOwnedMouseDown = function onOwnedMouseDown(e) {
+    if (InputManager.isRightClick(e)) {
       return;
     }
     
-    var slot = this.grid[parseInt(row)][parseInt(col)];
+    if (this.itemBeingMoved) {
+      return;
+    }
     
+    var slot = this.getMouseEventSlot(e);
+    
+    if (!slot || !slot.item) {
+      return;
+    }
+    
+    this.pickupToMove(slot, null, e);
+  };
+  
+  Inventory.prototype.pickupToMove = function pickupToMove(slot, item, e) {
+    this.slotTakenFrom = slot;
+    this.itemBeingMoved = item || slot.removeItem();
+    this.elMovingItem = document.createElement('div');
+    this.elMovingItem.id = 'moving-item';
+    this.elMovingItem.className = 'inventory-slot';
+    this.elMovingItem.innerHTML = '<div class="image" style="background-image: url(' + this.itemBeingMoved.iconSrc + ');"></div>';
+    this.elMovingItem.style.transform = 'translate(' + e.pageX + 'px, ' + e.pageY + 'px)';
+    document.body.appendChild(this.elMovingItem);
+    
+    window.addEventListener('mouseup', this.dropMovedItem_bound);
+    window.addEventListener('mousemove', this.moveMovedItem_bound);
+    
+    this.timePickedUp = Date.now();
+  };
+  
+  Inventory.prototype.dropMovedItem = function dropMovedItem(e) {
+    if (Date.now() - this.timePickedUp < 200) {
+      return;
+    }
+    
+    window.removeEventListener('mouseup', this.dropMovedItem_bound);
+    
+    var targetSlot = this.getMouseEventSlot(e),
+        itemToPickupAfterDrop = null;
+
+    if (this.itemBeingMoved) {
+      if (targetSlot) {
+        itemToPickupAfterDrop = targetSlot.removeItem();
+        targetSlot.setItem(this.itemBeingMoved);
+      } else {
+        if (this.slotTakenFrom && this.slotTakenFrom.isFree()) {
+          this.slotTakenFrom.setItem(this.itemBeingMoved);
+        } else {
+          var nextFreeSlot = this.getNextFreeSlot();
+          if (nextFreeSlot) {
+            nextFreeSlot.setItem(this.itemBeingMoved);
+          }
+        }
+      }
+    }
+      
+    if (this.elMovingItem) {
+      this.elMovingItem.parentNode.removeChild(this.elMovingItem);
+    }
+    
+    this.itemBeingMoved = null;
+    this.slotTakenFrom = null;
+    this.elMovingItem = null;
+    
+    if (itemToPickupAfterDrop) {
+      this.pickupToMove(null, itemToPickupAfterDrop, e);
+    }
+  };
+  
+  Inventory.prototype.moveMovedItem = function moveMovedItem(e) {
+    if (!this.itemBeingMoved) {
+      window.removeEventListener('mouseup', this.moveMovedItem_bound);
+      return;
+    }
+    
+    if (this.elMovingItem) {
+      this.elMovingItem.style.transform = 'translate(' + e.pageX + 'px, ' + e.pageY + 'px)';
+    }
+  };
+    
+  Inventory.prototype.getMouseEventSlot = function getMouseEventSlot(e) {
+    var elClicked = e.target,
+        data = elClicked && elClicked.dataset || {};
+
+    if (!('row' in data) || !('col' in data)) {
+      return null;
+    }
+    
+    return this.grid[parseInt(data.row)][parseInt(data.col)];
+  };
+  
+  Inventory.prototype.onOwnedMouseUp = function onOwnedMouseUp(e) {
+    var slot = this.getMouseEventSlot(e);
+
     if (!slot) {
       return;
     }
     
-    if (!slot.item) {
-      return;
-    }
-    
-    if (InputManager.isRightClick(e)) {
-      if (slot.item instanceof Weapon) {
-        var weaponToHold = slot.item,
-            equippedWeapon = this.getEquippedWeapon();
-            
-        this.holdWeapon(weaponToHold, equippedWeapon.index, slot);
-      } else if (slot.item instanceof VehiclePart) {
-        var partToEquip = slot.removeItem(),
-            equippedPart = this.player.parts[partToEquip.type];
-        
-        if (equippedPart) {
-          slot.setItem(equippedPart);
+    if (!this.itemBeingMoved) {
+      if (InputManager.isRightClick(e)) {
+        if (slot.item instanceof Weapon) {
+          var weaponToHold = slot.item,
+              equippedWeapon = this.getEquippedWeapon();
+              
+          this.holdWeapon(weaponToHold, equippedWeapon.index, slot);
+        } else if (slot.item instanceof VehiclePart) {
+          var partToEquip = slot.removeItem(),
+              equippedPart = this.player.parts[partToEquip.type];
+          
+          if (equippedPart) {
+            slot.setItem(equippedPart);
+          }
+              
+          this.player.equipPart(partToEquip);
         }
-            
-        this.player.equipPart(partToEquip);
       }
     }
   };
@@ -281,7 +368,8 @@ var Inventory = (function Inventory() {
 
     this.elShowBuiltVehicle = this.el.querySelector('.toggle-built');
 
-    this.elOwned.addEventListener('mouseup', this.onClickOwned.bind(this));
+    this.elOwned.addEventListener('mousedown', this.onOwnedMouseDown.bind(this));
+    this.elOwned.addEventListener('mouseup', this.onOwnedMouseUp.bind(this));
     addClick(this.elWeapons, this.onClickWeapons.bind(this));
     addHover(this.elShowBuiltVehicle, this.showBuiltVehicle.bind(this), this.hideBuiltVehicle.bind(this));
     
@@ -306,7 +394,7 @@ var Inventory = (function Inventory() {
     
     InventorySlot.prototype.init = function init() {
       this.el = document.createElement('div');
-      this.el.className = 'slot free';
+      this.el.className = 'inventory-slot free';
       this.el.dataset.row = this.row;
       this.el.dataset.col = this.col;
       this.el.style.width = SLOT_SIZE + 'px';

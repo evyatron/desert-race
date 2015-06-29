@@ -138,20 +138,6 @@
   height: 200px;
   padding: 0 1px;
 }
-  .inventory .owned .slot {
-    position: relative;
-    float: left;
-    margin: 0 1px 1px 0;
-    box-shadow: 0 0 0 1px rgba(40, 40, 40, 1),
-                1px 1px 3px 0 rgba(0, 0, 0, .8) inset;
-    background-color: rgba(174, 157, 125, 0.5);
-  }
-  .inventory .owned .slot:hover {
-    z-index: 5;
-    box-shadow: 0 0 0 1px rgba(50, 50, 50, 1),
-                1px 1px 3px 0 rgba(0, 0, 0, .8) inset;
-    background-color: rgba(174, 157, 125, 0.7);
-  }
   .inventory .owned:after {
     content: '';
     clear: both;
@@ -159,30 +145,59 @@
     height: 0;
     width: 0;
   }
-    .inventory .owned .slot .image {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      margin: 3px;
-      pointer-events: none;
-      background-repeat: no-repeat;
-      background-position: 50% 50%;
-      background-size: contain;
-    }
-    .inventory .owned .slot .type {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 12px;
-      height: 12px;
-      margin: 5px;
-      pointer-events: none;
-      background-repeat: no-repeat;
-      background-position: 50% 50%;
-      background-size: contain;
-    }
+.inventory-slot {
+  position: relative;
+  float: left;
+  width: 48px;
+  height: 48px;
+  margin: 0 1px 1px 0;
+  box-shadow: 0 0 0 1px rgba(40, 40, 40, 1),
+              1px 1px 3px 0 rgba(0, 0, 0, .8) inset;
+  background-color: rgba(174, 157, 125, 0.5);
+}
+.inventory-slot:hover {
+  z-index: 5;
+  box-shadow: 0 0 0 1px rgba(50, 50, 50, 1),
+              1px 1px 3px 0 rgba(0, 0, 0, .8) inset;
+  background-color: rgba(174, 157, 125, 0.7);
+}
+  .inventory-slot .image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: 3px;
+    pointer-events: none;
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+    background-size: contain;
+  }
+  .inventory-slot .type {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 12px;
+    height: 12px;
+    margin: 5px;
+    pointer-events: none;
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+    background-size: contain;
+  }
+
+#moving-item {
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 0;
+  z-index: 100;
+  margin: -24px 0 0 -24px;
+  pointer-events: none;
+  background-color: rgba(174, 157, 125, 1);
+  box-shadow: 0 0 0 1px rgba(40, 40, 40, 1),
+              0 0 3px 0 rgba(0, 0, 0, .8);
+}
   
 
 .inventory .status {
