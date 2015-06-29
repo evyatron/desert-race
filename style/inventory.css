@@ -136,81 +136,52 @@
 .inventory .owned {
   position: relative;
   height: 200px;
+  padding: 0 1px;
 }
-  .inventory .owned .tab-labels {
+  .inventory .owned .slot {
     position: relative;
+    float: left;
+    margin: 0 1px 1px 0;
+    box-shadow: 0 0 0 1px rgba(40, 40, 40, 1),
+                1px 1px 3px 0 rgba(0, 0, 0, .8) inset;
+    background-color: rgba(174, 157, 125, 0.5);
+  }
+  .inventory .owned .slot:hover {
     z-index: 5;
-    height: 34px;
-    line-height: 34px;
-    font-size: .6em;
-    text-transform: capitalize;
+    box-shadow: 0 0 0 1px rgba(50, 50, 50, 1),
+                1px 1px 3px 0 rgba(0, 0, 0, .8) inset;
+    background-color: rgba(174, 157, 125, 0.7);
   }
-    .inventory .owned .tab-labels .tab-label {
-      display: inline-block;
-      margin-left: 3px;
-      width: 50px;
-      height: 34px;
-      text-align: center;
-      border: 1px solid #fff;
-      border-radius: 4px 4px 0 0;
-      border-bottom-width: 0;
-      cursor: pointer;
-    }
-    .inventory .owned .tab-labels .tab-label:hover {
-      background: #333;
-    }
-    .inventory .owned .tab-labels .tab-label.active {
-      background: #fff;
-      color: #000;
-    }
-  .inventory .owned .tab-contents {
-    position: absolute;
-    top: 35px;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 4;
-    border-top: 1px solid #fff;
+  .inventory .owned:after {
+    content: '';
+    clear: both;
+    float: none;
+    height: 0;
+    width: 0;
   }
-    .inventory .owned .tab-contents .tab-content {
+    .inventory .owned .slot .image {
       position: absolute;
       top: 0;
       left: 0;
       right: 0;
       bottom: 0;
-      padding: 10px;
-      background: rgba(10, 10, 10, 0.1);
-      display: none;
+      margin: 3px;
+      background-repeat: no-repeat;
+      background-position: 50% 50%;
+      background-size: contain;
     }
-    .inventory .owned .tab-contents .tab-content.active {
-      display: block;
+    .inventory .owned .slot .type {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 12px;
+      height: 12px;
+      margin: 5px;
+      background-repeat: no-repeat;
+      background-position: 50% 50%;
+      background-size: contain;
     }
-      .inventory .owned .tab-contents .tab-content .item {
-        position: relative;
-        float: left;
-        width: 48px;
-        height: 48px;
-        box-shadow: 0 0 0 1px rgba(100, 100, 100, 0.1),
-                    1px 1px 3px 0 rgba(0, 0, 0, .6) inset;
-        background-color: rgba(0, 0, 0, .2);
-      }
-      .inventory .owned .tab-contents .tab-content .item:hover {
-        background-color: rgba(30, 30, 30, .2);
-      }
-        .inventory .owned .tab-contents .tab-content .item * {
-          pointer-events: none;
-        }
-        .inventory .owned .tab-contents .tab-content .item .icon {
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          margin: 5px;
-          background-repeat: no-repeat;
-          background-position: 50% 50%;
-          background-size: contain;
-        }
+  
 
 .inventory .status {
   height: 24px;

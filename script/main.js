@@ -38,7 +38,7 @@ function init() {
     });
     return;
   }
-  
+
   bindInputActions();
   
   AudioPlayer.init({

@@ -89,12 +89,14 @@ var LocalPlayer = (function LocalPlayer() {
   };
   
   LocalPlayer.prototype.pickupWeapon = function pickupWeapon(weapon) {
-    this.inventory.addWeapon(weapon);
-    
-    Notification.show(STATUS_TYPES.PICKUP_WEAPON, weapon);
-    
-    if (!this.equippedWeapon) {
-      this.equipWeapon(weapon);
+    if (this.inventory.addWeapon(weapon)) {
+      Notification.show(STATUS_TYPES.PICKUP_WEAPON, weapon);
+      
+      if (!this.equippedWeapon) {
+        this.equipWeapon(weapon);
+      }
+    } else {
+      Notification.show(STATUS_TYPES.INVENTORY_FULL, weapon);
     }
   };
   
@@ -136,11 +138,15 @@ var LocalPlayer = (function LocalPlayer() {
   };
 
   LocalPlayer.prototype.pickupPart = function pickupPart(part) {
-    if (!this.parts[part.type]) {
-      this.equipPart(part);
+    if (this.inventory.addPart(part)) {
+      Notification.show(STATUS_TYPES.PICKUP_PART, part);
+      
+      if (!this.parts[part.type]) {
+        this.equipPart(part);
+      }
+    } else {
+      Notification.show(STATUS_TYPES.INVENTORY_FULL, part);
     }
-    
-    this.inventory.addPart(part);
   };
   
   LocalPlayer.prototype.equipPart = function equipPart(part) {

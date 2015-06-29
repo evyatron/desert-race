@@ -1,6 +1,7 @@
 var STATUS_TYPES = {
   'PICKUP_WEAPON': 'weapon',
-  'PICKUP_PART': 'part'
+  'PICKUP_PART': 'part',
+  'INVENTORY_FULL': 'inventory-full'
 };
 
 var Notification = (function Notification() {
