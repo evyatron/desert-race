@@ -230,6 +230,22 @@ var InputManager = (function InputManager() {
       }
     }
   };
+  
+  InputManager.prototype.isRightClick = function isRightClick(button) {
+    if (typeof button !== 'number') {
+      button = button.button;
+    }
+    
+    return (button === 2);
+  };
+  
+  InputManager.prototype.isLeftClick = function isLeftClick(button) {
+    if (typeof button !== 'number') {
+      button = button.button;
+    }
+    
+    return (button === 0);
+  };
 
   return new InputManager();
 }());

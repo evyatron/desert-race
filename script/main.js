@@ -38,6 +38,8 @@ function init() {
     });
     return;
   }
+  
+  window.addEventListener('contextmenu', preventFunction);
 
   bindInputActions();
   

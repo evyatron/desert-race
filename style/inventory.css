@@ -166,6 +166,7 @@
       right: 0;
       bottom: 0;
       margin: 3px;
+      pointer-events: none;
       background-repeat: no-repeat;
       background-position: 50% 50%;
       background-size: contain;
@@ -177,6 +178,7 @@
       width: 12px;
       height: 12px;
       margin: 5px;
+      pointer-events: none;
       background-repeat: no-repeat;
       background-position: 50% 50%;
       background-size: contain;

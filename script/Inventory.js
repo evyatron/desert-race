@@ -47,13 +47,8 @@ var Inventory = (function Inventory() {
     this.currentTabId;
     
     this.numberOfWeaponSlots = 3;
-    this.weaponsHeld = [];
-    
-    this.weapons = [];
-    this.weaponsMap = {};
-    
-    this.partsMap = {};
-    this.parts = {};
+    this.weaponsHeld = []; //new Array(this.numberOfWeaponSlots);
+
     this.equippedParts = {};
     
     this.items = {};
@@ -69,30 +64,20 @@ var Inventory = (function Inventory() {
     this.player = options.player;
 
     for (var id in VEHICLE_PART_TYPES) {
-      this.parts[id] = [];
       this.equippedParts[id] = null;
     }
     
     this.createHTML();
   };
-  
-  Inventory.prototype.addPart = function addPart(part) {
-    var type = part.type;
-    
-    this.parts[type].push(part);
-    this.partsMap[part.id] = part;
 
-    return this.addItem(part);
-  };
-  
   Inventory.prototype.equipPart = function equipPart(part) {
     console.log('[Inventory] Equip part', part);
     
     var type = part.type;
-    
-    this.unequipType(type);
-    
+
     this.equippedParts[type] = part;
+    
+    this.removeItem(part);
     
     var elSlot = this.elVehicle.querySelector('.' + type.toLowerCase());
     if (elSlot) {
@@ -102,23 +87,20 @@ var Inventory = (function Inventory() {
     }
   };
   
-  Inventory.prototype.unequipType = function unequipType(type) {
-    var currentlyEquipped = this.equippedParts[type];
-    
-    if (currentlyEquipped) {
-      console.log('[Inventory] Unequip part', currentlyEquipped);
-      
-      this.equippedParts[type] = null;
-      //this.addItemToTab(type, currentlyEquipped);
+  Inventory.prototype.removeItem = function removeItem(itemToRemove) {
+    for (var i = 0, rows = this.grid.length; i < rows; i++) {
+      for (var j = 0, cols = this.grid[i].length; j < cols; j++) {
+        var item = this.grid[i][j].item;
+        if (item && item.id === itemToRemove.id) {
+          return this.grid[i][j].removeItem();
+        }
+      }
     }
     
-    return currentlyEquipped;
+    return null;
   };
   
   Inventory.prototype.addWeapon = function addWeapon(weapon) {
-    this.weapons.push(weapon);
-    this.weaponsMap[weapon.id] = weapon;
-    
     if (this.weaponsHeld.length < this.numberOfWeaponSlots) {
       this.weaponsHeld.push(weapon);
       this.updateHeldWeapons();
@@ -129,11 +111,10 @@ var Inventory = (function Inventory() {
   };
   
   Inventory.prototype.updateHeldWeapons = function updateHeldWeapons() {
-    var weapons = this.weaponsHeld,
-        html = '';
+    var html = '';
     
-    for (var i = 0, len = weapons.length;  i < len; i++) {
-      html += TEMPLATE_HELD_WEAPON.format(weapons[i]).format({
+    for (var i = 0, len = this.weaponsHeld.length;  i < len; i++) {
+      html += TEMPLATE_HELD_WEAPON.format(this.weaponsHeld[i]).format({
         'index': i,
         'key': InputManager.KEY_NAMES[InputManager.getActionKey('EquipWeapon' + i)] || ''
       });
@@ -183,21 +164,81 @@ var Inventory = (function Inventory() {
     this.player.equipWeapon(this.weaponsHeld[slot * 1]);
   };
   
+  Inventory.prototype.holdWeapon = function holdWeapon(weapon, index, slot) {
+    var weaponHeld = this.weaponsHeld[index],
+        autoEquip = weaponHeld && weaponHeld.isEquipped;
+    
+    if (weaponHeld && weaponHeld.isReloading) {
+      return false;
+    }
+    
+    this.weaponsHeld[index] = weapon;
+    
+    if (slot) {
+      slot.removeItem();
+      
+      if (weaponHeld) {
+        slot.setItem(weaponHeld);
+      }
+    }
+    
+    if (autoEquip) {
+      this.player.equipWeapon(weapon);
+    }
+    
+    return true;
+  };
+  
   Inventory.prototype.onClickOwned = function onClickOwned(e) {
     var elClicked = e.target,
         data = elClicked.dataset,
-        tabId = data.tabId,
-        id = data.id;
+        row = data.row,
+        col = data.col;
 
-    if (!id) {
+    if (!row || !col) {
       return;
     }
-
-    if (tabId === 'weapon') {
-      this.player.equipWeapon(this.weaponsMap[id]);
-    } else {
-      this.player.equipPart(this.partsMap[id]);
+    
+    var slot = this.grid[parseInt(row)][parseInt(col)];
+    
+    if (!slot) {
+      return;
     }
+    
+    if (!slot.item) {
+      return;
+    }
+    
+    if (InputManager.isRightClick(e)) {
+      if (slot.item instanceof Weapon) {
+        var weaponToHold = slot.item,
+            equippedWeapon = this.getEquippedWeapon();
+            
+        this.holdWeapon(weaponToHold, equippedWeapon.index, slot);
+      } else if (slot.item instanceof VehiclePart) {
+        var partToEquip = slot.removeItem(),
+            equippedPart = this.player.parts[partToEquip.type];
+        
+        if (equippedPart) {
+          slot.setItem(equippedPart);
+        }
+            
+        this.player.equipPart(partToEquip);
+      }
+    }
+  };
+  
+  Inventory.prototype.getEquippedWeapon = function getEquippedWeapon() {
+    for (var i = 0, len = this.weaponsHeld.length;  i < len; i++) {
+      if (this.weaponsHeld[i].isEquipped) {
+        return {
+          'weapon': this.weaponsHeld[i],
+          'index': i
+        };
+      }
+    }
+    
+    return null;
   };
   
   Inventory.prototype.createItemSlots = function createItemSlots() {
@@ -240,11 +281,9 @@ var Inventory = (function Inventory() {
 
     this.elShowBuiltVehicle = this.el.querySelector('.toggle-built');
 
+    this.elOwned.addEventListener('mouseup', this.onClickOwned.bind(this));
     addClick(this.elWeapons, this.onClickWeapons.bind(this));
-    
-    if (this.elShowBuiltVehicle) {
-      addHover(this.elShowBuiltVehicle, this.showBuiltVehicle.bind(this), this.hideBuiltVehicle.bind(this));
-    }
+    addHover(this.elShowBuiltVehicle, this.showBuiltVehicle.bind(this), this.hideBuiltVehicle.bind(this));
     
     this.elContainer.appendChild(this.el);
     
@@ -284,7 +323,7 @@ var Inventory = (function Inventory() {
         this.item = item;
         
         this.el.classList.remove('free');
-        this.el.title = this.item.id;
+        this.el.title = this.item.name || this.item.id;
         this.elImage.style.backgroundImage = 'url(' + item.iconSrc + ')';
         
         return true;
@@ -298,7 +337,7 @@ var Inventory = (function Inventory() {
         var item = this.item;
         this.item = null;
         
-        this.classList.add('free');
+        this.el.classList.add('free');
         this.el.title = '';
         this.elImage.style.backgroundImage = 'none';
         

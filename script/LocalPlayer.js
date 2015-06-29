@@ -138,7 +138,7 @@ var LocalPlayer = (function LocalPlayer() {
   };
 
   LocalPlayer.prototype.pickupPart = function pickupPart(part) {
-    if (this.inventory.addPart(part)) {
+    if (this.inventory.addItem(part)) {
       Notification.show(STATUS_TYPES.PICKUP_PART, part);
       
       if (!this.parts[part.type]) {
