@@ -299,13 +299,13 @@ var Engine = (function Engine() {
   
   Engine.prototype.init = function init(options) {
     var body = {
-          'top': 36,
-          'left': 42,
-          'right': 86,
-          'bottom': 116,
-          'width': 44,
-          'height': 80
-        };
+      'top': 36,
+      'left': 42,
+      'right': 86,
+      'bottom': 116,
+      'width': 44,
+      'height': 80
+    };
         
     this.colour = new Colour(options.colour || rand(50, 100));
     this.isFront = initBool(options.isFront, false);

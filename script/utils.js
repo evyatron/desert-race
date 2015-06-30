@@ -90,19 +90,17 @@ function addHover(elOrSelector, callbackOver, callbackOut) {
 
 var Benchmarker = (function Benchmarker() {
   function Benchmarker() {
-    this.timings = {};
+    this.timings = [];
     this.active = {};
   }
   
   Benchmarker.prototype.start = function start(id) {
-    this.timings[id] = {
+    this.active[id] = {
       'id': id,
       'startTime': Date.now(),
       'endTime': 0,
       'duration': 0
     };
-    
-    this.active[id] = true;
   };
   
   Benchmarker.prototype.end = function end(id) {
@@ -111,34 +109,40 @@ var Benchmarker = (function Benchmarker() {
       return;
     }
     
-    this.timings[id].endTime = Date.now();
-    this.timings[id].duration = this.timings[id].endTime - this.timings[id].startTime;
+    this.active[id].endTime = Date.now();
+    this.active[id].duration = this.active[id].endTime - this.active[id].startTime;
     
-    console.info('[Benchmarker]', id, ':', this.timings[id].duration, 'ms');
+    this.active[id].startTimeFormatted = this.formatTime(this.active[id].startTime);
+    this.active[id].endTimeFormatted = this.formatTime(this.active[id].endTime);
     
-    this.timings[id + '_' + Date.now()] = this.timings[id];
+    console.info('[Benchmarker]', id, ':', this.active[id].duration, 'ms');
     
-    delete this.timings[id];
+    this.timings.push(this.active[id]);
+    
     delete this.active[id];
   };
   
-  Benchmarker.prototype.printAll = function printAll(shouldSortByTime) {
-    var ids = Object.keys(this.timings);
+  Benchmarker.prototype.printAll = function printAll() {
+    var timings = this.timings.slice(0);
     
-    if (shouldSortByTime) {
-      ids.sort(function(a, b){ 
-        return this.timings[a].duration > this.timings[b].duration? -1 :
-               this.timings[a].duration < this.timings[b].duration? 1 :
-               0;
-      }.bind(this));
-    }
+    console.table(timings, ['id', 'duration', 'startTimeFormatted', 'endTimeFormatted']);
+  };
+  
+  Benchmarker.prototype.formatTime = function formatTime(time) {
+    var date = new Date(time),
+        milliseconds = date.getMilliseconds(),
+        seconds = date.getSeconds(),
+        minutes = date.getMinutes(),
+        hours = date.getHours(),
+        time = '';
     
-    console.group('Benchmarker');
-    for (var i = 0, len = ids.length, timing; i < len; i++) {
-      timing = this.timings[ids[i]];
-      console.log(timing.id, ':', timing.duration, 'ms');
-    }
-    console.groupEnd('Benchmarker');
+    (hours < 10) && (hours = '0' + hours);
+    (minutes < 10) && (minutes = '0' + minutes);
+    (seconds < 10) && (seconds = '0' + seconds);
+    (milliseconds < 10) && (milliseconds = '00' + milliseconds);
+    (milliseconds < 100) && (milliseconds = '0' + milliseconds);
+    
+    return hours + ':' + minutes + ':' + seconds + '.' + milliseconds;
   };
   
   return new Benchmarker();

@@ -1,5 +1,7 @@
 var Weapon = (function Weapon() {
   function Weapon(options) {
+    Benchmarker.start('Create Weapon [' + options.type + ']');
+    
     !options && (options = {});
 
     this.id = options.id || ('weapon_' + Date.now() + '_' + rand(0, 10000));
@@ -37,6 +39,8 @@ var Weapon = (function Weapon() {
     this.isEquipped = false;
     
     this.timeFromAction = 0;
+    
+    Benchmarker.end('Create Weapon [' + options.type + ']');
   }
 
   Weapon.prototype.update = function update(dt) {

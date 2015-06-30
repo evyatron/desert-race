@@ -32,6 +32,8 @@ var STATS = {
 var DEBUG = /DEBUG/.test(window.location.href);
 
 function init() {
+  Benchmarker.start('Init');
+  
   if (!l10n.isReady) {
     l10n.init({
       'onReady': init
@@ -64,7 +66,10 @@ function init() {
       'ASSAULT_RIFLE_FIRE': 'rifle/fire.wav',
       'ASSAULT_RIFLE_RELOAD': 'rifle/reload-bullet.wav',
       
-      'VOLUME_CHANGE': 'shotgun/empty.mp3'
+      'VOLUME_CHANGE': 'shotgun/empty.mp3',
+      'INVENTORY_PICKUP': 'ui/inventory-pickup.mp3',
+      'INVENTORY_DROP': 'ui/inventory-pickup.mp3',
+      'INVENTORY_EQUIP': 'ui/inventory-drop.mp3'
     }
   });
   
@@ -107,13 +112,15 @@ function init() {
   scene.addSprite(roadSprite1);
   scene.addSprite(roadSprite2);
   scene.addSprite(player);
+  
+  Benchmarker.end('Init');
 
-  createRoad(function onRoadCreated() {
-    //AudioPlayer.loop(AudioPlayer.ENGINE);
-    scene.start();
-    
-    addDefaultLoadout();
-  });
+  createRoad();
+  
+  //AudioPlayer.loop(AudioPlayer.ENGINE);
+  scene.start();
+  
+  addDefaultLoadout();
 }
 
 function addDefaultLoadout() {
@@ -164,6 +171,9 @@ function addDefaultLoadout() {
   player.pickupPart(new Engine());
   player.pickupPart(new Engine());
   player.pickupPart(new Engine());
+  player.pickupPart(new VanityWings());
+  player.pickupPart(new VanityWings());
+  player.pickupPart(new VanityWings());
   
   Benchmarker.end('Default Loadout');
 }
@@ -397,7 +407,9 @@ function createRoad(callback) {
       image = new Image(),
       w = roadSprite1.width,
       h = roadSprite1.height,
-      spread = 0.8;
+      spread = 0.8,
+      imageData = context.getImageData(0, 0, w, h),
+      data = imageData.data;
 
   canvas.width = w;
   canvas.height = h;
@@ -406,15 +418,17 @@ function createRoad(callback) {
   context.fillStyle = 'rgba(161, 144, 111, 1)';
   context.fillRect(0, 0, w, h);
 
-  // add noise
-  for (var i = 0; i < w; i++) {
-    for (var j = 0; j < h; j++) {
-      if (Math.random() > spread) {
-        context.fillStyle = 'rgba(118, 106, 95, ' + randF(0.1, 0.2)  + ')';
-        context.fillRect(i, j, 1, 1);
-      }
+  // Fill with noise
+  for (var i = 0, len = data.length; i < len; i += 4) {
+    if (Math.random() > spread) {
+      data[i] = 118;
+      data[i + 1] = 106;
+      data[i + 2] = 95;
+      data[i + 3] = rand(25, 50);
     }
   }
+  
+  context.putImageData(imageData, 0, 0);
 
   // fade out both sides
   context.globalCompositeOperation = 'destination-in';
@@ -434,10 +448,6 @@ function createRoad(callback) {
   roadSprite2.position = new Victor(scene.width / 2, -scene.height / 2);
   
   Benchmarker.end('Create Road');
-  
-  if (callback) {
-    callback();
-  }
 }
 
 /* main scene - the actual game */

@@ -34,6 +34,7 @@ var Inventory = (function Inventory() {
   
     
   var SLOT_SIZE = 48;
+  var CLICK_TO_DROP_THRESHOLD = 120;
     
   function Inventory(options) {
     this.elContainer;
@@ -210,6 +211,8 @@ var Inventory = (function Inventory() {
   };
   
   Inventory.prototype.holdItem = function holdItem(slot, item, e) {
+    AudioPlayer.play(AudioPlayer.INVENTORY_PICKUP);
+    
     this.slotTakenFrom = slot;
     this.itemBeingMoved = item || slot.removeItem();
     this.elMovingItem = document.createElement('div');
@@ -225,31 +228,48 @@ var Inventory = (function Inventory() {
   };
   
   Inventory.prototype.dropHeldItem = function dropHeldItem(e) {
-    if (Date.now() - this.timePickedUpToHold < 100) {
+    if (InputManager.isRightClick(e)) {
+      return;
+    }
+    
+    if (Date.now() - this.timePickedUpToHold < CLICK_TO_DROP_THRESHOLD) {
       return;
     }
     
     window.removeEventListener('mouseup', this.dropHeldItem_bound);
     
     var targetSlot = this.getMouseEventSlot(e),
-        itemToPickupAfterDrop = null;
+        slotToDrop = null;
 
     if (this.itemBeingMoved) {
       if (targetSlot) {
-        itemToPickupAfterDrop = targetSlot.removeItem();
-        targetSlot.setItem(this.itemBeingMoved);
-      } else {
-        if (this.slotTakenFrom && this.slotTakenFrom.isFree()) {
-          this.slotTakenFrom.setItem(this.itemBeingMoved);
-        } else {
-          var nextFreeSlot = this.getNextFreeSlot();
-          if (nextFreeSlot) {
-            nextFreeSlot.setItem(this.itemBeingMoved);
+        var itemInDropSlot = targetSlot.removeItem();
+        slotToDrop = targetSlot;
+
+        if (itemInDropSlot) {
+          if (this.slotTakenFrom.isFree()) {
+            this.slotTakenFrom.setItem(itemInDropSlot);
+          } else {
+            var nextFreeSlot = this.getNextFreeSlot();
+            if (nextFreeSlot) {
+              nextFreeSlot.setItem(itemInDropSlot);
+            }
           }
         }
+      } else {
+        if (this.slotTakenFrom && this.slotTakenFrom.isFree()) {
+          slotToDrop = this.slotTakenFrom;
+        } else {
+          slotToDrop = this.getNextFreeSlot();
+        }
+      }
+      
+      if (slotToDrop) {
+        AudioPlayer.play(AudioPlayer.INVENTORY_DROP);
+        slotToDrop.setItem(this.itemBeingMoved);
       }
     }
-      
+    
     if (this.elMovingItem) {
       this.elMovingItem.parentNode.removeChild(this.elMovingItem);
     }
@@ -257,10 +277,6 @@ var Inventory = (function Inventory() {
     this.itemBeingMoved = null;
     this.slotTakenFrom = null;
     this.elMovingItem = null;
-    
-    if (itemToPickupAfterDrop) {
-      this.holdItem(null, itemToPickupAfterDrop, e);
-    }
   };
     
   Inventory.prototype.getMouseEventSlot = function getMouseEventSlot(e) {
@@ -281,8 +297,10 @@ var Inventory = (function Inventory() {
       return;
     }
     
-    if (!this.itemBeingMoved) {
+    if (!this.itemBeingMoved && slot.item) {
       if (InputManager.isRightClick(e)) {
+        AudioPlayer.play(AudioPlayer.INVENTORY_EQUIP);
+        
         if (slot.item instanceof Weapon) {
           var weaponToHold = slot.item,
               equippedWeapon = this.getEquippedWeapon();
@@ -319,12 +337,7 @@ var Inventory = (function Inventory() {
       this.currentHoverSlot.el.classList.remove('hover');
       this.currentHoverSlot = null;
     }
-    
-    if (!this.itemBeingMoved) {
-      //window.removeEventListener('mouseup', this.moveMovedItem_bound);
-      return;
-    }
-    
+
     if (this.elMovingItem) {
       this.elMovingItem.style.transform = 'translate(' + e.pageX + 'px, ' + e.pageY + 'px)';
     }
