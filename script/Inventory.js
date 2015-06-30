@@ -63,8 +63,7 @@ var Inventory = (function Inventory() {
     this.elContainer = options.elContainer;
     this.player = options.player;
     
-    this.dropMovedItem_bound = this.dropMovedItem.bind(this);
-    this.moveMovedItem_bound = this.moveMovedItem.bind(this);
+    this.dropHeldItem_bound = this.dropHeldItem.bind(this);
 
     for (var id in VEHICLE_PART_TYPES) {
       this.equippedParts[id] = null;
@@ -207,10 +206,10 @@ var Inventory = (function Inventory() {
       return;
     }
     
-    this.pickupToMove(slot, null, e);
+    this.holdItem(slot, null, e);
   };
   
-  Inventory.prototype.pickupToMove = function pickupToMove(slot, item, e) {
+  Inventory.prototype.holdItem = function holdItem(slot, item, e) {
     this.slotTakenFrom = slot;
     this.itemBeingMoved = item || slot.removeItem();
     this.elMovingItem = document.createElement('div');
@@ -220,18 +219,17 @@ var Inventory = (function Inventory() {
     this.elMovingItem.style.transform = 'translate(' + e.pageX + 'px, ' + e.pageY + 'px)';
     document.body.appendChild(this.elMovingItem);
     
-    window.addEventListener('mouseup', this.dropMovedItem_bound);
-    window.addEventListener('mousemove', this.moveMovedItem_bound);
+    window.addEventListener('mouseup', this.dropHeldItem_bound);
     
-    this.timePickedUp = Date.now();
+    this.timePickedUpToHold = Date.now();
   };
   
-  Inventory.prototype.dropMovedItem = function dropMovedItem(e) {
-    if (Date.now() - this.timePickedUp < 200) {
+  Inventory.prototype.dropHeldItem = function dropHeldItem(e) {
+    if (Date.now() - this.timePickedUpToHold < 100) {
       return;
     }
     
-    window.removeEventListener('mouseup', this.dropMovedItem_bound);
+    window.removeEventListener('mouseup', this.dropHeldItem_bound);
     
     var targetSlot = this.getMouseEventSlot(e),
         itemToPickupAfterDrop = null;
@@ -261,18 +259,7 @@ var Inventory = (function Inventory() {
     this.elMovingItem = null;
     
     if (itemToPickupAfterDrop) {
-      this.pickupToMove(null, itemToPickupAfterDrop, e);
-    }
-  };
-  
-  Inventory.prototype.moveMovedItem = function moveMovedItem(e) {
-    if (!this.itemBeingMoved) {
-      window.removeEventListener('mouseup', this.moveMovedItem_bound);
-      return;
-    }
-    
-    if (this.elMovingItem) {
-      this.elMovingItem.style.transform = 'translate(' + e.pageX + 'px, ' + e.pageY + 'px)';
+      this.holdItem(null, itemToPickupAfterDrop, e);
     }
   };
     
@@ -312,6 +299,34 @@ var Inventory = (function Inventory() {
           this.player.equipPart(partToEquip);
         }
       }
+    }
+  };
+  
+  Inventory.prototype.onOwnedMouseMove = function onOwnedMouseMove(e) {
+    var slot = this.getMouseEventSlot(e);
+    if (slot) {
+      if (slot !== this.currentHoverSlot) {
+        if (this.currentHoverSlot) {
+          this.currentHoverSlot.el.classList.remove('hover');
+          this.currentHoverSlot = null;
+        }
+        
+        slot.el.classList.add('hover');
+        
+        this.currentHoverSlot = slot;
+      }
+    } else if (this.currentHoverSlot) {
+      this.currentHoverSlot.el.classList.remove('hover');
+      this.currentHoverSlot = null;
+    }
+    
+    if (!this.itemBeingMoved) {
+      //window.removeEventListener('mouseup', this.moveMovedItem_bound);
+      return;
+    }
+    
+    if (this.elMovingItem) {
+      this.elMovingItem.style.transform = 'translate(' + e.pageX + 'px, ' + e.pageY + 'px)';
     }
   };
   
@@ -368,6 +383,7 @@ var Inventory = (function Inventory() {
 
     this.elShowBuiltVehicle = this.el.querySelector('.toggle-built');
 
+    window.addEventListener('mousemove', this.onOwnedMouseMove.bind(this));
     this.elOwned.addEventListener('mousedown', this.onOwnedMouseDown.bind(this));
     this.elOwned.addEventListener('mouseup', this.onOwnedMouseUp.bind(this));
     addClick(this.elWeapons, this.onClickWeapons.bind(this));
