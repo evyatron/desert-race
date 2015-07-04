@@ -356,11 +356,14 @@ var Engine = (function Engine() {
 
     context.fillStyle = this.colour;
     
-    // Engine
-    context.fillRect(left, top, width, height - 1);
+    // Engine Main
+    context.fillRect(left, top, width, height);
     
-    context.fillRect(midY - width / 4, this.isFront? body.bottom - height / 3 - 5 : body.top,
-                     width / 2, height / 3);
+    // Engine Secondary
+    context.fillRect(midY - width / 4,
+                    this.isFront? body.bottom - height / 3 - 5 : body.top,
+                    width / 2,
+                    height / 3);
     
     // Exhaust
     context.fillRect(x - this.exhaustWidth / 2,
@@ -377,10 +380,15 @@ var Engine = (function Engine() {
       context.fillRect(midY - pipeWidth / 2, top + height,
                        pipeWidth, body.bottom - height / 3 - (top + height));
     } else {
+      // Exausht Pipes
       context.fillRect(pipeLeft, pipeTop,
                        pipeWidth, body.bottom - this.exhaustHeight / 2 - pipeTop);
-      context.fillRect(midY - pipeWidth / 2, body.top + height / 3 - 3,
-                       pipeWidth, top - body.top + height / 3);
+                       
+      // Engine Pipes
+      context.fillRect(midY - pipeWidth / 2,
+                       body.top + height / 3,
+                       pipeWidth,
+                       top - body.top - height / 3);
     }
     
     
@@ -448,11 +456,13 @@ var Wheels = (function Wheels() {
     
     var elCanvas = document.createElement('canvas'),
         context = elCanvas.getContext('2d'),
-        w = this.width,
-        h = this.height,
         wheelWidth = this.wheelWidth,
         wheelHeight = this.wheelHeight,
-        frameSize = this.frameThickness;
+        halfWheelWidth = Math.round(wheelWidth / 2),
+        halfWheelHeight = Math.round(wheelHeight / 2),
+        frameSize = this.frameThickness,
+        halfFrameSize = Math.round(frameSize / 2),
+        i, top;
     
     var body = {
       'top': 36,
@@ -468,23 +478,23 @@ var Wheels = (function Wheels() {
     
     context.fillStyle = this.colour;
     
-    context.fillRect(body.left + body.width / 2 - frameSize / 2, body.top,
+    context.fillRect(body.left + Math.round(body.width / 2) - halfFrameSize, body.top,
                      frameSize, body.height);
    
-    for (var i = 0; i < this.numberOfFrontWheels; i++) {
-      var top = body.top + i * (wheelHeight + this.wheelMargin) + wheelHeight / 2;
+    for (i = 0, top; i < this.numberOfFrontWheels; i++) {
+      top = body.top + i * (wheelHeight + this.wheelMargin) + halfWheelHeight;
       
       context.fillRect(body.left, top, body.width, frameSize);
-      context.fillRect(body.left - wheelWidth / 2, top - wheelHeight / 2 + frameSize / 2, wheelWidth, wheelHeight);
-      context.fillRect(body.right - wheelWidth / 2, top - wheelHeight / 2 + frameSize / 2, wheelWidth, wheelHeight);
+      context.fillRect(body.left - halfWheelWidth, top - halfWheelHeight + halfFrameSize, wheelWidth, wheelHeight);
+      context.fillRect(body.right - halfWheelWidth, top - halfWheelHeight + halfFrameSize, wheelWidth, wheelHeight);
     }
     
-    for (var i = 0; i < this.numberOfBackWheels; i++) {
-      var top = body.bottom - frameSize - i * (wheelHeight + this.wheelMargin) - wheelHeight / 2;
+    for (i = 0, top; i < this.numberOfBackWheels; i++) {
+      top = body.bottom - frameSize - i * (wheelHeight + this.wheelMargin) - halfWheelHeight;
       
       context.fillRect(body.left, top, body.width, frameSize);
-      context.fillRect(body.left - wheelWidth / 2, top - wheelHeight / 2 + frameSize / 2, wheelWidth, wheelHeight);
-      context.fillRect(body.right - wheelWidth / 2, top - wheelHeight / 2 + frameSize / 2, wheelWidth, wheelHeight);
+      context.fillRect(body.left - halfWheelWidth, top - halfWheelHeight + halfFrameSize, wheelWidth, wheelHeight);
+      context.fillRect(body.right - halfWheelWidth, top - halfWheelHeight + halfFrameSize, wheelWidth, wheelHeight);
     }
 
     var src = elCanvas.toDataURL();

@@ -100,6 +100,19 @@
         }
       }
       
+      function createPart(type) {
+        var objs = {
+          'ENGINE': Engine,
+          'TURRET': Turret,
+          'WHEELS': Wheels,
+          'VANITY': VanityWings
+        };
+        
+        if (objs[type]) {
+          createItemElement(new objs[type]());
+        }
+      }
+      
       function createItemElement(item) {
         var elList = getList(item.type),
             el = document.createElement('li');
@@ -134,7 +147,7 @@
         var html = '';
         for (var k in VEHICLE_PART_TYPES) {
           html += '<li class="' + k + '">' +
-                    '<h2>' + k + '</h2>' +
+                    '<h2 onclick="createPart(\'' + k + '\');">' + k + '</h2>' +
                     '<ul class="parts"></ul>' +
                   '</li>';
         }
