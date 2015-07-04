@@ -409,6 +409,7 @@ var Wheels = (function Wheels() {
     
     // Design
     this.colour = null;
+    this.wheelsColour = null;
     this.frameThickness = 0;
     this.wheelWidth = 0;
     this.wheelHeight = 0;
@@ -440,7 +441,8 @@ var Wheels = (function Wheels() {
     this.boundingBoxWidth = body.width;
     this.boundingBoxHeight = body.height;
     
-    this.colour = new Colour(options.colour || rand(0, 50));
+    this.colour = new Colour(options.colour || rand(10, 50));
+    this.wheelsColour = new Colour(this.colour).brighten(1);
     this.frameThickness = Math.round(initNumber(options.frameThickness, rand(2, 6)));
     this.wheelWidth = Math.round(initNumber(options.wheelWidth, rand(this.frameThickness + 2, this.frameThickness * 2)));
     this.wheelHeight = Math.round(initNumber(options.wheelHeight, this.wheelWidth * 1.5));
@@ -476,23 +478,37 @@ var Wheels = (function Wheels() {
     elCanvas.width = this.width;
     elCanvas.height = this.height;
     
+    
     context.fillStyle = this.colour;
     
+    // Main Frame
     context.fillRect(body.left + Math.round(body.width / 2) - halfFrameSize, body.top,
                      frameSize, body.height);
    
+    // Front Wheels Frame
     for (i = 0, top; i < this.numberOfFrontWheels; i++) {
       top = body.top + i * (wheelHeight + this.wheelMargin) + halfWheelHeight;
-      
       context.fillRect(body.left, top, body.width, frameSize);
+    }
+
+    // Back Wheels Frame
+    for (i = 0, top; i < this.numberOfBackWheels; i++) {
+      top = body.bottom - frameSize - i * (wheelHeight + this.wheelMargin) - halfWheelHeight;
+      context.fillRect(body.left, top, body.width, frameSize);
+    }
+    
+    context.fillStyle = this.wheelsColour;
+    
+    // Front Wheels
+    for (i = 0, top; i < this.numberOfFrontWheels; i++) {
+      top = body.top + i * (wheelHeight + this.wheelMargin) + halfWheelHeight;
       context.fillRect(body.left - halfWheelWidth, top - halfWheelHeight + halfFrameSize, wheelWidth, wheelHeight);
       context.fillRect(body.right - halfWheelWidth, top - halfWheelHeight + halfFrameSize, wheelWidth, wheelHeight);
     }
     
+    // Back Wheels
     for (i = 0, top; i < this.numberOfBackWheels; i++) {
       top = body.bottom - frameSize - i * (wheelHeight + this.wheelMargin) - halfWheelHeight;
-      
-      context.fillRect(body.left, top, body.width, frameSize);
       context.fillRect(body.left - halfWheelWidth, top - halfWheelHeight + halfFrameSize, wheelWidth, wheelHeight);
       context.fillRect(body.right - halfWheelWidth, top - halfWheelHeight + halfFrameSize, wheelWidth, wheelHeight);
     }
