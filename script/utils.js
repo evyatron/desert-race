@@ -59,7 +59,7 @@ function getJSON(url, callback) {
   var request = new XMLHttpRequest();
   request.open('GET', url, true);
   request.responseType = 'json';
-  request.onload = function() {
+  request.onload = function onRequestLoad() {
     callback(request.response);
   };
   request.send();

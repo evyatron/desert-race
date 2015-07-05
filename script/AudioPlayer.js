@@ -87,7 +87,7 @@ var AudioPlayer = (function AudioPlayer() {
     request.open('GET', this.baseSrc + '/' + sound.src, true);
     request.responseType = 'arraybuffer';
 
-    request.onload = function() {
+    request.onload = function onAudioLoad() {
       var audioData = request.response;
       
       this.audioContext.decodeAudioData(audioData, function onAudioDecode(buffer) {

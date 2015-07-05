@@ -10,8 +10,6 @@ var LocalPlayer = (function LocalPlayer() {
     this.wasWeaponInCooldown = false;
     this.weaponAimAngle = 0;
     this.weaponRecoil = 0;
-    
-    this.currentWorldSpeed = 0;
 
     this.onFireWeapon;
 

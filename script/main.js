@@ -1,11 +1,13 @@
 var scene,
     player,
-    roadSprite1,
-    roadSprite2,
-
+    worldSpeed,
+    
     timeToSpawnRoadThing = 0,
-    timeToSpawnSideThing = 0,
-    things = [];
+    things = [],
+    
+    roadTexture,
+    roadTextureY = 0,
+    roadTextureX = 0;
 
 var PLAYER_MOVEMENT_SPEED = 100,
     NORMAL_WORLD_SPEED = 400,
@@ -83,34 +85,20 @@ function init() {
     'onAfterUpdate': onAfterGameLoopUpdate,
     'onResize': onSceneResize
   });
+  
+  worldSpeed = NORMAL_WORLD_SPEED;
 
   player = new LocalPlayer({
-    'worldSpeed': NORMAL_WORLD_SPEED,
+    //'worldSpeed': NORMAL_WORLD_SPEED,
     'boostFactor': BOOST_FACTOR,
     'obstacleFactor': OBSTACLE_FACTOR,
     'speed': PLAYER_MOVEMENT_SPEED,
     'position': new Victor(scene.width / 2, scene.height - 125)
   });
 
-  roadSprite1 = new Sprite({
-    'width': ROAD_WIDTH,
-    'height': scene.height,
-    'zIndex': 0,
-    'friction': 1,
-    'position': new Victor(scene.width / 2, scene.height / 2)
-  });
-  roadSprite2 = new Sprite({
-    'width': ROAD_WIDTH,
-    'height': scene.height,
-    'zIndex': 0,
-    'friction': 1,
-    'position': new Victor(scene.width / 2, -scene.height / 2)
-  });
   
   InputManager.listenTo(scene);
 
-  scene.addSprite(roadSprite1);
-  scene.addSprite(roadSprite2);
   scene.addSprite(player);
   
   Benchmarker.end('Init');
@@ -131,7 +119,7 @@ function addDefaultLoadout() {
   player.inventory.addWeapon(new Shotgun());
   player.equipHeldWeapon(0);
   
-  window.setTimeout(function() {
+  window.setTimeout(function pickupDemoWeapon() {
     player.pickupWeapon(new AssaultRifle());
   }, 500);
   
@@ -247,8 +235,10 @@ function onBeforeGameLoopUpdate(dt) {
 }
 
 function onAfterGameLoopUpdate(dt, context) {
-  var worldSpeed = player.currentWorldSpeed,
-      i, len, sprite;
+  var i, len, sprite, velocity;
+  
+  // Keep player in centre of screen
+  player.position.x = scene.width / 2;
   
   if (player.didHit) {
     if (player.equippedWeapon) {
@@ -278,31 +268,21 @@ function onAfterGameLoopUpdate(dt, context) {
       worldSpeed = lerp(worldSpeed, player.worldSpeed, dt * 3);
     }
   }
-
-  // make sure everything always moves at the correct speed
-  if (worldSpeed !== player.currentWorldSpeed) {
-    player.currentWorldSpeed = worldSpeed;
-
-    roadSprite1.velocity.y = worldSpeed;
-    roadSprite2.velocity.y = worldSpeed;
-    for (i = 0, len = things.length; i < len; i++) {
-      things[i].velocity.y = worldSpeed;
-    }
+  
+  
+  // Always move all sprites according to the player
+  player.currentWorldSpeed = worldSpeed;
+  for (i = 0, len = things.length; i < len; i++) {
+    velocity = things[i].velocity;
+    velocity.x = -player.velocity.x;
+    velocity.y = worldSpeed;
   }
-
-  var playerHDist = ROAD_MARGIN,
-      playerVDist = PLAYER_DISTANCE_FROM_BOTTOM;
-
+  
   // bound player to scene margins
-  if (player.left - playerHDist < ROAD_LEFT) {
-    player.position.x = ROAD_LEFT + player.halfWidth + playerHDist;
-  } else if (player.right + playerHDist > ROAD_RIGHT) {
-    player.position.x = ROAD_RIGHT - player.halfWidth - playerHDist;
-  }
-  if (player.bottom + playerVDist > scene.height) {
-    player.position.y = scene.height - player.halfHeight - playerVDist;
-  } else if (player.top < playerVDist) {
-    player.position.y = player.halfHeight + playerVDist;
+  if (player.bottom + PLAYER_DISTANCE_FROM_BOTTOM > scene.height) {
+    player.position.y = scene.height - player.halfHeight - PLAYER_DISTANCE_FROM_BOTTOM;
+  } else if (player.top < scene.height / 2) {
+    player.position.y = player.halfHeight + scene.height / 2;
   }
 
   // check if road things have reached the bottom
@@ -315,24 +295,21 @@ function onAfterGameLoopUpdate(dt, context) {
     }
   }
 
-  // wrap road textures around each other
-  if (roadSprite1.top > scene.height) {
-    roadSprite1.position.y = roadSprite2.top - roadSprite2.halfHeight;
-  }
-  if (roadSprite2.top > scene.height) {
-    roadSprite2.position.y = roadSprite1.top - roadSprite1.halfHeight;
-  }
-
   // respawn new road thing
   timeToSpawnRoadThing -= dt;
   if (timeToSpawnRoadThing <= 0) {
     spawnRoadThing();
   }
-
-  // respawn new side road thing
-  timeToSpawnSideThing -= dt;
-  if (timeToSpawnSideThing <= 0) {
-    spawnSideThing();
+  
+  // Move road texture to repeat
+  if (roadTexture) {
+    roadTextureY += (worldSpeed * dt);
+    roadTextureX += -player.velocity.x * dt;
+    scene.context.save();
+    scene.context.translate(roadTextureX, roadTextureY);
+    scene.context.fillStyle = roadTexture;
+    scene.context.fillRect(-roadTextureX, -roadTextureY, scene.width, scene.height);
+    scene.context.restore();
   }
 
   // update distance
@@ -342,12 +319,14 @@ function onAfterGameLoopUpdate(dt, context) {
 
   STATS.distance += distance;
 
+  /*
   document.getElementById('stats').innerHTML = 
     //'<li>' + STATS.turboTime.toFixed(2) + '<span>s</span> turbo time</li>' +
     //'<li>' + STATS.timeOverThings.toFixed(2) + '<span>s</span> bump time</li>' +
     //'<li>' + STATS.roadThingsHit + ' <span>hit</span></li>' +
     //'<li>' + Math.round(kmph) + '<span>km/h</span></li>' +
     '<li>' + numberWithCommas(Math.round(STATS.distance)) + '<span>m</span></li>';
+  */
 }
 
 function spawnRoadThing() {
@@ -358,62 +337,39 @@ function spawnRoadThing() {
         'type': 'roadThing',
         'width': width,
         'height': height,
-        'colour': 'rgba(0, 0, 0, .1)',
         'zIndex': 50,
         'friction': 1,
         'doesCollide': true,
-        'velocity': new Victor(0, speed),
-        'position': new Victor(rand(ROAD_LEFT + width / 2 + ROAD_MARGIN, ROAD_RIGHT - width / 2 - ROAD_MARGIN), -height)
-      });
-
-  things.push(thing);
-  scene.addSprite(thing);
-
-  timeToSpawnRoadThing = scene.height / speed * randF(0.15, 0.4);
-}
-
-function spawnSideThing() {
-  var width = rand(10, 100),
-      height = width,
-      speed = Math.max(player.currentWorldSpeed || player.worldSpeed, player.worldSpeed / 2),
-      isOnLeftSide = Math.random() > 0.5,
-      x = isOnLeftSide? rand(width / 2, ROAD_LEFT - width / 2) : rand(ROAD_RIGHT + width / 2, scene.width - width / 2),
-      thing = new Sprite({
-        'type': 'sideThing',
-        'width': width,
-        'height': height,
-        'zIndex': 50,
-        'friction': 1,
         'image': 'images/rock' + rand(1, NUMBER_OF_ROCK_IMAGES) + '.png',
         'velocity': new Victor(0, speed),
-        'position': new Victor(x, -height)
+        'position': new Victor(rand(-scene.width / 2 + width / 2, scene.width * 3 / 2 - width / 2), -height)
       });
 
   things.push(thing);
   scene.addSprite(thing);
 
-  timeToSpawnSideThing = scene.height / speed * randF(0.2, 0.7);
+  timeToSpawnRoadThing = scene.height / speed * randF(0, 0.1);
 }
 
-function createRoad(callback) {
+function createRoad() {
   if (!scene) {
     return;
   }
   
   Benchmarker.start('Create Road');
-
+  
   var canvas = document.createElement('canvas'),
       context = canvas.getContext('2d'),
       image = new Image(),
-      w = roadSprite1.width,
-      h = roadSprite1.height,
       spread = 0.8,
+      w = scene.width / 4,
+      h = scene.height / 4,
       imageData = context.getImageData(0, 0, w, h),
       data = imageData.data;
 
   canvas.width = w;
   canvas.height = h;
-
+  
   // road background
   context.fillStyle = 'rgba(161, 144, 111, 1)';
   context.fillRect(0, 0, w, h);
@@ -429,23 +385,10 @@ function createRoad(callback) {
   }
   
   context.putImageData(imageData, 0, 0);
-
-  // fade out both sides
-  context.globalCompositeOperation = 'destination-in';
-  var gradient = context.createLinearGradient(0, 0, w, 0);
-  gradient.addColorStop(0, 'rgba(255, 255, 255, 0)');
-  gradient.addColorStop(ROAD_GRADIENT_FALLOFF, 'rgba(255, 255, 255, 1)');
-  gradient.addColorStop(1 - ROAD_GRADIENT_FALLOFF, 'rgba(255, 255, 255, 1)');
-  gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-  context.fillStyle = gradient;
-  context.fillRect(0, 0, w, h);
-
+  
   image.src = canvas.toDataURL();
-
-  roadSprite1.image = image;
-  roadSprite2.image = image;
-  roadSprite1.position = new Victor(scene.width / 2, scene.height / 2);
-  roadSprite2.position = new Victor(scene.width / 2, -scene.height / 2);
+  
+  roadTexture = scene.context.createPattern(image, 'repeat');
   
   Benchmarker.end('Create Road');
 }
