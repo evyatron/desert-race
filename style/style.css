@@ -145,7 +145,7 @@ canvas {
   
 .menu.right {
   right: 0;
-  atransform: translateX(95%);
+  transform: translateX(95%);
 }
   .menu.right .content {
     top: 50%;

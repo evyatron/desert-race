@@ -5,9 +5,7 @@ var scene,
     timeToSpawnRoadThing = 0,
     things = [],
     
-    roadTexture,
-    roadTextureY = 0,
-    roadTextureX = 0;
+    roadTexture;
 
 var PLAYER_MOVEMENT_SPEED = 100,
     NORMAL_WORLD_SPEED = 400,
@@ -81,8 +79,8 @@ function init() {
   
   scene = new Scene({
     'elParent': document.getElementById('game'),
-    'onBeforeUpdate': onBeforeGameLoopUpdate,
-    'onAfterUpdate': onAfterGameLoopUpdate,
+    'onBeforeUpdate': onPreUpdate,
+    'onAfterUpdate': onPostUpdate,
     'onResize': onSceneResize
   });
   
@@ -186,32 +184,8 @@ function onSceneResize(width, height) {
   createRoad();
 }
 
-function onBeforeGameLoopUpdate(dt) {
-  /*
-    Move world around instead of the player itself
-    
-  var velocityX = 0,
-      velocityY = 0;
-      
-  if (InputManager.actionsActive.MoveRight) {
-    velocityX += player.speed;
-  }
-  if (InputManager.actionsActive.MoveLeft) {
-    velocityX -= player.speed;
-  }
-  if (InputManager.actionsActive.MoveUp) {
-    velocityY -= player.speed;
-  }
-  if (InputManager.actionsActive.MoveDown) {
-    velocityY += player.speed;
-  }
-  
-  for (var i = 0, len = things.length; i < len; i++) {
-    things[i].velocity.x = -velocityX;
-  }
-  roadSprite1.velocity.x = -velocityX;
-  roadSprite2.velocity.x = -velocityX;
-  */
+function onPreUpdate(dt) {
+  player.velocity.y = -NORMAL_WORLD_SPEED;
   
   if (InputManager.actionsActive.MoveRight) {
     player.velocity.x += player.speed;
@@ -234,12 +208,10 @@ function onBeforeGameLoopUpdate(dt) {
   }
 }
 
-function onAfterGameLoopUpdate(dt, context) {
-  var i, len, sprite, velocity;
+function onPostUpdate(dt, context) {
+  var i, len, sprite;
   
-  // Keep player in centre of screen
-  player.position.x = scene.width / 2;
-  
+  /*
   if (player.didHit) {
     if (player.equippedWeapon) {
       player.equippedWeapon.increaseSpread(dt);
@@ -268,22 +240,21 @@ function onAfterGameLoopUpdate(dt, context) {
       worldSpeed = lerp(worldSpeed, player.worldSpeed, dt * 3);
     }
   }
+  */
   
   
   // Always move all sprites according to the player
   player.currentWorldSpeed = worldSpeed;
-  for (i = 0, len = things.length; i < len; i++) {
-    velocity = things[i].velocity;
-    velocity.x = -player.velocity.x;
-    velocity.y = worldSpeed;
-  }
+
   
   // bound player to scene margins
+  /*
   if (player.bottom + PLAYER_DISTANCE_FROM_BOTTOM > scene.height) {
     player.position.y = scene.height - player.halfHeight - PLAYER_DISTANCE_FROM_BOTTOM;
   } else if (player.top < scene.height / 2) {
     player.position.y = player.halfHeight + scene.height / 2;
   }
+  */
 
   // check if road things have reached the bottom
   for (i = 0, len = things.length; i < len; i++) {
@@ -303,12 +274,10 @@ function onAfterGameLoopUpdate(dt, context) {
   
   // Move road texture to repeat
   if (roadTexture) {
-    roadTextureY += (worldSpeed * dt);
-    roadTextureX += -player.velocity.x * dt;
     scene.context.save();
-    scene.context.translate(roadTextureX, roadTextureY);
+    scene.context.translate(scene.offset.x, scene.offset.y);
     scene.context.fillStyle = roadTexture;
-    scene.context.fillRect(-roadTextureX, -roadTextureY, scene.width, scene.height);
+    scene.context.fillRect(-scene.offset.x, -scene.offset.y, scene.width, scene.height);
     scene.context.restore();
   }
 
@@ -333,16 +302,17 @@ function spawnRoadThing() {
   var width = rand(10, 50),
       height = rand(width, width * 2),
       speed = Math.max(player.currentWorldSpeed || player.worldSpeed, player.worldSpeed / 2),
+      x = rand(0, scene.width) - scene.offset.x,
+      y = -scene.offset.y,
       thing = new Sprite({
         'type': 'roadThing',
         'width': width,
         'height': height,
         'zIndex': 50,
-        'friction': 1,
         'doesCollide': true,
+        'destroyWhenOutOfBounds': true,
         'image': 'images/rock' + rand(1, NUMBER_OF_ROCK_IMAGES) + '.png',
-        'velocity': new Victor(0, speed),
-        'position': new Victor(rand(-scene.width / 2 + width / 2, scene.width * 3 / 2 - width / 2), -height)
+        'position': new Victor(x, y)
       });
 
   things.push(thing);
@@ -401,6 +371,7 @@ var Scene = (function Scene() {
     this.context;
     this.width;
     this.height;
+    this.offset;
 
     this.lastUpdate;
 
@@ -422,6 +393,7 @@ var Scene = (function Scene() {
     this.onAfterUpdate = options.onAfterUpdate;
     this.onAfterDraw = options.onAfterDraw;
     this.onResize = options.onResize;
+    this.offset = options.offset || new Victor();
 
     this.createHTML();
 

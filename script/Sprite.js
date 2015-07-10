@@ -7,6 +7,7 @@ var Sprite = (function Sprite() {
 
     this.colour;
     this.image;
+    this.isStationary;
 
     this.friction;
     this.speed;
@@ -15,7 +16,9 @@ var Sprite = (function Sprite() {
     this.halfWidth;
     this.halfHeight;
     this.position;
+    this.drawPosition;
     this.velocity;
+    this.acceleration;
     
     this.hitBounds = {
       'width': 0,
@@ -50,9 +53,12 @@ var Sprite = (function Sprite() {
     this.height = options.height || 0;
     this.speed = options.speed || 0;
     this.position = options.position || new Victor(0, 0);
+    this.drawPosition = this.position.clone();
     this.velocity = options.velocity || new Victor(0, 0);
+    this.acceleration = new Victor(0, 0);
     this.doesCollide = Boolean(options.doesCollide);
     this.destroyWhenOutOfBounds = Boolean(options.destroyWhenOutOfBounds);
+    this.isStationary =  Boolean(options.isStationary);
 
     this.halfWidth = this.width / 2;
     this.halfHeight = this.height / 2;
@@ -86,33 +92,44 @@ var Sprite = (function Sprite() {
     var x = this.position.x,
         y = this.position.y;
 
-    if (this.velocity.x !== 0 || this.velocity.y !== 0) {
-      this.position.x = x = x + this.velocity.x * dt;
-      this.position.y = y = y + this.velocity.y * dt;
+    if (Math.abs(this.velocity.x) < 1) {
+      this.velocity.x = 0;
+    }
+    if (Math.abs(this.velocity.y) < 1) {
+      this.velocity.y = 0;
+    }
+    
+    this.acceleration.x = this.velocity.x * dt;
+    this.acceleration.y = this.velocity.y * dt;
+
+    if (this.acceleration.x !== 0 || this.acceleration.y !== 0) {
+      this.position.x = x = x + this.acceleration.x;
+      this.position.y = y = y +  this.acceleration.y;
 
       this.velocity.x *= this.friction;
       this.velocity.y *= this.friction;
-
-      if (Math.abs(this.velocity.x) < 1) {
-        this.velocity.x = 0;
-      }
-      if (Math.abs(this.velocity.y) < 1) {
-        this.velocity.y = 0;
-      }
     }
+    
+    if (this.id === 'localPlayer') {
+      this.scene.offset.y -= this.acceleration.y;
+      this.scene.offset.x -= this.acceleration.x;
+    }
+    
+    this.drawPosition.x = x + this.scene.offset.x;
+    this.drawPosition.y = y + this.scene.offset.y;
 
-    this.top = y - this.halfHeight;
-    this.bottom = y + this.halfHeight;
-    this.left = x - this.halfWidth;
-    this.right = x + this.halfWidth;
+    this.top = this.drawPosition.y - this.halfHeight;
+    this.bottom = this.drawPosition.y + this.halfHeight;
+    this.left = this.drawPosition.x - this.halfWidth;
+    this.right = this.drawPosition.x + this.halfWidth;
 
     var halfWidth = this.hitBounds.width / 2,
         halfHeight = this.hitBounds.height / 2;
         
-    this.hitBounds.top = y - halfHeight;
-    this.hitBounds.bottom = y + halfHeight;
-    this.hitBounds.left = x - halfWidth;
-    this.hitBounds.right = x + halfWidth;
+    this.hitBounds.top = this.drawPosition.y - halfHeight;
+    this.hitBounds.bottom = this.drawPosition.y + halfHeight;
+    this.hitBounds.left = this.drawPosition.x - halfWidth;
+    this.hitBounds.right = this.drawPosition.x + halfWidth;
 
     if (this.destroyWhenOutOfBounds) {
       if (this.right < 0 || this.left > this.scene.width ||
@@ -152,8 +169,8 @@ var Sprite = (function Sprite() {
   Sprite.prototype.draw = function draw(context) {
     var w = this.width,
         h = this.height,
-        x = this.position.x - w / 2,
-        y = this.position.y - h / 2;
+        x = this.drawPosition.x - w / 2,
+        y = this.drawPosition.y - h / 2;
 
     if (this.image) {
       context.drawImage(this.image, x, y, w, h);

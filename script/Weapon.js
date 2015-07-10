@@ -126,13 +126,11 @@ var Weapon = (function Weapon() {
         spread = this.spreadAngle / 2 * (1 + player.weaponRecoil);
 
     for (var i = 0; i < this.bulletsPerShot; i++) {
-      var bullet = new Bullet({
+      player.scene.addSprite(new Bullet({
         'angle': angleDeg + rand(-spread, spread),
         'speed': this.bulletSpeed,
         'position': playerPosition.clone()
-      });
-
-      player.scene.addSprite(bullet);
+      }));
     }
   };
 

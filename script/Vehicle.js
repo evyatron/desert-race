@@ -33,8 +33,8 @@ var Vehicle = (function Vehicle() {
   };
   
   Vehicle.prototype.draw = function draw(context) {
-    var x = Math.round(this.position.x - this.width / 2),
-        y = Math.round(this.position.y - this.height / 2);
+    var x = Math.round(this.drawPosition.x - this.width / 2),
+        y = Math.round(this.drawPosition.y - this.height / 2);
     
     for (var i = 0, len = VEHICLE_PARTS_ORDER.length, part; i < len; i++) {
       part = this.parts[VEHICLE_PARTS_ORDER[i]];

@@ -51,7 +51,7 @@ var LocalPlayer = (function LocalPlayer() {
 
   LocalPlayer.prototype.update = function update(dt) {
     Sprite.prototype.update.apply(this, arguments);
-    
+
     // Save current weapon aim angle
     this.weaponAimAngle = this.getWeaponAngle();
 
@@ -156,8 +156,8 @@ var LocalPlayer = (function LocalPlayer() {
   LocalPlayer.prototype.draw = function draw(context) {
     Vehicle.prototype.draw.apply(this, arguments);
 
-    var x = this.position.x,
-        y = this.position.y,
+    var x = this.drawPosition.x,
+        y = this.drawPosition.y,
         weapon = this.equippedWeapon;
 
     if (DEBUG) {
