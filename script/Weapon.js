@@ -30,7 +30,7 @@ var Weapon = (function Weapon() {
     this.iconSrc = options.iconSrc || '';
 
     this.reloadTime = 0;
-    this.cooldownTime = 0;23
+    this.cooldownTime = 0;
     this.isInCooldown = false;
     this.canFire = true;
     this.isEmpty = this.inMagazine <= 0;
@@ -39,6 +39,8 @@ var Weapon = (function Weapon() {
     this.isEquipped = false;
     
     this.timeFromAction = 0;
+    
+    this.tooltipStats = ['bulletSpeed', 'damagePerBullet', 'bulletsPerShot', 'ammo', 'magazineSize', 'timeToReload'];
     
     Benchmarker.end('Create Weapon [' + options.type + ']');
   }
@@ -172,6 +174,27 @@ var Weapon = (function Weapon() {
 
   Weapon.prototype.setEquipped = function setEquipped(isEquipped) {
     this.isEquipped = isEquipped;
+  };
+
+  Weapon.prototype.getTooltipStats = function getTooltipStats() {
+    return {
+      'bulletSpeed': this.bulletSpeed,
+      'damage': this.damagePerBullet * this.bulletsPerShot,
+      'magazineSize': this.magazineSize,
+      'reloadTime': this.timeToReload * (this.magazineSize / this.bulletsPerReload) + 's',
+      'recoil': this.recoil + 's'
+    };
+  };
+
+  Weapon.prototype.getTooltip = function getTooltip() {
+    var tooltip = '',
+        stats = this.getTooltipStats();
+      
+    for (var id in stats) {
+      tooltip += id + ': ' + stats[id] + "\n";
+    }
+    
+    return tooltip;
   };
 
   return Weapon;

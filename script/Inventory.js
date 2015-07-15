@@ -22,6 +22,14 @@ var Inventory = (function Inventory() {
 
   var TEMPLATE_PART_SLOT = '<div class="part {{id}}" title="{{name}}" style="z-index: {{order}};"></div>';
   
+  var TEMPLATE_TOOLTIP_STAT = '<tr>' +
+                                '<td>{{name}}</td>' +
+                                '<td>{{value}}</td>' +
+                              '</tr>';
+  
+  var TEMPLATE_TOOLTIP_WEAPON = '<div class="name">{{item.name}}</div>' +
+                                '<table class="stats">{{statsHTML}}</table>';
+  
   var VEHICLE_PART_NAMES = {};
   VEHICLE_PART_NAMES[VEHICLE_PART_TYPES.ENGINE] = 'Engine';
   VEHICLE_PART_NAMES[VEHICLE_PART_TYPES.WHEELS] = 'Wheels';
@@ -327,19 +335,65 @@ var Inventory = (function Inventory() {
         if (this.currentHoverSlot) {
           this.currentHoverSlot.el.classList.remove('hover');
           this.currentHoverSlot = null;
+          this.hideItemTooltip();
         }
         
         slot.el.classList.add('hover');
+        
+        this.showItemTooltip(slot);
         
         this.currentHoverSlot = slot;
       }
     } else if (this.currentHoverSlot) {
       this.currentHoverSlot.el.classList.remove('hover');
       this.currentHoverSlot = null;
+      this.hideItemTooltip();
     }
 
     if (this.elMovingItem) {
       this.elMovingItem.style.transform = 'translate(' + e.pageX + 'px, ' + e.pageY + 'px)';
+    }
+  };
+  
+  Inventory.prototype.showItemTooltip = function showItemTooltip(slot) {
+    var item = slot.item;
+    
+    if (!item) {
+      return;
+    }
+    
+    var stats = item.getTooltipStats? item.getTooltipStats() : {},
+        statsHTML = '',
+        html = '';
+    
+    for (var id in stats) {
+      statsHTML += TEMPLATE_TOOLTIP_STAT.format({
+        'name': id,
+        'value': stats[id]
+      });
+    }
+        
+    html = TEMPLATE_TOOLTIP_WEAPON.format({
+      'item': item,
+      'statsHTML': statsHTML
+    });
+    
+    if (!this.elTooltip) {
+      this.elTooltip = document.createElement('div');
+      this.elTooltip.className = 'inventory-tooltip';
+      document.body.appendChild(this.elTooltip);
+    }
+    
+    this.elTooltip.innerHTML = html;
+    
+    var slotBounds = slot.el.getBoundingClientRect();
+    this.elTooltip.style.transform = 'translate(' + (slotBounds.left - this.elTooltip.offsetWidth) + 'px, ' + slotBounds.top + 'px)';
+  };
+  
+  Inventory.prototype.hideItemTooltip = function hideItemTooltip() {
+    if (this.elTooltip) {
+      this.elTooltip.parentNode.removeChild(this.elTooltip);
+      this.elTooltip = null;
     }
   };
   
@@ -438,9 +492,8 @@ var Inventory = (function Inventory() {
     InventorySlot.prototype.setItem = function setItem(item) {
       if (this.isFree()) {
         this.item = item;
-        
+
         this.el.classList.remove('free');
-        this.el.title = this.item.name || this.item.id;
         this.elImage.style.backgroundImage = 'url(' + item.iconSrc + ')';
         
         return true;
@@ -455,7 +508,6 @@ var Inventory = (function Inventory() {
         this.item = null;
         
         this.el.classList.add('free');
-        this.el.title = '';
         this.elImage.style.backgroundImage = 'none';
         
         return item;
@@ -467,7 +519,7 @@ var Inventory = (function Inventory() {
     InventorySlot.prototype.isFree = function isFree() {
       return !this.item;
     };
-
+    
     return InventorySlot;
   }());
   

@@ -205,3 +205,16 @@
   line-height: 24px;
   text-align: center;
 }
+
+.inventory-tooltip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 200px;
+  height: 300px;
+  padding: 10px;
+  color: #fff;
+  background: #000;
+  z-index: 100;
+  pointer-events: none;
+}
