@@ -128,6 +128,7 @@ var Weapon = (function Weapon() {
     for (var i = 0; i < this.bulletsPerShot; i++) {
       player.scene.addSprite(new Bullet({
         'angle': angleDeg + rand(-spread, spread),
+        'velocity': player.velocity.clone(),
         'speed': this.bulletSpeed,
         'position': playerPosition.clone()
       }));
@@ -316,9 +317,13 @@ var Bullet = (function Bullet() {
     options.friction = 1;
     options.destroyWhenOutOfBounds = true;
 
-    options.velocity = new Victor(options.speed, 0);
-    options.velocity.rotateDeg(options.angle || 0);
+    if (!options.velocity) {
+      options.velocity = new Victor();
+    }
     
+    var speedRotated = new Victor(options.speed, 0).rotateDeg(options.angle || 0);
+    options.velocity.add(speedRotated);
+
     options.zIndex = 500;
 
     Sprite.apply(this, arguments);

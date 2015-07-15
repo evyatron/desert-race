@@ -188,7 +188,7 @@ var LocalPlayer = (function LocalPlayer() {
   };
   
   LocalPlayer.prototype.getWeaponAngle = function getWeaponAngle() {
-    var angle = InputManager.mousePosition.clone().subtract(this.position).angle(),
+    var angle = InputManager.mousePosition.clone().subtract(this.drawPosition).angle(),
         maxAngle = this.weaponRotation;
     
     var centre = 90 * Math.PI / 180,

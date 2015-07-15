@@ -110,6 +110,10 @@ var Sprite = (function Sprite() {
       this.velocity.y *= this.friction;
     }
     
+    if (this instanceof Bullet) {
+      document.getElementById('stats').innerHTML = '<li>' + this.velocity + '</li>';
+    }
+    
     if (this.id === 'localPlayer') {
       this.scene.offset.y -= this.acceleration.y;
       this.scene.offset.x -= this.acceleration.x;
