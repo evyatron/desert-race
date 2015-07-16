@@ -13,14 +13,15 @@ var Inventory = (function Inventory() {
                             '0' +
                            '</div>';
 
-  var TEMPLATE_HELD_WEAPON = '<div title="{{name}}" data-slot="{{index}}" '+
+  var TEMPLATE_HELD_WEAPON = '<div data-slot="{{index}}" ' +
+                              'data-tooltip-item-id="{{id}}" ' +
                               'class="held-weapon weapon {{type}} equipped-{{isEquipped}}">' +
                               '<b class="key">{{key}}</b>' +
                              '</div>';
                              
   var TEMPLATE_GRID_ITEM = '<div class="icon" style="background-image: url({{iconSrc}});"></div>';
 
-  var TEMPLATE_PART_SLOT = '<div class="part {{id}}" title="{{name}}" style="z-index: {{order}};"></div>';
+  var TEMPLATE_PART_SLOT = '<div class="part {{id}}" style="z-index: {{order}};"></div>';
   
   var TEMPLATE_TOOLTIP_STAT = '<tr>' +
                                 '<td>{{name}}</td>' +
@@ -28,6 +29,7 @@ var Inventory = (function Inventory() {
                               '</tr>';
   
   var TEMPLATE_TOOLTIP_WEAPON = '<div class="name">{{item.name}}</div>' +
+                                '<div class="image" style="background-image: url({{item.iconSrc}});"></div>' +
                                 '<table class="stats">{{statsHTML}}</table>';
   
   var VEHICLE_PART_NAMES = {};
@@ -56,7 +58,7 @@ var Inventory = (function Inventory() {
     this.currentTabId;
     
     this.numberOfWeaponSlots = 3;
-    this.weaponsHeld = []; //new Array(this.numberOfWeaponSlots);
+    this.weaponsHeld = [];
 
     this.equippedParts = {};
     
@@ -79,6 +81,12 @@ var Inventory = (function Inventory() {
     }
     
     this.createHTML();
+    
+    window.addEventListener('mousemove', this.onMouseMove.bind(this));
+    this.elOwned.addEventListener('mousedown', this.onOwnedMouseDown.bind(this));
+    this.elOwned.addEventListener('mouseup', this.onOwnedMouseUp.bind(this));
+    addClick(this.elWeapons, this.onClickWeapons.bind(this));
+    addHover(this.elShowBuiltVehicle, this.showBuiltVehicle.bind(this), this.hideBuiltVehicle.bind(this));
   };
 
   Inventory.prototype.equipPart = function equipPart(part) {
@@ -93,6 +101,7 @@ var Inventory = (function Inventory() {
     var elSlot = this.elVehicle.querySelector('.' + type.toLowerCase());
     if (elSlot) {
       if (part.src) {
+        elSlot.dataset.tooltipItemId = part.id;
         elSlot.style.backgroundImage = 'url(' + part.src + ')';
       }
     }
@@ -309,6 +318,8 @@ var Inventory = (function Inventory() {
       if (InputManager.isRightClick(e)) {
         AudioPlayer.play(AudioPlayer.INVENTORY_EQUIP);
         
+        this.hideItemTooltip();
+        
         if (slot.item instanceof Weapon) {
           var weaponToHold = slot.item,
               equippedWeapon = this.getEquippedWeapon();
@@ -328,37 +339,62 @@ var Inventory = (function Inventory() {
     }
   };
   
-  Inventory.prototype.onOwnedMouseMove = function onOwnedMouseMove(e) {
+  Inventory.prototype.onMouseMove = function onMouseMove(e) {
     var slot = this.getMouseEventSlot(e);
     if (slot) {
       if (slot !== this.currentHoverSlot) {
         if (this.currentHoverSlot) {
           this.currentHoverSlot.el.classList.remove('hover');
           this.currentHoverSlot = null;
-          this.hideItemTooltip();
         }
         
         slot.el.classList.add('hover');
         
-        this.showItemTooltip(slot);
+        this.showItemTooltip(slot.item, slot.el);
         
         this.currentHoverSlot = slot;
       }
     } else if (this.currentHoverSlot) {
       this.currentHoverSlot.el.classList.remove('hover');
       this.currentHoverSlot = null;
-      this.hideItemTooltip();
     }
 
     if (this.elMovingItem) {
       this.elMovingItem.style.transform = 'translate(' + e.pageX + 'px, ' + e.pageY + 'px)';
     }
+    
+    var tooltipItemId = e.target.dataset.tooltipItemId;
+    if (tooltipItemId) {
+      var didFindItem = false;
+      
+      for (var i = 0, len = this.weaponsHeld.length; i < len; i++) {
+        if (this.weaponsHeld[i].id === tooltipItemId) {
+          this.showItemTooltip(this.weaponsHeld[i], e.target);
+          didFindItem = true;
+          break;
+        }
+      }
+      
+      if (!didFindItem) {
+        for (var type in this.equippedParts) {
+          if (this.equippedParts[type] && this.equippedParts[type].id === tooltipItemId) {
+            var elSlot = this.elVehicle.querySelector('.' + type.toLowerCase());
+            
+            this.showItemTooltip(this.equippedParts[type], elSlot);
+            didFindItem = true;
+            break;
+          }
+        }
+      }
+    }
   };
   
-  Inventory.prototype.showItemTooltip = function showItemTooltip(slot) {
-    var item = slot.item;
-    
+  Inventory.prototype.showItemTooltip = function showItemTooltip(item, elOrigin) {
     if (!item) {
+      return;
+    }
+    
+    if (this.elTooltip && this.elTooltip.dataset.id === item.id) {
       return;
     }
     
@@ -368,7 +404,7 @@ var Inventory = (function Inventory() {
     
     for (var id in stats) {
       statsHTML += TEMPLATE_TOOLTIP_STAT.format({
-        'name': id,
+        'name':  l10n.get('inv-tooltip-' + id),
         'value': stats[id]
       });
     }
@@ -385,9 +421,19 @@ var Inventory = (function Inventory() {
     }
     
     this.elTooltip.innerHTML = html;
+    this.elTooltip.dataset.id = item.id;
     
-    var slotBounds = slot.el.getBoundingClientRect();
-    this.elTooltip.style.transform = 'translate(' + (slotBounds.left - this.elTooltip.offsetWidth) + 'px, ' + slotBounds.top + 'px)';
+    var bounds = elOrigin.getBoundingClientRect(),
+        x = Math.round(bounds.left - this.elTooltip.offsetWidth),
+        y = Math.round(bounds.top);
+
+    this.elTooltip.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
+    
+    var self = this;
+    elOrigin.addEventListener('mouseout', function onMouseOut(e) {
+      e.target.removeEventListener('mouseout', onMouseOut);
+      self.hideItemTooltip();
+    });
   };
   
   Inventory.prototype.hideItemTooltip = function hideItemTooltip() {
@@ -450,12 +496,6 @@ var Inventory = (function Inventory() {
 
     this.elShowBuiltVehicle = this.el.querySelector('.toggle-built');
 
-    window.addEventListener('mousemove', this.onOwnedMouseMove.bind(this));
-    this.elOwned.addEventListener('mousedown', this.onOwnedMouseDown.bind(this));
-    this.elOwned.addEventListener('mouseup', this.onOwnedMouseUp.bind(this));
-    addClick(this.elWeapons, this.onClickWeapons.bind(this));
-    addHover(this.elShowBuiltVehicle, this.showBuiltVehicle.bind(this), this.hideBuiltVehicle.bind(this));
-    
     this.elContainer.appendChild(this.el);
     
     this.createItemSlots();

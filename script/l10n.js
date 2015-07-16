@@ -23,7 +23,13 @@ var l10n = (function l10n() {
   };
   
   l10n.prototype.get = function get(key) {
-    return this.strings[key] || null;
+    var value = this.strings[key];
+    
+    if (value === undefined) {
+      console.warn('[l10n] Trying to get invalid key', key);
+    }
+    
+    return value;
   };
   
   return new l10n();

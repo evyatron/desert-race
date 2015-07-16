@@ -5,6 +5,12 @@
   
   "inventory-show-built": "Construct",
   
+  "inv-tooltip-bulletSpeed": "Bullet Speed",
+  "inv-tooltip-damage": "Damage",
+  "inv-tooltip-magazineSize": "Magazine Size",
+  "inv-tooltip-reloadTime": "Reload Time",
+  "inv-tooltip-recoil": "Recoil",
+  
   "action-MoveUp": "Move Up",
   "action-MoveDown": "Move Down",
   "action-MoveLeft": "Move Left",
