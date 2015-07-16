@@ -21,7 +21,7 @@ var Inventory = (function Inventory() {
                              
   var TEMPLATE_GRID_ITEM = '<div class="icon" style="background-image: url({{iconSrc}});"></div>';
 
-  var TEMPLATE_PART_SLOT = '<div class="part {{id}}" style="z-index: {{order}};"></div>';
+  var TEMPLATE_PART_SLOT = '<div class="part {{id}}" data-type="{{id}}" style="z-index: {{order}};"></div>';
   
   var TEMPLATE_TOOLTIP_STAT = '<tr>' +
                                 '<td>{{name}}</td>' +
@@ -304,7 +304,7 @@ var Inventory = (function Inventory() {
       return null;
     }
     
-    return this.grid[parseInt(data.row)][parseInt(data.col)];
+    return this.grid[parseInt(data.row, 10)][parseInt(data.col, 10)];
   };
   
   Inventory.prototype.onOwnedMouseUp = function onOwnedMouseUp(e) {
@@ -484,6 +484,39 @@ var Inventory = (function Inventory() {
     }
     
     this.elVehicle.innerHTML = htmlEquippedParts;
+
+    // DEBUG - auto pick up items for testing
+    this.elVehicle.addEventListener('click', function onClick(e) {
+      var typeId = e.target.dataset.type;
+      if (typeId) {
+        switch (typeId.toUpperCase()) {
+          case VEHICLE_PART_TYPES.ENGINE:
+            player.pickupPart(new Engine());
+            break;
+          case VEHICLE_PART_TYPES.WHEELS:
+            player.pickupPart(new Wheels());
+            break;
+          case VEHICLE_PART_TYPES.BODY:
+            console.warn('IMPLEMENT BODY PART');
+            break;
+          case VEHICLE_PART_TYPES.FRONT:
+            console.warn('IMPLEMENT FRONT PART');
+            break;
+          case VEHICLE_PART_TYPES.REAR:
+            console.warn('IMPLEMENT REAR PART');
+            break;
+          case VEHICLE_PART_TYPES.TURRET:
+            player.pickupPart(new Turret());
+            break;
+          case VEHICLE_PART_TYPES.VANITY:
+            player.pickupPart(new VanityWings());
+            break;
+          case VEHICLE_PART_TYPES.MORALE:
+            console.warn('IMPLEMENT MORALE PART');
+            break;
+        }
+      }
+    });
   };
 
   Inventory.prototype.createHTML = function createHTML() {
