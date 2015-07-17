@@ -146,7 +146,8 @@ var VehiclePart = (function VehiclePart() {
     !options && (options = {});
 
     this.id = '';
-    this.type;
+    this.name = '';
+    this.type= '';
     this.src = '';
     this.image = null;
     
@@ -163,6 +164,7 @@ var VehiclePart = (function VehiclePart() {
     
     this.type = options.type;
     this.id = options.id || (this.type + '_' + Date.now() + '_' + rand(0, 10000));
+    this.name = options.name || l10n.get('part-type-' + this.type);
     
     this.width = initNumber(options.width, 128);
     this.height = initNumber(options.height, 128);
@@ -544,6 +546,8 @@ var VanityWings = (function VanityWings() {
     this.areWingsEqual;
     this.leftWing;
     this.rightWing;
+    
+    options.name = 'Vanity Wings';
     
     Vanity.call(this, options);
   }

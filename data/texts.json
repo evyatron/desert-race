@@ -11,6 +11,15 @@
   "inv-tooltip-reloadTime": "Reload Time",
   "inv-tooltip-recoil": "Recoil",
   
+  "part-type-engine": "Engine",
+  "part-type-wheels": "Wheels",
+  "part-type-body": "Body",
+  "part-type-front": "Front",
+  "part-type-rear": "Rear",
+  "part-type-turret": "Turret",
+  "part-type-vanity": "Vanity",
+  "part-type-morale": "Morale",
+  
   "action-MoveUp": "Move Up",
   "action-MoveDown": "Move Down",
   "action-MoveLeft": "Move Left",

@@ -165,6 +165,7 @@ var InputManager = (function InputManager() {
     scene.el.addEventListener('mousedown', this.onMouseDown.bind(this));
     window.addEventListener('mousemove', this.onMouseMove.bind(this));
     window.addEventListener('mouseup', this.onMouseUp.bind(this));
+    window.addEventListener('mousewheel', this.onMouseWheel.bind(this));
     
     scene.el.addEventListener('contextmenu', function onContextMenu(e) {
       e.preventDefault();
@@ -198,6 +199,15 @@ var InputManager = (function InputManager() {
     var key = this.mouseButtonKeys[e.button];
     if (typeof key === 'number') {
       this.setKeyStatus(key, false);
+    }
+  };
+
+  InputManager.prototype.onMouseWheel = function onMouseWheel(e) {
+    var isUp = e.deltaY < 0,
+        listeners = (this.listeners['mousewheel'] || {})[isUp? 'up' : 'down'] || []; 
+
+    for (var i = 0, len = listeners.length; i < len; i++) {
+      listeners[i](e);
     }
   };
 

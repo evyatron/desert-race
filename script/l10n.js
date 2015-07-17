@@ -23,7 +23,7 @@ var l10n = (function l10n() {
   };
   
   l10n.prototype.get = function get(key) {
-    var value = this.strings[key];
+    var value = this.strings[key] || this.strings[key.toLowerCase()];
     
     if (value === undefined) {
       console.warn('[l10n] Trying to get invalid key', key);

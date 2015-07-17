@@ -10,6 +10,8 @@ var LocalPlayer = (function LocalPlayer() {
     this.wasWeaponInCooldown = false;
     this.weaponAimAngle = 0;
     this.weaponRecoil = 0;
+    
+    this.weaponEquippedIndex;
 
     this.onFireWeapon;
 
@@ -47,6 +49,8 @@ var LocalPlayer = (function LocalPlayer() {
     InputManager.on('pressed', 'EquipWeapon0', this.equipHeldWeapon.bind(this, 0));
     InputManager.on('pressed', 'EquipWeapon1', this.equipHeldWeapon.bind(this, 1));
     InputManager.on('pressed', 'EquipWeapon2', this.equipHeldWeapon.bind(this, 2));
+    InputManager.on('mousewheel', 'up', this.equipPreviousWeapon.bind(this));
+    InputManager.on('mousewheel', 'down', this.equipNextWeapon.bind(this));
   };
 
   LocalPlayer.prototype.update = function update(dt) {
@@ -99,8 +103,29 @@ var LocalPlayer = (function LocalPlayer() {
   };
   
   LocalPlayer.prototype.equipHeldWeapon = function equipHeldWeapon(index) {
-    var weapon = this.inventory.weaponsHeld[index];
-    this.equipWeapon(weapon);
+    if (this.weaponEquippedIndex !== index) {
+      if (this.equipWeapon(this.inventory.weaponsHeld[index])) {
+        this.weaponEquippedIndex = index;
+      }
+    }
+  };
+  
+  LocalPlayer.prototype.equipPreviousWeapon = function equipPreviousWeapon() {
+    var index = this.weaponEquippedIndex - 1;
+    if (index < 0) {
+      index = this.inventory.weaponsHeld.length - 1;
+    }
+    
+    this.equipHeldWeapon(index);
+  };
+  
+  LocalPlayer.prototype.equipNextWeapon = function equipNextWeapon() {
+    var index = this.weaponEquippedIndex + 1;
+    if (index > this.inventory.weaponsHeld.length - 1) {
+      index = 0;
+    }
+    
+    this.equipHeldWeapon(index);
   };
   
   LocalPlayer.prototype.equipWeapon = function equipWeapon(weapon) {
