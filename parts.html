@@ -80,13 +80,14 @@
     <ul id="part-types"></ul>
     
     <script>
-      var ignoredStats = ['id', 'type', 'src', 'image', 'iconSrc', 'height', 'width', 'ready'];
+      var defaultBody,
+          ignoredStats = ['id', 'type', 'src', 'image', 'iconSrc', 'height', 'width', 'ready'];
       
       function init() {
         createTypes();
         
-        var defaultBody = new Body({
-          'frameWidth': 10,
+        defaultBody = new Body({
+          'frameWidth': 40,
           'frameHeight': 90
         });
         
@@ -125,7 +126,9 @@
         };
         
         if (objs[type]) {
-          createItemElement(new objs[type]());
+          createItemElement(new objs[type]({
+            'body': defaultBody
+          }));
         }
       }
       
