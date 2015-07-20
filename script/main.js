@@ -121,12 +121,11 @@ function addDefaultLoadout() {
     player.pickupWeapon(new AssaultRifle());
   }, 500);
   
+  var defaultBody = new Body({
+    
+  });
   
-  player.pickupPart(new VehiclePart({
-    'type': VEHICLE_PART_TYPES.BODY,
-    'src': 'images/parts/default/body.png',
-    'obstacleFactor': 0.1
-  }));
+  player.pickupPart(defaultBody);
   player.pickupPart(new Engine({
     'speed': 400,
     'boostFactor': 2
@@ -142,7 +141,6 @@ function addDefaultLoadout() {
     'borderSize': 2,
     'weaponRotation': 45
   }));
-  
   player.pickupPart(new VanityWings({
     'colour': 'rgba(55, 120, 120, 1)',
     'span': 20,

@@ -85,23 +85,39 @@
       function init() {
         createTypes();
         
-      
+        var defaultBody = new Body({
+          'frameWidth': 10,
+          'frameHeight': 90
+        });
+        
         for (var i = 0; i < 20; i++) {
-          createItemElement(new Turret());
+          createItemElement(new Body());
         }
         for (var i = 0; i < 20; i++) {
-          createItemElement(new Engine());
+          createItemElement(new Turret({
+            'body': defaultBody
+          }));
         }
         for (var i = 0; i < 20; i++) {
-          createItemElement(new Wheels());
+          createItemElement(new Engine({
+            'body': defaultBody
+          }));
         }
         for (var i = 0; i < 20; i++) {
-          createItemElement(new VanityWings());
+          createItemElement(new Wheels({
+            'body': defaultBody
+          }));
+        }
+        for (var i = 0; i < 20; i++) {
+          createItemElement(new VanityWings({
+            'body': defaultBody
+          }));
         }
       }
       
       function createPart(type) {
         var objs = {
+          'BODY': Body,
           'ENGINE': Engine,
           'TURRET': Turret,
           'WHEELS': Wheels,
@@ -159,8 +175,9 @@
         return document.querySelector('#part-types .' + type + ' .parts');
       }
       
-      init();
-      
+      l10n.init({
+        'onReady': init
+      });
     </script>
   </body>
 </html>

@@ -55,6 +55,8 @@ var Vehicle = (function Vehicle() {
     
     this.parts[type] = part;
     
+    part.setBody(this.parts[VEHICLE_PART_TYPES.BODY]);
+    
     this.updateStats();
     
     return currentPart;
@@ -151,8 +153,10 @@ var VehiclePart = (function VehiclePart() {
     this.src = '';
     this.image = null;
     
-    this.width = 128;
-    this.height = 128;
+    this.width = initNumber(options.width, 128);
+    this.height = initNumber(options.width, 128);
+    
+    this.body = null;
 
     this.ready = true;
     
@@ -165,11 +169,17 @@ var VehiclePart = (function VehiclePart() {
     this.type = options.type;
     this.id = options.id || (this.type + '_' + Date.now() + '_' + rand(0, 10000));
     this.name = options.name || l10n.get('part-type-' + this.type);
-    
-    this.width = initNumber(options.width, 128);
-    this.height = initNumber(options.height, 128);
-    
-    this.setImage(options.src);
+
+    if (options.body) {
+      this.setBody(options.body);
+    } else if (this.type === VEHICLE_PART_TYPES.BODY) {
+      this.setImage();
+    }
+  };
+  
+  VehiclePart.prototype.setBody = function setBody(body) {
+    this.body = body;
+    this.setImage();
   };
 
   VehiclePart.prototype.setImage = function setImage(src) {
@@ -191,6 +201,61 @@ var VehiclePart = (function VehiclePart() {
   };
 
   return VehiclePart;
+}());
+
+var Body = (function Body() {
+  function Body(options) {
+    !options && (options = {});
+    
+    options.type = VEHICLE_PART_TYPES.BODY;
+    
+    // Design
+    this.bounds = {};
+    this.colour = null;
+    
+    // Gameplay
+    
+    VehiclePart.call(this, options);
+  }
+
+  Body.prototype = Object.create(VehiclePart.prototype);
+  Body.prototype.constructor = Body;
+  
+  Body.prototype.init = function init(options) {
+    this.colour = new Colour(options.colour || rand(10, 60));
+    this.bounds.width = Math.round(initNumber(options.frameWidth, rand(30, this.width / 2)));
+    this.bounds.height = Math.round(initNumber(options.frameHeight, rand(this.bounds.width * 1.5, this.bounds.width * 1.75)));
+
+    this.bounds.width = Math.round(Math.min(this.bounds.width, this.width));
+    this.bounds.height = Math.round(Math.min(this.bounds.height, this.height));
+    this.bounds.top = Math.round(this.height / 2 - this.bounds.height / 2);
+    this.bounds.bottom = Math.round(this.height / 2 + this.bounds.height / 2);
+    this.bounds.left = Math.round(this.width / 2 - this.bounds.width / 2);
+    this.bounds.right = Math.round(this.width / 2 + this.bounds.width / 2);
+    
+    VehiclePart.prototype.init.call(this, options);
+  };
+
+  Body.prototype.setImage = function setImage() {
+    Benchmarker.start('Body Create Image');
+    
+    var elCanvas = document.createElement('canvas'),
+        context = elCanvas.getContext('2d');
+    
+    elCanvas.width = this.width;
+    elCanvas.height = this.height;
+
+    context.fillStyle = this.colour;
+    
+    context.fillRect(this.bounds.left, this.bounds.top,
+                    this.bounds.width, this.bounds.height);
+    
+    VehiclePart.prototype.setImage.call(this, elCanvas.toDataURL());
+    
+    Benchmarker.end('Body Create Image');
+  };
+
+  return Body;
 }());
 
 var Turret = (function Turret() {
@@ -264,10 +329,9 @@ var Turret = (function Turret() {
       }
     }
 
-    var src = elCanvas.toDataURL();
-    Benchmarker.end('Turret Create Image');
+    VehiclePart.prototype.setImage.call(this, elCanvas.toDataURL());
     
-    VehiclePart.prototype.setImage.call(this, src);
+    Benchmarker.end('Turret Create Image');
   };
 
   return Turret;
@@ -300,22 +364,13 @@ var Engine = (function Engine() {
   Engine.prototype.constructor = Engine;
   
   Engine.prototype.init = function init(options) {
-    var body = {
-      'top': 36,
-      'left': 42,
-      'right': 86,
-      'bottom': 116,
-      'width': 44,
-      'height': 80
-    };
-        
     this.colour = new Colour(options.colour || rand(50, 100));
     this.isFront = initBool(options.isFront, false);
     this.exhaustWidth = initNumber(options.exhaustWidth, rand(3, 10));
     this.exhaustHeight = initNumber(options.exhaustHeight, rand(this.exhaustWidth, this.exhaustWidth * 2));
     this.exhaustDistance = initNumber(options.exhaustDistance, rand(0, 10));
-    this.engineWidth = body.width * randF(0.4, 0.8);
-    this.engineHeight = this.engineWidth * randF(0.5, 1.2);
+    this.engineWidth = randF(0.4, 0.8);
+    this.engineHeight = randF(0.5, 1.2);
     this.pipeWidth = rand(1, 3);
     
     this.speed = initNumber(options.speed, rand(200, 1000));
@@ -333,18 +388,11 @@ var Engine = (function Engine() {
         h = this.height,
         midX = w / 2,
         midY = h / 2,
-        body = {
-          'top': 36,
-          'left': 42,
-          'right': 86,
-          'bottom': 116,
-          'width': 44,
-          'height': 80
-        },
+        body = this.body.bounds,
         x = midX + body.width / 2 - this.exhaustWidth / 2 - this.exhaustDistance,
         posY = this.isFront? body.top + body.height / 3 : body.top + body.height * 2 / 3,
-        width = this.engineWidth,
-        height = this.engineHeight,
+        width = body.width * this.engineWidth,
+        height = width * this.engineHeight,
         left = body.left + body.width / 2 - width / 2,
         top = posY - height / 2,
         pipeColour = new Colour(this.colour).brighten(0.5),
@@ -393,11 +441,9 @@ var Engine = (function Engine() {
                        top - body.top - height / 3);
     }
     
+    VehiclePart.prototype.setImage.call(this, elCanvas.toDataURL());
     
-    var src = elCanvas.toDataURL();
     Benchmarker.end('Engine Create Image');
-    
-    VehiclePart.prototype.setImage.call(this, src);
   };
 
   return Engine;
@@ -429,19 +475,7 @@ var Wheels = (function Wheels() {
   Wheels.prototype.constructor = Wheels;
   
   Wheels.prototype.init = function init(options) {
-    
-    var body = {
-      'top': 36,
-      'left': 42,
-      'right': 86,
-      'bottom': 116,
-      'width': 44,
-      'height': 80
-    };
-    
     this.obstacleFactor = initNumber(options.obstacleFactor, randF(0.2, 0.8));
-    this.boundingBoxWidth = body.width;
-    this.boundingBoxHeight = body.height;
     
     this.colour = new Colour(options.colour || rand(10, 50));
     this.wheelsColour = new Colour(this.colour).brighten(1);
@@ -466,16 +500,11 @@ var Wheels = (function Wheels() {
         halfWheelHeight = Math.round(wheelHeight / 2),
         frameSize = this.frameThickness,
         halfFrameSize = Math.round(frameSize / 2),
+        body = this.body.bounds,
         i, top;
-    
-    var body = {
-      'top': 36,
-      'left': 42,
-      'right': 86,
-      'bottom': 116,
-      'width': 44,
-      'height': 80
-    };
+
+    this.boundingBoxWidth = body.width;
+    this.boundingBoxHeight = body.height;
     
     elCanvas.width = this.width;
     elCanvas.height = this.height;
@@ -484,11 +513,12 @@ var Wheels = (function Wheels() {
     context.fillStyle = this.colour;
     
     // Main Frame
-    context.fillRect(body.left + Math.round(body.width / 2) - halfFrameSize, body.top,
-                     frameSize, body.height);
+    context.fillRect(body.left + Math.round(body.width / 2) - halfFrameSize, body.top + halfWheelHeight,
+                     frameSize, body.height - halfWheelHeight * 2);
    
     // Front Wheels Frame
     for (i = 0, top; i < this.numberOfFrontWheels; i++) {
+      
       top = body.top + i * (wheelHeight + this.wheelMargin) + halfWheelHeight;
       context.fillRect(body.left, top, body.width, frameSize);
     }
@@ -515,10 +545,9 @@ var Wheels = (function Wheels() {
       context.fillRect(body.right - halfWheelWidth, top - halfWheelHeight + halfFrameSize, wheelWidth, wheelHeight);
     }
 
-    var src = elCanvas.toDataURL();
-    Benchmarker.end('Wheels Create Image');
+    VehiclePart.prototype.setImage.call(this, elCanvas.toDataURL());
     
-    VehiclePart.prototype.setImage.call(this, src);
+    Benchmarker.end('Wheels Create Image');
   };
 
   return Wheels;
@@ -544,8 +573,8 @@ var VanityWings = (function VanityWings() {
     !options && (options = {});
 
     this.areWingsEqual;
-    this.leftWing;
-    this.rightWing;
+    this.leftWing = {};
+    this.rightWing = {};
     
     options.name = 'Vanity Wings';
     
@@ -566,31 +595,28 @@ var VanityWings = (function VanityWings() {
     };
     
     this.areWingsEqual = initBool(options.areWingsEqual, rand());
-    
-    this.leftWing = {
-      'colour': new Colour(options.colour || Colour.RANDOM),
-      'span': initNumber(options.span, rand(10, (this.width - body.width) / 3)),
-      'offset': initNumber(options.offset, 0)
-    };
-    
-    this.leftWing.span = Math.min(this.leftWing.span, (this.width - body.width) / 2);
+
+    this.leftWing.colour = new Colour(options.colour || Colour.RANDOM);
+    this.leftWing.offset = initNumber(options.offset, 0)
+    this.leftWing.span = Math.min(initNumber(options.span, rand(10, (this.width - body.width) / 3)), (this.width - body.width) / 2);
     this.leftWing.size = initNumber(options.size, rand(4, this.leftWing.span / 2));
     
     if (this.areWingsEqual) {
-      this.rightWing = this.leftWing;
+      for (var k in this.leftWing) {
+        this.rightWing[k] = this.leftWing[k];
+      }
     } else {
-      this.rightWing = {
-        'colour': new Colour(Colour.RANDOM),
-        'span': initNumber(rand(10, (this.width - body.width) / 3)),
-        'offset': initNumber(0)
-      };
-      
+      this.rightWing.colour = new Colour(Colour.RANDOM);
+      this.rightWing.span = initNumber(rand(10, (this.width - body.width) / 3));
       this.rightWing.size = initNumber(rand(4, this.rightWing.span / 2));
+      this.rightWing.offset = initNumber(0);
     }
-    
-    // Make sure it doesn't go outside the image
 
     Vanity.prototype.init.call(this, options);
+  };
+  
+  VanityWings.prototype.setBody = function setBody() {
+    Vanity.prototype.setBody.apply(this, arguments);
   };
   
   VanityWings.prototype.setImage = function setImage() {
@@ -598,14 +624,7 @@ var VanityWings = (function VanityWings() {
     
     var elCanvas = document.createElement('canvas'),
         context = elCanvas.getContext('2d'),
-        body = {
-          'top': 36,
-          'left': 42,
-          'right': 86,
-          'bottom': 116,
-          'width': 44,
-          'height': 80
-        },
+        body = this.body.bounds,
         leftBodyMidY = body.top + body.height / 2 + this.leftWing.offset,
         rightBodyMidY = body.top + body.height / 2 + this.rightWing.offset;
 
@@ -626,10 +645,9 @@ var VanityWings = (function VanityWings() {
     context.lineTo(body.right, rightBodyMidY - this.rightWing.size);
     context.fill();
 
-    var src = elCanvas.toDataURL();
-    Benchmarker.end('Vanity Wings Create Image');
+    VehiclePart.prototype.setImage.call(this, elCanvas.toDataURL());
     
-    VehiclePart.prototype.setImage.call(this, src);
+    Benchmarker.end('Vanity Wings Create Image');
   };
   
   return VanityWings;
