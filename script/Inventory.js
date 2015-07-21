@@ -329,11 +329,11 @@ var Inventory = (function Inventory() {
           var partToEquip = slot.removeItem(),
               equippedPart = this.player.parts[partToEquip.type];
           
+          this.player.equipPart(partToEquip);
+          
           if (equippedPart) {
             slot.setItem(equippedPart);
           }
-              
-          this.player.equipPart(partToEquip);
         }
       }
     }
@@ -423,9 +423,9 @@ var Inventory = (function Inventory() {
     this.elTooltip.innerHTML = html;
     this.elTooltip.dataset.id = item.id;
     
-    var bounds = elOrigin.getBoundingClientRect(),
+    var bounds = this.el.getBoundingClientRect(),
         x = Math.round(bounds.left - this.elTooltip.offsetWidth),
-        y = Math.round(bounds.top);
+        y = Math.round(bounds.top + bounds.height - this.elTooltip.offsetHeight);
 
     this.elTooltip.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
     
@@ -490,17 +490,17 @@ var Inventory = (function Inventory() {
       var typeId = e.target.dataset.type;
       if (typeId) {
         switch (typeId.toUpperCase()) {
+          case VEHICLE_PART_TYPES.BODY:
+            player.pickupPart(new Body());
+            break;
           case VEHICLE_PART_TYPES.ENGINE:
             player.pickupPart(new Engine());
             break;
-          case VEHICLE_PART_TYPES.WHEELS:
-            player.pickupPart(new Wheels());
-            break;
-          case VEHICLE_PART_TYPES.BODY:
-            console.warn('IMPLEMENT BODY PART');
-            break;
           case VEHICLE_PART_TYPES.FRONT:
             console.warn('IMPLEMENT FRONT PART');
+            break;
+          case VEHICLE_PART_TYPES.MORALE:
+            console.warn('IMPLEMENT MORALE PART');
             break;
           case VEHICLE_PART_TYPES.REAR:
             console.warn('IMPLEMENT REAR PART');
@@ -511,8 +511,8 @@ var Inventory = (function Inventory() {
           case VEHICLE_PART_TYPES.VANITY:
             player.pickupPart(new VanityWings());
             break;
-          case VEHICLE_PART_TYPES.MORALE:
-            console.warn('IMPLEMENT MORALE PART');
+          case VEHICLE_PART_TYPES.WHEELS:
+            player.pickupPart(new Wheels());
             break;
         }
       }

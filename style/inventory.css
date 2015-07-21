@@ -1,3 +1,6 @@
+.inventory-wrapper {
+  width: 483px;
+}
 .inventory .equipped {
   position: relative;
 }
@@ -150,7 +153,6 @@
   float: left;
   width: 48px;
   height: 48px;
-  margin: 0 1px 1px 0;
   box-shadow: 0 0 0 1px rgba(40, 40, 40, 1),
               1px 1px 3px 0 rgba(0, 0, 0, .8) inset;
   background-color: rgba(174, 157, 125, 0.5);

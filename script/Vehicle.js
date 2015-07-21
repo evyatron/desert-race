@@ -55,7 +55,19 @@ var Vehicle = (function Vehicle() {
     
     this.parts[type] = part;
     
-    part.setBody(this.parts[VEHICLE_PART_TYPES.BODY]);
+    if (type === VEHICLE_PART_TYPES.BODY) {
+      for (var id in this.parts) {
+        if (this.parts[id] && id !== VEHICLE_PART_TYPES.BODY) {
+          this.parts[id].setBody(part);
+        }
+      }
+    } else {
+      part.setBody(this.parts[VEHICLE_PART_TYPES.BODY]);
+    }
+    
+    if (currentPart) {
+      currentPart.setBody();
+    }
     
     this.updateStats();
     
@@ -157,6 +169,16 @@ var VehiclePart = (function VehiclePart() {
     this.height = initNumber(options.width, 128);
     
     this.body = null;
+    this.defaultBody = {
+      'bounds': {
+        'width': 44,
+        'height': 90
+      }
+    };
+    this.defaultBody.bounds.left = (this.width - this.defaultBody.bounds.width) / 2;
+    this.defaultBody.bounds.right = (this.width + this.defaultBody.bounds.width) / 2;
+    this.defaultBody.bounds.top = (this.height - this.defaultBody.bounds.height) / 2;
+    this.defaultBody.bounds.bottom = (this.height + this.defaultBody.bounds.height) / 2;
 
     this.ready = true;
     
@@ -170,15 +192,11 @@ var VehiclePart = (function VehiclePart() {
     this.id = options.id || (this.type + '_' + Date.now() + '_' + rand(0, 10000));
     this.name = options.name || l10n.get('part-type-' + this.type);
 
-    if (options.body) {
-      this.setBody(options.body);
-    } else if (this.type === VEHICLE_PART_TYPES.BODY) {
-      this.setImage();
-    }
+    this.setBody(options.body);
   };
   
   VehiclePart.prototype.setBody = function setBody(body) {
-    this.body = body;
+    this.body = body || this.defaultBody;
     this.setImage();
   };
 
