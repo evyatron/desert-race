@@ -11,7 +11,7 @@ var PLAYER_MOVEMENT_SPEED = 100,
     BOOST_FACTOR = 2,
     OBSTACLE_FACTOR = 0.6,
     PLAYER_DISTANCE_FROM_BOTTOM = 10,
-    OVER_SOMETHING_RATTLE = 100;
+    OVER_SOMETHING_RATTLE = 70;
 
 var ROAD_WIDTH = 1100,
     ROAD_LEFT = 0,
@@ -222,12 +222,14 @@ function onPostUpdate(dt, context) {
       player.equippedWeapon.increaseSpread(dt);
     }
     
-    // Shake vehicle when over obstacles
     if (OVER_SOMETHING_RATTLE) {
-      player.position.y += rand(-OVER_SOMETHING_RATTLE, OVER_SOMETHING_RATTLE) * dt;
-      player.position.x += rand(-OVER_SOMETHING_RATTLE, OVER_SOMETHING_RATTLE) * dt;
+      player.rattleOffset.y = rand(-OVER_SOMETHING_RATTLE, OVER_SOMETHING_RATTLE) * dt;
+      player.rattleOffset.x = rand(-OVER_SOMETHING_RATTLE, OVER_SOMETHING_RATTLE) * dt;
     }
   } else {
+    player.rattleOffset.y = 0;
+    player.rattleOffset.x = 0;
+    
     if (player.equippedWeapon) {
       player.equippedWeapon.decreaseSpread(dt);
     }
@@ -259,7 +261,6 @@ function onPostUpdate(dt, context) {
   }
 
   // update distance
-  // currentWorldSpeed is in pixels per second
   var kmph = -player.velocity.y * 3600 / 20000,
       distance = kmph * dt;
 

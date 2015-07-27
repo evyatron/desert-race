@@ -1,11 +1,6 @@
 var Vehicle = (function Vehicle() {
   function Vehicle(options) {
     !options && (options = {});
-
-    this.wheelsSize = options.wheelsSize || 8;
-    this.wheelsHit = this.wheelsSize * 3;
-    this.wheelsColour = options.wheelsColour || 'rgba(128, 128, 128, 1)';
-    this.bodyColour = options.bodyColour || 'rgba(0, 0, 0, 1)';
     
     this.worldSpeed = 0;
     this.boostFactor = 1;
@@ -15,6 +10,8 @@ var Vehicle = (function Vehicle() {
     this.targetWorldSpeed = 0;
     this.currentWorldSpeed = 0;
     this.parts = {};
+    
+    this.rattleOffset = new Victor();
 
     options.colour = '';
     options.type = 'vehicle';
@@ -43,8 +40,8 @@ var Vehicle = (function Vehicle() {
   };
   
   Vehicle.prototype.draw = function draw(context) {
-    var x = Math.round(this.drawPosition.x - this.width / 2),
-        y = Math.round(this.drawPosition.y - this.height / 2);
+    var x = Math.round(this.drawPosition.x - this.width / 2) + this.rattleOffset.x,
+        y = Math.round(this.drawPosition.y - this.height / 2) + this.rattleOffset.y;
     
     for (var i = 0, len = VEHICLE_PARTS_ORDER.length, part; i < len; i++) {
       part = this.parts[VEHICLE_PARTS_ORDER[i]];
@@ -109,26 +106,28 @@ var Vehicle = (function Vehicle() {
       var part = this.parts[type];
       
       if (part) {
-        if (typeof part.speed === 'number') {
-          worldSpeeds.push(part.speed);
+        var stats = part.gameplay;
+        
+        if (typeof stats.speed === 'number') {
+          worldSpeeds.push(stats.speed);
         }
         
-        if (typeof part.boostFactor === 'number') {
-          boostFactors.push(part.boostFactor);
+        if (typeof stats.boostFactor === 'number') {
+          boostFactors.push(stats.boostFactor);
         }
-        if (typeof part.obstacleFactor === 'number') {
-          obstacleFactors.push(part.obstacleFactor);
-        }
-        
-        if (typeof part.weaponRotation === 'number') {
-          weaponRotation = Math.max(weaponRotation, part.weaponRotation);
+        if (typeof stats.obstacleFactor === 'number') {
+          obstacleFactors.push(stats.obstacleFactor);
         }
         
-        if (typeof part.boundingBoxWidth === 'number') {
-          boundingBoxWidth = Math.max(boundingBoxWidth, part.boundingBoxWidth);
+        if (typeof stats.weaponRotation === 'number') {
+          weaponRotation = Math.max(weaponRotation, stats.weaponRotation);
         }
-        if (typeof part.boundingBoxHeight === 'number') {
-          boundingBoxHeight = Math.max(boundingBoxHeight, part.boundingBoxHeight);
+        
+        if (typeof stats.boundingBoxWidth === 'number') {
+          boundingBoxWidth = Math.max(boundingBoxWidth, stats.boundingBoxWidth);
+        }
+        if (typeof stats.boundingBoxHeight === 'number') {
+          boundingBoxHeight = Math.max(boundingBoxHeight, stats.boundingBoxHeight);
         }
       }
     }
@@ -177,6 +176,20 @@ var VehiclePart = (function VehiclePart() {
     
     this.width = initNumber(options.width, 128);
     this.height = initNumber(options.width, 128);
+    
+    this.gameplay = {
+      speed: null,
+      boostFactor: null,
+      obstacleFactor: null,
+      weaponRotation: null,
+      boundingBoxWidth: null,
+      boundingBoxHeight: null
+    };
+    
+    this.statsToIgnoreInTooltip = {
+      boundingBoxWidth: true,
+      boundingBoxHeight: true
+    };
     
     this.body = null;
     this.defaultBody = {
@@ -228,6 +241,30 @@ var VehiclePart = (function VehiclePart() {
     this.image.src = this.src = this.iconSrc = src;
   };
 
+  VehiclePart.prototype.getTooltipStats = function getTooltipStats() {
+    var stats = {};
+    
+    for (var k in this.gameplay) {
+      var value = this.gameplay[k];
+      
+      if (value === null || this.statsToIgnoreInTooltip[k]) {
+        continue;
+      }
+      
+      if (k === 'speed') {
+        value = Math.round(value * 3600 / 20000);
+      } else if (k === 'boostFactor') {
+        value = Math.round(value * 100) - 100;
+      } else if (k === 'obstacleFactor') {
+        value = Math.round(value * 100);
+      }
+      
+      stats[k] = value;
+    }
+    
+    return stats;
+  };
+  
   return VehiclePart;
 }());
 
@@ -237,11 +274,8 @@ var Body = (function Body() {
     
     options.type = VEHICLE_PART_TYPES.BODY;
     
-    // Design
     this.bounds = {};
     this.colour = null;
-    
-    // Gameplay
     
     VehiclePart.call(this, options);
   }
@@ -260,6 +294,9 @@ var Body = (function Body() {
     this.bounds.bottom = Math.round(this.height / 2 + this.bounds.height / 2);
     this.bounds.left = Math.round(this.width / 2 - this.bounds.width / 2);
     this.bounds.right = Math.round(this.width / 2 + this.bounds.width / 2);
+
+    this.gameplay.boundingBoxWidth = this.bounds.width;
+    this.gameplay.boundingBoxHeight = this.bounds.height;
     
     VehiclePart.prototype.init.call(this, options);
   };
@@ -292,15 +329,11 @@ var Turret = (function Turret() {
     
     options.type = VEHICLE_PART_TYPES.TURRET;
     
-    // Design
     this.size = 0;
     this.isRound = false;
     this.colour = null;
     this.borderColour = '';
     this.borderSize = 0;
-    
-    // Gameplay
-    this.weaponRotation = 0;
     
     VehiclePart.call(this, options);
   }
@@ -309,13 +342,13 @@ var Turret = (function Turret() {
   Turret.prototype.constructor = Turret;
   
   Turret.prototype.init = function init(options) {
-    this.weaponRotation = initNumber(options.weaponRotation, rand(0, 90));
-    
     this.size = options.size || rand(8, 22);
     this.isRound = initBool(options.isRound, this.weaponRotation > 45);
     this.colour = new Colour(options.colour || rand(0, 100));
     this.borderColour = new Colour(options.borderColour || rand(0, 50));
     this.borderSize = initNumber(options.borderSize, rand(0, this.size / 2));
+    
+    this.gameplay.weaponRotation = initNumber(options.weaponRotation, rand(0, 90));
     
     VehiclePart.prototype.init.call(this, options);
   };
@@ -362,12 +395,6 @@ var Turret = (function Turret() {
     Benchmarker.end('Turret Create Image');
   };
 
-  Turret.prototype.getTooltipStats = function getTooltipStats() {
-    return {
-      'weaponRotation': this.weaponRotation
-    };
-  };
-  
   return Turret;
 }());
 
@@ -377,7 +404,6 @@ var Engine = (function Engine() {
     
     options.type = VEHICLE_PART_TYPES.ENGINE;
     
-    // Design
     this.colour = null;
     this.isFront = false;
     this.exhaustWidth = 0;
@@ -386,11 +412,7 @@ var Engine = (function Engine() {
     this.engineWidth = 0;
     this.engineHeight = 0;
     this.pipeWidth = 0;
-    
-    // Gameplay
-    this.speed = 0;
-    this.boostFactor = 0;
-    
+
     VehiclePart.call(this, options);
   }
 
@@ -407,8 +429,8 @@ var Engine = (function Engine() {
     this.engineHeight = randF(0.5, 1.2);
     this.pipeWidth = rand(1, 3);
     
-    this.speed = initNumber(options.speed, rand(200, 1000));
-    this.boostFactor = initNumber(options.boostFactor, randF(1.2, 3));
+    this.gameplay.speed = initNumber(options.speed, rand(200, 1000));
+    this.gameplay.boostFactor = initNumber(options.boostFactor, randF(1.2, 3));
 
     VehiclePart.prototype.init.call(this, options);
   };
@@ -480,15 +502,6 @@ var Engine = (function Engine() {
     Benchmarker.end('Engine Create Image');
   };
 
-  Engine.prototype.getTooltipStats = function getTooltipStats() {
-    var speed = Math.round(this.speed * 3600 / 20000);
-    
-    return {
-      'speed': speed,
-      'boostSpeed': Math.round(speed * this.boostFactor)
-    };
-  };
-  
   return Engine;
 }());
 
@@ -498,7 +511,6 @@ var Wheels = (function Wheels() {
     
     options.type = VEHICLE_PART_TYPES.WHEELS;
     
-    // Design
     this.colour = null;
     this.wheelsColour = null;
     this.frameThickness = 0;
@@ -508,9 +520,6 @@ var Wheels = (function Wheels() {
     this.numberOfFrontWheels = 0;
     this.numberOfBackWheels = 0;
     
-    // Gameplay
-    this.obstacleFactor = 0;
-    
     VehiclePart.call(this, options);
   }
 
@@ -518,8 +527,6 @@ var Wheels = (function Wheels() {
   Wheels.prototype.constructor = Wheels;
   
   Wheels.prototype.init = function init(options) {
-    this.obstacleFactor = initNumber(options.obstacleFactor, randF(0.2, 0.8));
-    
     this.colour = new Colour(options.colour || rand(10, 50));
     this.wheelsColour = new Colour(this.colour).brighten(1);
     this.frameThickness = Math.round(initNumber(options.frameThickness, rand(2, 6)));
@@ -528,6 +535,8 @@ var Wheels = (function Wheels() {
     this.wheelMargin = Math.round(initNumber(options.wheelMargin, rand(2, 4)));
     this.numberOfFrontWheels = Math.round(initNumber(options.numberOfFrontWheels, rand(1, 2)));
     this.numberOfBackWheels = Math.round(initNumber(options.numberOfBackWheels, rand(1, 2)));
+    
+    this.gameplay.obstacleFactor = initNumber(options.obstacleFactor, randF(0.2, 0.8));
     
     VehiclePart.prototype.init.call(this, options);
   };
@@ -545,9 +554,6 @@ var Wheels = (function Wheels() {
         halfFrameSize = Math.round(frameSize / 2),
         body = this.body.bounds,
         i, top;
-
-    this.boundingBoxWidth = body.width;
-    this.boundingBoxHeight = body.height;
     
     elCanvas.width = this.width;
     elCanvas.height = this.height;
@@ -591,12 +597,6 @@ var Wheels = (function Wheels() {
     VehiclePart.prototype.setImage.call(this, elCanvas.toDataURL());
     
     Benchmarker.end('Wheels Create Image');
-  };
-
-  Wheels.prototype.getTooltipStats = function getTooltipStats() {
-    return {
-      'obstacleFactor': this.obstacleFactor
-    };
   };
   
   return Wheels;

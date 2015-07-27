@@ -403,9 +403,14 @@ var Inventory = (function Inventory() {
         html = '';
     
     for (var id in stats) {
+      var value = l10n.get('inv-tooltip-' + id + '-value');
+      if (value) {
+        value = value.format({'value': stats[id]});
+      }
+      
       statsHTML += TEMPLATE_TOOLTIP_STAT.format({
         'name':  l10n.get('inv-tooltip-' + id),
-        'value': stats[id]
+        'value': value
       });
     }
         

@@ -181,8 +181,8 @@ var Weapon = (function Weapon() {
       'bulletSpeed': this.bulletSpeed,
       'damage': this.damagePerBullet * this.bulletsPerShot,
       'magazineSize': this.magazineSize,
-      'reloadTime': Math.round(this.timeToReload * (this.magazineSize / this.bulletsPerReload) * 10) / 10 + 's',
-      'recoil': this.recoil + 's'
+      'reloadTime': Math.round(this.timeToReload * (this.magazineSize / this.bulletsPerReload) * 10) / 10,
+      'recoil': Math.round(this.recoil * 100)
     };
   };
 
