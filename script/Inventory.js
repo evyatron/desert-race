@@ -1,17 +1,13 @@
 var Inventory = (function Inventory() {
   var TEMPLATE_INVENTORY = '<div class="equipped">' +
-                              '<div class="vehicle">' +
-                              '</div>' +
+                              '<div class="vehicle"></div>' +
                               '<div class="weapons">' +
                                 '<ul></ul>' +
                               '</div>' +
                               '<b class="button toggle-built">{{l10n(inventory-show-built)}}</b>' +
                            '</div>' +
-                           '<div class="owned">' +
-                           '</div>' +
-                           '<div class="status">' +
-                            '0' +
-                           '</div>';
+                           '<div class="owned"></div>' +
+                           '<div class="status">0</div>';
 
   var TEMPLATE_HELD_WEAPON = '<div data-slot="{{index}}" ' +
                               'data-tooltip-item-id="{{id}}" ' +
@@ -62,7 +58,6 @@ var Inventory = (function Inventory() {
 
     this.equippedParts = {};
     
-    this.items = {};
     this.grid = [];
     
     this.player;
@@ -96,8 +91,6 @@ var Inventory = (function Inventory() {
 
     this.equippedParts[type] = part;
     
-    this.removeItem(part);
-    
     var elSlot = this.elVehicle.querySelector('.' + type.toLowerCase());
     if (elSlot) {
       if (part.src) {
@@ -116,6 +109,8 @@ var Inventory = (function Inventory() {
         }
       }
     }
+    
+    console.warn('Trying to remove item not in inventory', itemToRemove);
     
     return null;
   };
@@ -239,6 +234,8 @@ var Inventory = (function Inventory() {
     this.elMovingItem.style.transform = 'translate(' + e.pageX + 'px, ' + e.pageY + 'px)';
     document.body.appendChild(this.elMovingItem);
     
+    this.el.classList.add('holding-item');
+    
     window.addEventListener('mouseup', this.dropHeldItem_bound);
     
     this.timePickedUpToHold = Date.now();
@@ -274,10 +271,14 @@ var Inventory = (function Inventory() {
           }
         }
       } else {
-        if (this.slotTakenFrom && this.slotTakenFrom.isFree()) {
-          slotToDrop = this.slotTakenFrom;
+        if (isDescendant(e.target, this.el)) {
+          if (this.slotTakenFrom && this.slotTakenFrom.isFree()) {
+            slotToDrop = this.slotTakenFrom;
+          } else {
+            slotToDrop = this.getNextFreeSlot();
+          }
         } else {
-          slotToDrop = this.getNextFreeSlot();
+          // Do nothing here - item will be removed
         }
       }
       
@@ -291,11 +292,17 @@ var Inventory = (function Inventory() {
       this.elMovingItem.parentNode.removeChild(this.elMovingItem);
     }
     
+    this.el.classList.remove('holding-item');
+    
     this.itemBeingMoved = null;
     this.slotTakenFrom = null;
     this.elMovingItem = null;
   };
     
+  Inventory.prototype.isHoldingItem = function isHoldingItem() {
+    return Boolean(this.itemBeingMoved);
+  };
+  
   Inventory.prototype.getMouseEventSlot = function getMouseEventSlot(e) {
     var elClicked = e.target,
         data = elClicked && elClicked.dataset || {};

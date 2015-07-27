@@ -118,10 +118,8 @@ canvas {
   }
 
 .menu .content {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
+  position: relative;
+  width: 100%;
   background: rgba(0, 0, 0, .8);
 }
 
@@ -146,11 +144,11 @@ canvas {
 .menu.right {
   right: 0;
   transform: translateX(95%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
   .menu.right .content {
-    top: 50%;
-    height: 570px;
-    margin-top: -285px;
     border-radius: 0 0 0 10px;
     box-shadow: 0 0 3px 0 rgba(0, 0, 0, 1),
                 0 0 10px 0 rgba(0, 0, 0, .7);

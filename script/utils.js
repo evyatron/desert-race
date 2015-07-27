@@ -55,6 +55,17 @@ function sum(array) {
   return result;
 }
 
+function isDescendant(el, elParent) {
+  while (el) {
+    if (el === elParent) {
+      return true;
+    }
+    el = el.parentNode;
+  }
+  
+  return false;
+}
+
 function getJSON(url, callback) {
   var request = new XMLHttpRequest();
   request.open('GET', url, true);

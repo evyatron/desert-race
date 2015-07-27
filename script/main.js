@@ -205,12 +205,14 @@ function onPreUpdate(dt) {
     player.velocity.x *= player.obstacleFactor;
   }
   
-
-  if (InputManager.actionsActive.WeaponFire) {
-    player.fireWeapon();
-  }
-  if (InputManager.actionsActive.WeaponReload) {
-    player.reloadWeapon();
+  // Weapon control - LMB to fire, RMB to reload
+  if (!player.inventory.isHoldingItem()) {
+    if (InputManager.actionsActive.WeaponFire) {
+      player.fireWeapon();
+    }
+    if (InputManager.actionsActive.WeaponReload) {
+      player.reloadWeapon();
+    }
   }
 }
 
