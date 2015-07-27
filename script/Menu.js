@@ -17,11 +17,17 @@ var Menu = (function Menu() {
         html = '';
     
     for (var actionId in actions) {
-      var actionName = l10n.get('action-' + actionId) || actionId;
+      var actionName = l10n.get('action-' + actionId) || actionId,
+          keys = actions[actionId],
+          keyNames = [];
+      
+      for (var i = 0, len = keys.length; i < len; i++) {
+        keyNames.push('<b>' + InputManager.getKeyName(keys[i]) + '</b>');
+      }
       
       html += '<tr>' +
                 '<td>' + actionName + '</td>' +
-                '<td>' + InputManager.getKeyName(actions[actionId]) + '</td>' +
+                '<td>' + keyNames.join(' <span>or</span> ') + '</td>' +
               '</tr>';
     }
     

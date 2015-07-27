@@ -95,10 +95,10 @@ var InputManager = (function InputManager() {
     this.KEY_NAMES[this.KEYS.MIDDLE_MOUSE_BUTTON] = 'Middle Mouse Button';
     this.KEY_NAMES[this.KEYS.RIGHT_MOUSE_BUTTON] = 'Right Mouse Button';
     this.KEY_NAMES[this.KEYS.SHIFT] = 'Shift';
-    this.KEY_NAMES[this.KEYS.LEFT] = 'Left';
-    this.KEY_NAMES[this.KEYS.UP] = 'Up';
-    this.KEY_NAMES[this.KEYS.RIGHT] = 'Right';
-    this.KEY_NAMES[this.KEYS.DOWN] = 'Down';
+    this.KEY_NAMES[this.KEYS.LEFT] = '&#8592;';
+    this.KEY_NAMES[this.KEYS.UP] = '&#8593;';
+    this.KEY_NAMES[this.KEYS.RIGHT] = '&#8594;';
+    this.KEY_NAMES[this.KEYS.DOWN] = '&#8595;';
     this.KEY_NAMES[this.KEYS.W] = 'W';
     this.KEY_NAMES[this.KEYS.D] = 'D';
     this.KEY_NAMES[this.KEYS.S] = 'S';
@@ -134,20 +134,16 @@ var InputManager = (function InputManager() {
     return this.actionKeys[actionName];
   };
   
-  InputManager.prototype.bindAction = function bindAction(actionName, key) {
-    if (!this.keyToAction[key]) {
-      var currentActionKey = this.getActionKey(actionName);
-      if (currentActionKey) {
-        delete this.keyToAction[currentActionKey];
-      }
-      
-      this.actionKeys[actionName] = key;
-      this.keyToAction[key] = actionName;
-      
-      return true;
+  InputManager.prototype.bindAction = function bindAction(actionName, keys) {
+    if (!Array.isArray(keys)) {
+      keys = [keys];
     }
     
-    return false;
+    this.actionKeys[actionName] = keys;
+    
+    for (var i = 0, len = keys.length; i < len; i++) {
+      this.keyToAction[keys[i]] = actionName;
+    }
   };
   
   InputManager.prototype.getBoundActions = function getBoundActions() {

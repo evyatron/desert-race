@@ -159,10 +159,10 @@ function addDefaultLoadout() {
 }
 
 function bindInputActions() {
-  InputManager.bindAction('MoveRight', InputManager.KEYS.D);
-  InputManager.bindAction('MoveLeft', InputManager.KEYS.A);
-  InputManager.bindAction('MoveUp', InputManager.KEYS.W);
-  InputManager.bindAction('MoveDown', InputManager.KEYS.S);
+  InputManager.bindAction('MoveRight', [InputManager.KEYS.D, InputManager.KEYS.RIGHT]);
+  InputManager.bindAction('MoveLeft', [InputManager.KEYS.A, InputManager.KEYS.LEFT]);
+  InputManager.bindAction('MoveUp', [InputManager.KEYS.W, InputManager.KEYS.UP]);
+  InputManager.bindAction('MoveDown', [InputManager.KEYS.S, InputManager.KEYS.DOWN]);
   InputManager.bindAction('Boost', InputManager.KEYS.SHIFT);
   
   InputManager.bindAction('WeaponFire', InputManager.KEYS.LEFT_MOUSE_BUTTON);
