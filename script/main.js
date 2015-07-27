@@ -1,6 +1,5 @@
 var scene,
     player,
-    worldSpeed,
     
     timeToSpawnRoadThing = 0,
     things = [],
@@ -83,11 +82,8 @@ function init() {
     'onAfterUpdate': onPostUpdate,
     'onResize': onSceneResize
   });
-  
-  worldSpeed = NORMAL_WORLD_SPEED;
 
   player = new LocalPlayer({
-    //'worldSpeed': NORMAL_WORLD_SPEED,
     'boostFactor': BOOST_FACTOR,
     'obstacleFactor': OBSTACLE_FACTOR,
     'speed': PLAYER_MOVEMENT_SPEED,
@@ -185,16 +181,16 @@ function onSceneResize(width, height) {
 function onPreUpdate(dt) {
   if (InputManager.actionsActive.Boost) {
     STATS.turboTime += dt;
-    if (worldSpeed !== NORMAL_WORLD_SPEED * player.boostFactor) {
-      worldSpeed = lerp(worldSpeed, NORMAL_WORLD_SPEED * player.boostFactor, dt * 3);
+    if (player.currentWorldSpeed !== player.worldSpeed * player.boostFactor) {
+      player.currentWorldSpeed = lerp(player.currentWorldSpeed, player.worldSpeed * player.boostFactor, dt * 3);
     }
   } else {
-    if (worldSpeed !== NORMAL_WORLD_SPEED) {
-      worldSpeed = lerp(worldSpeed, NORMAL_WORLD_SPEED, dt * 3);
+    if (player.currentWorldSpeed !== player.worldSpeed) {
+      player.currentWorldSpeed = lerp(player.currentWorldSpeed, player.worldSpeed, dt * 3);
     }
   }
   
-  player.velocity.y = -worldSpeed;
+  player.velocity.y = -player.currentWorldSpeed;
   
   if (InputManager.actionsActive.MoveRight) {
     player.velocity.x += player.speed;
@@ -202,14 +198,6 @@ function onPreUpdate(dt) {
   if (InputManager.actionsActive.MoveLeft) {
     player.velocity.x -= player.speed;
   }
-  /*
-  if (InputManager.actionsActive.MoveUp) {
-    player.velocity.y -= player.speed;
-  }
-  if (InputManager.actionsActive.MoveDown) {
-    player.velocity.y += player.speed;
-  }
-  */
   
   // Add obstacle hit modifiers
   if (player.didHit) {
@@ -244,10 +232,6 @@ function onPostUpdate(dt, context) {
       player.equippedWeapon.decreaseSpread(dt);
     }
   }
-  
-  // Always move all sprites according to the player
-  player.currentWorldSpeed = worldSpeed;
-
 
   // check if road things have reached the bottom
   for (i = 0, len = things.length; i < len; i++) {
@@ -287,7 +271,7 @@ function onPostUpdate(dt, context) {
     //'<li>' + STATS.roadThingsHit + ' <span>hit</span></li>' +
     //'<li>' + Math.round(kmph) + '<span>km/h</span></li>' +
     '<li>' + numberWithCommas(Math.round(STATS.distance)) + '<span>m</span></li>' +
-    '<li>' + kmph + ' <span>kmph</span></li>';
+    '<li>' + Math.round(kmph) + ' <span>kmph</span></li>';
 }
 
 function spawnRoadThing() {
@@ -309,7 +293,7 @@ function spawnRoadThing() {
   things.push(thing);
   scene.addSprite(thing);
 
-  timeToSpawnRoadThing = scene.height / worldSpeed * randF(0, 0.1);
+  timeToSpawnRoadThing = scene.height / player.currentWorldSpeed * randF(0, 0.1);
 }
 
 function createRoad() {

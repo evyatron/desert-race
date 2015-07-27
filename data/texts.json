@@ -11,6 +11,11 @@
   "inv-tooltip-reloadTime": "Reload Time",
   "inv-tooltip-recoil": "Recoil",
   
+  "inv-tooltip-speed": "Speed",
+  "inv-tooltip-boostSpeed": "Boost Speed",
+  "inv-tooltip-weaponRotation": "Weapon Coverage",
+  "inv-tooltip-obstacleFactor": "Obstacle Factor",
+  
   "part-type-ENGINE": "Engine",
   "part-type-WHEELS": "Wheels",
   "part-type-BODY": "Body",

@@ -12,6 +12,8 @@ var Vehicle = (function Vehicle() {
     this.obstacleFactor = 1;
     this.weaponRotation = 0;
     
+    this.targetWorldSpeed = 0;
+    this.currentWorldSpeed = 0;
     this.parts = {};
 
     options.colour = '';
@@ -30,6 +32,14 @@ var Vehicle = (function Vehicle() {
     for (var id in VEHICLE_PART_TYPES) {
       this.parts[id] = null;
     }
+  };
+  
+  Vehicle.prototype.update = function update(dt) {
+    if (this.targetWorldSpeed !== this.worldSpeed) {
+      this.worldSpeed = this.currentWorldSpeed = lerp(this.worldSpeed, this.targetWorldSpeed, dt * 2);
+    }
+    
+    Sprite.prototype.update.apply(this, arguments);
   };
   
   Vehicle.prototype.draw = function draw(context) {
@@ -123,7 +133,7 @@ var Vehicle = (function Vehicle() {
       }
     }
     
-    this.worldSpeed = Math.max.apply(Math, worldSpeeds);
+    this.targetWorldSpeed = Math.max.apply(Math, worldSpeeds);
     this.boostFactor = sum(boostFactors);
     this.obstacleFactor = sum(obstacleFactors);
     this.weaponRotation = Math.max(Math.min(weaponRotation, 180), 0) * Math.PI / 180;
@@ -352,6 +362,12 @@ var Turret = (function Turret() {
     Benchmarker.end('Turret Create Image');
   };
 
+  Turret.prototype.getTooltipStats = function getTooltipStats() {
+    return {
+      'weaponRotation': this.weaponRotation
+    };
+  };
+  
   return Turret;
 }());
 
@@ -464,6 +480,15 @@ var Engine = (function Engine() {
     Benchmarker.end('Engine Create Image');
   };
 
+  Engine.prototype.getTooltipStats = function getTooltipStats() {
+    var speed = Math.round(this.speed * 3600 / 20000);
+    
+    return {
+      'speed': speed,
+      'boostSpeed': Math.round(speed * this.boostFactor)
+    };
+  };
+  
   return Engine;
 }());
 
@@ -568,6 +593,12 @@ var Wheels = (function Wheels() {
     Benchmarker.end('Wheels Create Image');
   };
 
+  Wheels.prototype.getTooltipStats = function getTooltipStats() {
+    return {
+      'obstacleFactor': this.obstacleFactor
+    };
+  };
+  
   return Wheels;
 }());
 
