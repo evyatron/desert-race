@@ -35,6 +35,9 @@ var Sprite = (function Sprite() {
     Sprite.prototype.init.apply(this, arguments);
   }
   
+  Sprite.prototype = Object.create(EventDispatcher.prototype);
+  Sprite.prototype.constructor = Sprite;
+  
   Sprite.prototype.init = function init(options) {
     !options && (options = {});
 
@@ -57,7 +60,7 @@ var Sprite = (function Sprite() {
     this.velocity = options.velocity || new Victor(0, 0);
     this.acceleration = new Victor(0, 0);
     this.doesCollide = Boolean(options.doesCollide);
-    this.destroyWhenOutOfBounds = Boolean(options.destroyWhenOutOfBounds);
+    this.destroyWhenOutOfBounds = options.destroyWhenOutOfBounds;
     this.isStationary =  Boolean(options.isStationary);
 
     this.halfWidth = this.width / 2;
@@ -79,6 +82,7 @@ var Sprite = (function Sprite() {
     if (this.scene) {
       this.scene.removeSprite(this);
     }
+    this.dispatch('destroy');
   };
 
   Sprite.prototype.setScene = function setScene(scene) {
@@ -132,8 +136,12 @@ var Sprite = (function Sprite() {
     this.hitBounds.right = this.drawPosition.x + halfWidth;
 
     if (this.destroyWhenOutOfBounds) {
-      if (this.right < 0 || this.left > this.scene.width ||
-          this.bottom < 0 || this.top > this.scene.height) {
+      var outOfBoundsH = this.right < 0 || this.left > this.scene.width,
+          outOfBoundsV = this.bottom < 0 || this.top > this.scene.height;
+          
+      if (this.destroyWhenOutOfBounds === 'h' && outOfBoundsH ||
+          this.destroyWhenOutOfBounds === 'v' && outOfBoundsV ||
+          outOfBoundsH && outOfBoundsV) {
         this.destroy();
       }
     }

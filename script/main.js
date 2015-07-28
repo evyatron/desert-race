@@ -1,9 +1,6 @@
 var scene,
     player,
-    
-    timeToSpawnRoadThing = 0,
-    things = [],
-    
+
     roadTexture;
 
 var PLAYER_MOVEMENT_SPEED = 100,
@@ -217,8 +214,6 @@ function onPreUpdate(dt) {
 }
 
 function onPostUpdate(dt, context) {
-  var i, len, sprite;
-  
   if (player.didHit) {
     if (player.equippedWeapon) {
       player.equippedWeapon.increaseSpread(dt);
@@ -237,19 +232,8 @@ function onPostUpdate(dt, context) {
     }
   }
 
-  // check if road things have reached the bottom
-  for (i = 0, len = things.length; i < len; i++) {
-    sprite = things[i];
-
-    if (sprite && sprite.top > scene.height) {
-      sprite.destroy();
-      things.splice(i, 1);
-    }
-  }
-
   // respawn new road thing
-  timeToSpawnRoadThing -= dt;
-  if (timeToSpawnRoadThing <= 0) {
+  if (Math.random() > 0.9) {
     spawnRoadThing();
   }
   
@@ -274,29 +258,29 @@ function onPostUpdate(dt, context) {
     //'<li>' + STATS.roadThingsHit + ' <span>hit</span></li>' +
     //'<li>' + Math.round(kmph) + '<span>km/h</span></li>' +
     '<li>' + numberWithCommas(Math.round(STATS.distance)) + '<span>m</span></li>' +
-    '<li>' + Math.round(kmph) + ' <span>kmph</span></li>';
+    '<li>' + Math.round(kmph) + ' <span>kmph</span></li>' +
+    '<li>' + scene.sprites.length + ' sprites</li>';
 }
 
 function spawnRoadThing() {
   var width = rand(10, 50),
       height = rand(width, width * 2),
-      x = rand(0, scene.width) - scene.offset.x,
-      y = -scene.offset.y,
+      isMoving = player.velocity.x !== 0,
+      edge = player.velocity.x < 0? 0 : scene.width,
+      x = (isMoving? edge : rand(0, scene.width)) - scene.offset.x,
+      y = -scene.offset.y + (isMoving? rand(0, scene.height) : 0),
       thing = new Sprite({
         'type': 'roadThing',
         'width': width,
         'height': height,
         'zIndex': 50,
         'doesCollide': true,
-        'destroyWhenOutOfBounds': true,
+        'destroyWhenOutOfBounds': 'v',
         'image': 'images/rock' + rand(1, NUMBER_OF_ROCK_IMAGES) + '.png',
         'position': new Victor(x, y)
       });
-
-  things.push(thing);
+  
   scene.addSprite(thing);
-
-  timeToSpawnRoadThing = scene.height / player.currentWorldSpeed * randF(0, 0.1);
 }
 
 function createRoad() {
